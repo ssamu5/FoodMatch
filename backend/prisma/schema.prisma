@@ -1,0 +1,133 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Usuario registrado en la app
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // hasheada con bcrypt
+  name      String?
+  createdAt DateTime @default(now())
+
+  reviews   Review[]
+  favorites Favorite[]
+  orders    Order[]
+
+  @@map("users")
+}
+
+// Restaurante
+model Restaurant {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+
+  // Ubicación
+  latitude    Float
+  longitude   Float
+  address     String
+  city        String
+
+  // Contacto
+  phone       String
+  email       String?
+  website     String?
+
+  // Tipo de comida
+  cuisine     String   // "Sushi", "Pizza", "Carne"
+  format      String   // "Buffet", "À la carte", "Menú del día"
+  priceRange  String   // "€", "€€", "€€€"
+
+  // Horarios
+  openingTime String
+  closingTime String
+  closedDays  String?
+
+  // Imagen
+  imageUrl    String?
+
+  // Relaciones
+  menu        Menu[]
+  reviews     Review[]
+  favorites   Favorite[]
+  orders      Order[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("restaurants")
+}
+
+// Platos del menú
+model Menu {
+  id           String   @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  name         String
+  description  String?
+  price        Float
+  imageUrl     String?
+  category     String
+
+  createdAt    DateTime @default(now())
+
+  @@map("menus")
+}
+
+// Reseñas de usuarios
+model Review {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  rating       Int      // 1-5
+  comment      String?
+  imageUrl     String?
+
+  createdAt    DateTime @default(now())
+
+  @@map("reviews")
+}
+
+// Restaurantes favoritos
+model Favorite {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, restaurantId])
+  @@map("favorites")
+}
+
+// Pedidos
+model Order {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  status       String   @default("pending") // pending, confirmed, delivered
+  total        Float
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("orders")
+}
