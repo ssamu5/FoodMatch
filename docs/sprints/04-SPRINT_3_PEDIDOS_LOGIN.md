@@ -1,6 +1,6 @@
-# SPRINT 3: PEDIDOS + LOGIN COMPLETO + PREPARACIÓN PAGOS
-**Duración:** 3-4 semanas
-**Objetivo:** Usuario puede registrarse/loginear, hacer pedidos reales que llegan a restaurante, preparación para pagos.
+# SPRINT 3: PEDIDOS + LOGIN COMPLETO + STRIPE INTEGRADO
+**Duración:** 4-5 semanas (EXTENDIDO de 3-4)
+**Objetivo:** Usuario puede registrarse/loginear, hacer pedidos PAGADOS que llegan a restaurante con dinero procesado.
 
 ---
 
@@ -896,6 +896,348 @@ export default function MyOrders() {
     </div>
   );
 }
+```
+
+---
+
+## 💳 PARTE 5: STRIPE INTEGRADO (CRÍTICO PARA MONETIZACIÓN)
+
+### ¿Por qué Stripe es crítico?
+
+Sin Stripe:
+- ❌ Cliente NO paga en plataforma (riesgo de fraude)
+- ❌ FoodMatch NO gana dinero
+- ❌ Restaurante NO sabe si cliente está serio
+- ❌ Es como Uber sin pagos integrados
+
+Con Stripe:
+- ✅ Cliente paga seguro con tarjeta
+- ✅ FoodMatch gana 5-15% comisión
+- ✅ Restaurante recibe dinero confirmado
+- ✅ Es un negocio real
+
+### Backend - Stripe Integration
+
+**Instalar Stripe:**
+```bash
+npm install stripe
+```
+
+**backend/src/services/payment.service.ts:**
+
+```typescript
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export async function createPaymentIntent(orderId: string, amount: number) {
+  // amount en céntimos (45.50 € = 4550)
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount,
+    currency: 'eur',
+    metadata: { orderId }
+  });
+
+  return paymentIntent.client_secret;
+}
+
+export async function confirmPayment(paymentIntentId: string) {
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+  return paymentIntent.status === 'succeeded';
+}
+```
+
+**backend/src/routes/payments.routes.ts:**
+
+```typescript
+import express from 'express';
+import { createPaymentIntent } from '../services/payment.service';
+import { authMiddleware } from '../middleware/auth.middleware';
+
+const router = express.Router();
+
+router.post('/create-payment', authMiddleware, async (req: any, res: any) => {
+  try {
+    const { orderId, amount } = req.body;
+    const clientSecret = await createPaymentIntent(orderId, amount);
+    
+    res.json({
+      success: true,
+      clientSecret
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Payment error' });
+  }
+});
+
+export default router;
+```
+
+**Actualizar orden POST endpoint:**
+
+```typescript
+// backend/src/controllers/orders.controller.ts
+
+export async function createOrder(req: any, res: any) {
+  try {
+    const { restaurantId, items, notes, paymentIntentId } = req.body;
+    const userId = req.userId;
+
+    // Verificar que payment fue exitoso
+    const payment = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (payment.status !== 'succeeded') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Payment not completed' 
+      });
+    }
+
+    // Crear orden (SOLO SI pago fue exitoso)
+    const order = await prisma.order.create({
+      data: {
+        userId,
+        restaurantId,
+        customerName: user.name,
+        customerPhone: user.phone,
+        customerEmail: user.email,
+        status: 'confirmed', // Ya pagado, listo
+        totalPrice,
+        notes,
+        paymentIntentId, // Guardar para refunds
+        items: {
+          create: orderItems
+        }
+      }
+    });
+
+    // Enviar a restaurante
+    await sendOrderViaWhatsApp(restaurant.phone, orderMessage);
+
+    res.json({
+      success: true,
+      order: { id: order.id, status: order.status }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error });
+  }
+}
+```
+
+### Frontend - Payment Form
+
+**frontend/src/components/PaymentForm.tsx:**
+
+```typescript
+import { useState } from 'react';
+import { loadStripe } from '@stripe/js';
+import { CardElement, Elements, useStripe, useElements } from '@stripe/react-stripe-js';
+import axios from 'axios';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+export function PaymentForm({ orderId, amount, onSuccess }: any) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // 1. Crear payment intent en backend
+      const { data } = await axios.post('/api/v1/payments/create-payment', {
+        orderId,
+        amount: Math.round(amount * 100) // convertir a céntimos
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+
+      // 2. Confirmar pago con Stripe
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+        data.clientSecret,
+        {
+          payment_method: {
+            card: elements.getElement(CardElement)!,
+            billing_details: { email: localStorage.getItem('userEmail') }
+          }
+        }
+      );
+
+      if (stripeError) {
+        setError(stripeError.message);
+        return;
+      }
+
+      // 3. Crear orden en backend (SOLO si pago exitoso)
+      await axios.post('/api/v1/orders', {
+        restaurantId: orderId,
+        items,
+        notes,
+        paymentIntentId: paymentIntent.id
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+
+      onSuccess();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Payment failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handlePayment} className="p-4 border rounded-lg">
+      <h3 className="font-bold mb-4">Pagar con Tarjeta</h3>
+      
+      <CardElement className="mb-4 p-3 border rounded" />
+      
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+      
+      <button
+        type="submit"
+        disabled={loading || !stripe}
+        className="w-full bg-[#D17A5A] text-white py-2 rounded hover:bg-opacity-90 disabled:opacity-50"
+      >
+        {loading ? 'Procesando...' : `Pagar €${amount.toFixed(2)}`}
+      </button>
+
+      <p className="text-xs text-gray-500 mt-2">
+        💳 Seguro: Stripe procesa tu pago, no guardamos tus datos
+      </p>
+    </form>
+  );
+}
+```
+
+**Instalar librerías Stripe React:**
+```bash
+npm install @stripe/react-stripe-js @stripe/js
+```
+
+### Database Changes
+
+**Prisma Schema (actualizar Order model):**
+
+```prisma
+model Order {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  
+  items        OrderItem[]
+  
+  customerName String
+  customerPhone String
+  customerEmail String
+  
+  status       String   // "pending", "confirmed", "preparing", "ready", "delivered"
+  totalPrice   Float
+  notes        String?
+  
+  // NUEVO: Stripe
+  paymentIntentId  String?  // Para refunds
+  paymentStatus    String   // "pending", "succeeded", "failed"
+  paidAt           DateTime?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("orders")
+}
+```
+
+### Monetización - Opciones
+
+**OPCIÓN A: Comisión por pedidos**
+```
+Cliente paga €15
+FoodMatch toma €1.50 (10%)
+Restaurante recibe €13.50
+
+Con 1000 pedidos/mes:
+FoodMatch gana: €1,500/mes = €18,000/año
+```
+
+**OPCIÓN B: Suscripción Pro + Comisión**
+```
+Restaurante paga €30/mes por panel
++ FoodMatch toma 3% de comisión
+
+100 restaurantes x €30 = €3,000/mes
++ 1000 pedidos x €0.45 (3%) = €450/mes
+Total: €3,450/mes = €41,400/año
+```
+
+### Environment Variables
+
+**Actualizar .env:**
+```
+# Stripe
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PUBLIC_KEY="pk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+```
+
+**frontend/.env:**
+```
+VITE_STRIPE_PUBLIC_KEY="pk_test_..."
+```
+
+### Testing Payments
+
+```
+Usar test cards de Stripe:
+- 4242 4242 4242 4242 (success)
+- 4000 0000 0000 0002 (decline)
+- 4000 0000 0000 9995 (CVC error)
+
+Expiración: cualquier fecha futura
+CVC: cualquier 3 dígitos
+```
+
+### Webhook Setup
+
+**Para production, recibir notificaciones de Stripe:**
+
+```typescript
+// backend/src/routes/webhook.routes.ts
+
+import express from 'express';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+router.post('/stripe-webhook', express.raw({type: 'application/json'}), async (req, res) => {
+  const sig = req.headers['stripe-signature'] as string;
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (error) {
+    return res.status(400).send(`Webhook Error`);
+  }
+
+  if (event.type === 'payment_intent.succeeded') {
+    const paymentIntent = event.data.object as any;
+    // Actualizar orden en BD
+    await prisma.order.update({
+      where: { paymentIntentId: paymentIntent.id },
+      data: { paymentStatus: 'succeeded', paidAt: new Date() }
+    });
+  }
+
+  res.json({received: true});
+});
 ```
 
 ---
