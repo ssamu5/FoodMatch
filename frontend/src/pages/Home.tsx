@@ -38,7 +38,7 @@ export default function Home() {
   const fetchRestaurants = async () => {
     try {
       setLoading(true)
-      const response = await client.get('/restaurants')
+      const response = await client.get('/api/v1/restaurants')
       setRestaurants(response.data.data)
     } catch (error) {
       console.error('Error fetching restaurants:', error)
@@ -50,7 +50,7 @@ export default function Home() {
   const searchRestaurants = async () => {
     try {
       setLoading(true)
-      const response = await client.get(`/restaurants/search?query=${searchQuery}`)
+      const response = await client.get(`/api/v1/restaurants/search?query=${searchQuery}`)
       setRestaurants(response.data.data)
     } catch (error) {
       console.error('Error searching restaurants:', error)
@@ -67,7 +67,7 @@ export default function Home() {
       if (filters.priceRange !== 'Todos') params.append('priceRange', filters.priceRange)
       if (filters.format !== 'Todos') params.append('format', filters.format)
 
-      const response = await client.get(`/restaurants/filter?${params}`)
+      const response = await client.get(`/api/v1/restaurants/filter?${params}`)
       setRestaurants(response.data.data)
     } catch (error) {
       console.error('Error filtering restaurants:', error)

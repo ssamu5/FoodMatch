@@ -7,10 +7,7 @@ interface RestaurantCardProps {
 
 export default function RestaurantCard({ restaurant, onClick }: RestaurantCardProps) {
   return (
-    <div
-      onClick={onClick}
-      className="bg-white rounded-lg shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden"
-    >
+    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition overflow-hidden">
       {/* Imagen */}
       <div className="relative h-48 overflow-hidden bg-gray-200">
         <img
@@ -52,7 +49,13 @@ export default function RestaurantCard({ restaurant, onClick }: RestaurantCardPr
           </div>
         </div>
 
-        <button className="w-full mt-3 bg-red-600 text-white py-2 rounded font-semibold hover:bg-red-700 transition text-sm">
+        <button
+          onClick={() => {
+            console.log('Clickeado:', restaurant.name, restaurant.id)
+            onClick()
+          }}
+          className="w-full mt-3 bg-red-600 text-white py-2 rounded font-semibold hover:bg-red-700 transition text-sm cursor-pointer"
+        >
           Ver detalles
         </button>
       </div>

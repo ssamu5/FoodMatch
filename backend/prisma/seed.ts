@@ -41,7 +41,7 @@ async function main() {
       openingTime: '13:00',
       closingTime: '23:30',
       closedDays: 'Martes',
-      imageUrl: 'https://images.unsplash.com/photo-1593614505738-4587873d60b5?w=400'
+      imageUrl: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400'
     },
     {
       name: 'La Carne y el Fuego',
@@ -59,7 +59,7 @@ async function main() {
       openingTime: '13:00',
       closingTime: '00:00',
       closedDays: 'Domingo',
-      imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561404?w=400'
+      imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'
     },
     {
       name: 'Taj Mahal',
