@@ -1,6 +1,7 @@
 import express, { Express } from 'express'
 import cors from 'cors'
 import 'dotenv/config'
+import restaurantRoutes from './routes/restaurantRoutes'
 
 const app: Express = express()
 const PORT = process.env.PORT || 5000
@@ -14,9 +15,9 @@ app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'ok', message: 'FoodMatch backend is running' })
 })
 
-// Routes (to be added)
+// Routes
+app.use('/api/v1/restaurants', restaurantRoutes)
 // app.use('/api/v1/auth', authRoutes)
-// app.use('/api/v1/restaurants', restaurantRoutes)
 // app.use('/api/v1/users', userRoutes)
 
 // Error handling

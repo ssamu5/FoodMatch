@@ -1,37 +1,124 @@
+import { useState, useEffect } from 'react'
+import SearchBar from '../components/SearchBar'
+import FilterPanel from '../components/FilterPanel'
+import RestaurantList from '../components/RestaurantList'
+import { Restaurant } from '../types'
+import client from '../api/client'
+
+interface Filters {
+  cuisine: string
+  priceRange: string
+  format: string
+}
+
 export default function Home() {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
+  const [loading, setLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filters, setFilters] = useState<Filters>({
+    cuisine: 'Todos',
+    priceRange: 'Todos',
+    format: 'Todos'
+  })
+
+  // Cargar restaurantes iniciales
+  useEffect(() => {
+    fetchRestaurants()
+  }, [])
+
+  // Buscar/filtrar cuando cambia query o filtros
+  useEffect(() => {
+    if (searchQuery) {
+      searchRestaurants()
+    } else {
+      filterRestaurants()
+    }
+  }, [searchQuery, filters])
+
+  const fetchRestaurants = async () => {
+    try {
+      setLoading(true)
+      const response = await client.get('/restaurants')
+      setRestaurants(response.data.data)
+    } catch (error) {
+      console.error('Error fetching restaurants:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const searchRestaurants = async () => {
+    try {
+      setLoading(true)
+      const response = await client.get(`/restaurants/search?query=${searchQuery}`)
+      setRestaurants(response.data.data)
+    } catch (error) {
+      console.error('Error searching restaurants:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filterRestaurants = async () => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams()
+      if (filters.cuisine !== 'Todos') params.append('cuisine', filters.cuisine)
+      if (filters.priceRange !== 'Todos') params.append('priceRange', filters.priceRange)
+      if (filters.format !== 'Todos') params.append('format', filters.format)
+
+      const response = await client.get(`/restaurants/filter?${params}`)
+      setRestaurants(response.data.data)
+    } catch (error) {
+      console.error('Error filtering restaurants:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+  }
+
+  const handleFilterChange = (newFilters: Filters) => {
+    setFilters(newFilters)
+  }
+
+  const handleRestaurantClick = (restaurantId: string) => {
+    console.log('Restaurante clickeado:', restaurantId)
+    // Próximamente: navegar a página de detalle
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-black text-white p-4">
-        <h1 className="text-3xl font-bold">🍽️ FoodMatch</h1>
-        <p className="text-gray-300">Descubre y pide comida de los mejores restaurantes</p>
+      {/* Header */}
+      <header className="bg-black text-white p-6 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-bold">🍽️ FoodMatch</h1>
+          <p className="text-gray-300">Descubre y pide comida de los mejores restaurantes</p>
+        </div>
       </header>
 
-      <main className="max-w-4xl mx-auto p-8">
-        <div className="bg-red-600 text-white p-8 rounded-lg mb-8">
-          <h2 className="text-2xl font-bold mb-4">¡Bienvenido a FoodMatch!</h2>
-          <p className="mb-4">Sprint 0 está completado. El backend y frontend están funcionando.</p>
-          <div className="space-y-2">
-            <p>✅ Base de datos configurada</p>
-            <p>✅ API backend corriendo en http://localhost:5000</p>
-            <p>✅ Frontend corriendo en http://localhost:5173</p>
-            <p>✅ Estructuras listas para Sprint 1</p>
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto p-6">
+        {/* Search Bar */}
+        <SearchBar onSearch={handleSearch} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Filters */}
+          <div className="lg:col-span-1">
+            <FilterPanel onFilterChange={handleFilterChange} />
+          </div>
+
+          {/* Restaurant List */}
+          <div className="lg:col-span-3">
+            <RestaurantList
+              restaurants={restaurants}
+              loading={loading}
+              onRestaurantClick={handleRestaurantClick}
+            />
           </div>
         </div>
-
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold text-black">Próximos pasos:</h3>
-          <ul className="space-y-3">
-            <li className="p-4 border-l-4 border-red-600">
-              <strong>Sprint 1:</strong> Crear búsqueda de restaurantes y login de usuario
-            </li>
-            <li className="p-4 border-l-4 border-red-600">
-              <strong>Sprint 2:</strong> Integrar chatbot IA para recomendaciones
-            </li>
-            <li className="p-4 border-l-4 border-red-600">
-              <strong>Sprint 3:</strong> Sistema de pedidos y pagos con Stripe
-            </li>
-          </ul>
-        </section>
       </main>
     </div>
   )
