@@ -95,7 +95,7 @@ async function main() {
       openingTime: '13:00',
       closingTime: '23:00',
       closedDays: 'Lunes',
-      imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'
+      imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400'
     },
     {
       name: 'Taquería México Lindo',
@@ -113,7 +113,7 @@ async function main() {
       openingTime: '12:00',
       closingTime: '23:00',
       closedDays: '',
-      imageUrl: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400'
+      imageUrl: 'https://images.unsplash.com/photo-1565299885657-406dbf434b3f?w=400'
     }
   ]
 

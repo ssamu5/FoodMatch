@@ -1,7 +1,7 @@
 # 📊 Estado del Proyecto FoodMatch
 
-**Última actualización:** 1 de Mayo de 2026  
-**Estado:** ✅ Documentación lista, listo para empezar a codear
+**Última actualización:** 2 de Mayo de 2026  
+**Estado:** ✅ Sprint 1 en progreso - Core features funcionando
 
 ---
 
@@ -22,25 +22,43 @@
 ## 📈 Progreso Actual
 
 ```
-Sprint 0: Setup                [████████░░] 80%
-Sprint 1: MVP Básico          [░░░░░░░░░░] 0%
+Sprint 0: Setup                [██████████] 100% ✅
+Sprint 1: MVP Básico          [███████░░░] 70%
 Sprint 2: Detalle + IA        [░░░░░░░░░░] 0%
 Sprint 3: Pedidos + Login     [░░░░░░░░░░] 0%
 Sprint 4: Pulido              [░░░░░░░░░░] 0%
 
-TOTAL PROYECTO              [████░░░░░░] 16%
+TOTAL PROYECTO              [███░░░░░░░] 34%
 ```
 
-**Completado:**
-- ✅ Documentación completa (100%)
-- ✅ Diseño de arquitectura
-- ✅ Especificación de endpoints
-- ✅ Schema de base de datos
-- ✅ Estructura de carpetas definida
-- ✅ Guides y checklists
+**Sprint 0 - Completado:**
+- ✅ Proyecto React + Vite estructurado
+- ✅ Proyecto Node.js + Express configurado
+- ✅ PostgreSQL con 7 tablas (User, Restaurant, Menu, Review, Favorite, Order)
+- ✅ TypeScript en frontend y backend
+- ✅ Prisma ORM integrado
+- ✅ Autenticación JWT preparada
+- ✅ Tailwind CSS configurado (colores custom)
+- ✅ Seed con 6 restaurantes de ejemplo
+
+**Sprint 1 - En Progreso:**
+- ✅ Backend con endpoints REST (/api/v1/restaurants, /search, /filter)
+- ✅ Controllers y Services implementados
+- ✅ API de búsqueda funcional
+- ✅ API de filtrado funcional
+- ✅ SearchBar component (React)
+- ✅ FilterPanel component (React)
+- ✅ RestaurantCard component (React)
+- ✅ RestaurantList component (React)
+- ✅ Home page con state management
+- ✅ Listado de 6 restaurantes con imágenes únicas
+- ⏳ Navegación al detalle del restaurante (botón "Ver detalles")
 
 **Pendiente:**
-- ⏳ Implementación de código (Sprints 0-4)
+- ⏳ Sprint 1: Página de detalle del restaurante
+- ⏳ Sprint 2: Chatbot IA + Sistema de reseñas
+- ⏳ Sprint 3: Sistema de pedidos + Autenticación completa
+- ⏳ Sprint 4: Pulido y optimizaciones
 - ⏳ Testing (unitario + integración)
 - ⏳ Deployment en producción
 
@@ -142,12 +160,12 @@ Una vez completes cada sprint:
 | Hito | Fecha Estimada | Estado |
 |------|---|---|
 | **Documentación Lista** | 1 Mayo 2026 | ✅ Completado |
-| **Sprint 0 (Setup)** | 1-2 semanas | ⏳ Pendiente |
-| **Sprint 1 (MVP)** | 3-4 semanas | ⏳ Pendiente |
-| **Sprint 2 (Detalle+IA)** | 3-4 semanas | ⏳ Pendiente |
-| **Sprint 3 (Pedidos+Auth)** | 3-4 semanas | ⏳ Pendiente |
-| **Sprint 4 (Pulido)** | 2-3 semanas | ⏳ Pendiente |
-| **MVP Listo** | ~14 semanas | ⏳ Pendiente |
+| **Sprint 0 (Setup)** | 1 Mayo 2026 | ✅ Completado |
+| **Sprint 1 (MVP)** | 2 Mayo 2026 | 🔄 En progreso (~70%) |
+| **Sprint 2 (Detalle+IA)** | 3-5 Mayo 2026 | ⏳ Próximo |
+| **Sprint 3 (Pedidos+Auth)** | 6-8 Mayo 2026 | ⏳ Pendiente |
+| **Sprint 4 (Pulido)** | 9-10 Mayo 2026 | ⏳ Pendiente |
+| **MVP Listo** | ~10 Mayo 2026 | ⏳ Estimado |
 | **Producción** | TBD | ⏳ Pendiente |
 
 ---
