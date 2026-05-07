@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+<meta name="theme-color" content="#E63946" />
+<meta name="description" content="FoodMatch. La nueva forma de descubrir restaurantes en Valencia. Apunta tu restaurante a la lista de los primeros 100. Dos meses gratis." />
+<meta property="og:title" content="FoodMatch. Aparece en la lista." />
+<meta property="og:description" content="Los primeros 100 restaurantes de Valencia entran gratis durante 2 meses." />
+<meta property="og:locale" content="es_ES" />
+<title>FoodMatch. Aparece en la lista. Gratis durante 2 meses.</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          cream: '#F8F1E5',
+          creamy: '#F2E9D8',
+          tomate: '#E63946',
+          tomateDeep: '#B72C39',
+          mostaza: '#F2A93B',
+          oliva: '#5C6B2F',
+          fresco: '#3FAE6B',
+          tinta: '#1F1814',
+          ceramica: '#D9694D',
+          azulejo: '#1F4E5F',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'ui-serif', 'Georgia', 'serif'],
+          body: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  :root {
+    color-scheme: light;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+    background-color: #F8F1E5;
+    color: #1F1814;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+  .it { font-style: italic; }
+
+  /* Headline tightening */
+  .h-tight { letter-spacing: -0.02em; line-height: 0.95; }
+  .h-very-tight { letter-spacing: -0.035em; line-height: 0.9; }
+
+  /* Paper texture, very subtle */
+  .paper {
+    background-image: radial-gradient(rgba(31, 24, 20, 0.035) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+  }
+
+  /* Stamp badge for "100 GRATIS" */
+  .stamp {
+    background: #E63946;
+    color: #F8F1E5;
+    border: 3px solid #F8F1E5;
+    box-shadow: 0 0 0 3px #E63946, 8px 8px 0 0 rgba(31, 24, 20, 0.18);
+    transform: rotate(-6deg);
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1);
+  }
+  .stamp:hover { transform: rotate(-2deg) scale(1.02); }
+
+  /* Squiggle divider */
+  .squiggle {
+    height: 18px;
+    width: 100%;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 18' preserveAspectRatio='none'><path d='M0 9 Q10 0 20 9 T40 9 T60 9 T80 9' stroke='%231F1814' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: repeat-x;
+    background-size: 80px 18px;
+    opacity: 0.55;
+  }
+
+  /* Form inputs feel tactile */
+  .field {
+    background: #fff;
+    border: 2px solid #1F1814;
+    border-radius: 0.75rem;
+    padding: 0.95rem 1rem;
+    width: 100%;
+    font-size: 1.05rem;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .field:focus {
+    outline: none;
+    border-color: #E63946;
+    box-shadow: 6px 6px 0 0 #E63946;
+    transform: translate(-3px, -3px);
+  }
+  .field::placeholder { color: rgba(31,24,20,.45); }
+  .field-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+  }
+
+  /* Big primary button */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #1F1814;
+    color: #F8F1E5;
+    padding: 1rem 1.6rem;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); background: #E63946; }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #F8F1E5;
+    color: #1F1814;
+    border: 2px solid #1F1814;
+    padding: 0.85rem 1.4rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .btn-secondary:hover { background: #F2A93B; }
+
+  /* Numbered step dots */
+  .step-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: clamp(3rem, 8vw, 5rem);
+    line-height: 1;
+    color: #E63946;
+    font-weight: 600;
+  }
+
+  /* Section transitions */
+  section { position: relative; }
+
+  /* Anchor focus: gentle pulse */
+  .pulse-dot {
+    width: 10px; height: 10px; border-radius: 999px; background: #3FAE6B; display: inline-block;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(63, 174, 107, 0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(63, 174, 107, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(63, 174, 107, 0); }
+  }
+
+  /* FAQ details */
+  details summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 1.4rem 0;
+    border-top: 1px solid rgba(31, 24, 20, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 600;
+    font-size: 1.15rem;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details[open] summary { color: #B72C39; }
+  details summary .plus { transition: transform .25s ease; font-size: 1.5rem; line-height: 1; color: #E63946; font-family: 'Fraunces', serif; }
+  details[open] summary .plus { transform: rotate(45deg); }
+
+  /* Tilted card */
+  .tilt-l { transform: rotate(-1.2deg); }
+  .tilt-r { transform: rotate(1.2deg); }
+
+  /* Underline accent for inline emphasis */
+  .ul-accent {
+    background-image: linear-gradient(transparent 60%, rgba(63, 174, 107, 0.45) 60%);
+    padding: 0 0.05em;
+  }
+
+  /* Selection */
+  ::selection { background: #E63946; color: #F8F1E5; }
+
+  /* Hide scrollbar on horizontal scroll feature row, optional */
+  .scroll-row::-webkit-scrollbar { height: 6px; }
+  .scroll-row::-webkit-scrollbar-thumb { background: rgba(31,24,20,0.2); border-radius: 999px; }
+
+  /* Reduced motion respect */
+  @media (prefers-reduced-motion: reduce) {
+    .stamp, .field, .btn-primary, details summary .plus { transition: none; }
+    .pulse-dot { animation: none; }
+  }
+</style>
+</head>
+<body class="paper">
+
+<!-- =========================== NAV =========================== -->
+<header class="px-5 sm:px-8 py-5 flex items-center justify-between">
+  <a href="#" class="flex items-center gap-2.5">
+    <span class="display text-2xl font-bold tracking-tight">food<span class="text-tomate it">match</span></span>
+  </a>
+  <a href="#apuntarme" class="hidden sm:inline-flex btn-secondary text-sm">
+    Apuntarme
+    <span aria-hidden="true">→</span>
+  </a>
+</header>
+
+<!-- =========================== HERO =========================== -->
+<section class="px-5 sm:px-8 pt-6 sm:pt-12 pb-20 sm:pb-32 relative overflow-hidden">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-center gap-2 mb-6 text-sm uppercase tracking-[0.18em] font-semibold">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      <span>Lanzamiento. Otoño 2026. Valencia.</span>
+    </div>
+
+    <h1 class="display h-very-tight font-bold text-[clamp(3rem,11vw,9rem)]">
+      Aparece en
+      <span class="block">FoodMatch.</span>
+      <span class="it text-tomate font-light">Gratis durante</span>
+      <span class="it text-tomate font-light">2 meses.</span>
+    </h1>
+
+    <p class="mt-8 max-w-2xl text-lg sm:text-xl leading-relaxed">
+      La nueva forma de descubrir restaurantes en Valencia. Si tu restaurante es uno de los primeros 100 en apuntarse, entra <span class="ul-accent">sin pagar nada</span> y guarda un precio fundador para siempre.
+    </p>
+
+    <div class="mt-10 flex flex-wrap items-center gap-4">
+      <a href="#apuntarme" class="btn-primary text-base sm:text-lg">
+        Apuntar mi restaurante
+        <span aria-hidden="true">→</span>
+      </a>
+      <span class="text-sm opacity-70">60 segundos. Sin tarjeta. Sin compromiso.</span>
+    </div>
+  </div>
+
+  <!-- Stamp absolutely positioned -->
+  <div class="hidden md:block absolute right-6 top-16 z-10">
+    <div class="stamp display rounded-full w-44 h-44 lg:w-56 lg:h-56 flex flex-col items-center justify-center text-center px-3">
+      <span class="text-[2.6rem] lg:text-[3.4rem] font-black leading-none">100</span>
+      <span class="uppercase text-[0.72rem] lg:text-xs tracking-[0.22em] mt-1.5 font-semibold">primeros</span>
+      <span class="uppercase text-[0.72rem] lg:text-xs tracking-[0.22em] font-semibold">gratis</span>
+    </div>
+  </div>
+</section>
+
+<div class="squiggle" role="presentation"></div>
+
+<!-- =========================== 100 FREE CALLOUT =========================== -->
+<section class="bg-tomate text-cream px-5 sm:px-8 py-20 sm:py-28 relative overflow-hidden">
+  <div class="max-w-5xl mx-auto grid md:grid-cols-12 gap-x-12 gap-y-10 items-center">
+    <div class="md:col-span-5 lg:col-span-4">
+      <div class="display text-[clamp(7rem,16vw,13rem)] font-black leading-[0.82] h-very-tight">100</div>
+      <div class="display text-2xl sm:text-3xl it mt-1">primeros restaurantes.</div>
+    </div>
+    <div class="md:col-span-7 lg:col-span-8 space-y-5 text-lg sm:text-xl leading-relaxed">
+      <p>Sólo <strong>cien</strong>. No es marketing. Somos dos personas y queremos arrancar Valencia con cada uno bien atendido. Te llamamos, te configuramos la ficha, te enseñamos cómo funciona.</p>
+      <p>Después de los dos meses gratis, los primeros 100 conservan el <strong>precio fundador de 69 EUR/mes para siempre</strong>. El resto pagará 99 EUR/mes.</p>
+      <div class="pt-2">
+        <a href="#apuntarme" class="inline-flex items-center gap-2 bg-cream text-tomate font-semibold rounded-full px-6 py-3 hover:bg-mostaza hover:text-tinta transition">
+          Quiero estar en los 100
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== WHAT WE DO =========================== -->
+<section class="px-5 sm:px-8 py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto">
+    <div class="max-w-3xl">
+      <p class="uppercase tracking-[0.2em] text-sm font-semibold text-tomate">Qué hacemos</p>
+      <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)]">
+        Construimos algo nuevo
+        <span class="block it font-light">en Valencia.</span>
+      </h2>
+    </div>
+
+    <div class="mt-14 grid md:grid-cols-3 gap-10">
+      <div class="space-y-3">
+        <div class="display text-tomate text-5xl font-bold it">i.</div>
+        <h3 class="display text-2xl font-semibold">Más visibilidad.</h3>
+        <p class="text-base leading-relaxed opacity-85">
+          Cuando un cliente pregunta a la IA "¿dónde como una buena hamburguesa cerca?", tu restaurante aparece. Conversacional, directo, sin scroll infinito.
+        </p>
+      </div>
+      <div class="space-y-3">
+        <div class="display text-mostaza text-5xl font-bold it">ii.</div>
+        <h3 class="display text-2xl font-semibold">Sin comisiones.</h3>
+        <p class="text-base leading-relaxed opacity-85">
+          Cero por ciento sobre reservas o pedidos. Una suscripción plana, transparente. Tú cobras lo que cobras, sin descuentos forzados.
+        </p>
+      </div>
+      <div class="space-y-3">
+        <div class="display text-fresco text-5xl font-bold it">iii.</div>
+        <h3 class="display text-2xl font-semibold">Para los pequeños.</h3>
+        <p class="text-base leading-relaxed opacity-85">
+          Si TheFork te ahoga con descuentos, esto es para ti. Ningún restaurante pequeño queda fuera del índice por no pagar lo suficiente.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="squiggle" role="presentation"></div>
+
+<!-- =========================== HOW IT WORKS =========================== -->
+<section class="bg-mostaza px-5 sm:px-8 py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto">
+    <div class="max-w-3xl">
+      <p class="uppercase tracking-[0.2em] text-sm font-semibold">Cómo funciona</p>
+      <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)] text-tinta">
+        Tres pasos. <span class="it font-light">Cero papeleo.</span>
+      </h2>
+    </div>
+
+    <ol class="mt-14 grid md:grid-cols-3 gap-8 list-none">
+      <li class="bg-cream rounded-3xl p-7 sm:p-8 tilt-l">
+        <div class="step-num">1</div>
+        <h3 class="display text-2xl font-semibold mt-3">Te apuntas.</h3>
+        <p class="mt-2 leading-relaxed opacity-90">Rellenas el formulario en 60 segundos. Sin tarjeta, sin contrato, sin compromiso.</p>
+      </li>
+      <li class="bg-cream rounded-3xl p-7 sm:p-8">
+        <div class="step-num">2</div>
+        <h3 class="display text-2xl font-semibold mt-3">Te llamamos.</h3>
+        <p class="mt-2 leading-relaxed opacity-90">Te ayudamos a montar tu ficha. Fotos, menú, horarios. Lo que necesites.</p>
+      </li>
+      <li class="bg-cream rounded-3xl p-7 sm:p-8 tilt-r">
+        <div class="step-num">3</div>
+        <h3 class="display text-2xl font-semibold mt-3">Apareces.</h3>
+        <p class="mt-2 leading-relaxed opacity-90">Cuando lancemos en otoño 2026, tu restaurante está dentro desde el primer minuto.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- =========================== WHAT YOU GET =========================== -->
+<section class="px-5 sm:px-8 py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid md:grid-cols-12 gap-8 items-end mb-14">
+      <div class="md:col-span-7">
+        <p class="uppercase tracking-[0.2em] text-sm font-semibold text-tomate">Lo que recibes</p>
+        <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)]">
+          Todo. <span class="it font-light">De verdad.</span>
+        </h2>
+      </div>
+      <div class="md:col-span-5 text-base sm:text-lg leading-relaxed opacity-85">
+        Plan Pro completo desde el día uno. Sin upgrades, sin tiers escondidos. Lo que ves es lo que tienes.
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <article class="bg-creamy rounded-3xl p-7">
+        <h3 class="display text-xl font-semibold">Panel propio</h3>
+        <p class="mt-2 text-sm leading-relaxed opacity-90">Edita tu menú, fotos y horarios en tiempo real. Cuando cambias algo, los clientes lo ven al instante.</p>
+      </article>
+      <article class="bg-cream border-2 border-tinta rounded-3xl p-7">
+        <h3 class="display text-xl font-semibold">Menú multilingüe</h3>
+        <p class="mt-2 text-sm leading-relaxed opacity-90">Tu menú traducido automáticamente a inglés, alemán, francés y holandés. Los turistas leen sin Google Translate.</p>
+      </article>
+      <article class="bg-fresco text-cream rounded-3xl p-7">
+        <h3 class="display text-xl font-semibold">Recomendado por la IA</h3>
+        <p class="mt-2 text-sm leading-relaxed opacity-95">Apareces cuando los clientes preguntan en lenguaje natural. "Algo bueno para grupos, no caro" te encuentra.</p>
+      </article>
+      <article class="bg-cream border-2 border-tinta rounded-3xl p-7">
+        <h3 class="display text-xl font-semibold">Reviews integradas</h3>
+        <p class="mt-2 text-sm leading-relaxed opacity-90">Tu rating de Google visible en la ficha, más nuestro propio sistema de reviews dentro de la app.</p>
+      </article>
+      <article class="bg-creamy rounded-3xl p-7">
+        <h3 class="display text-xl font-semibold">Estadísticas claras</h3>
+        <p class="mt-2 text-sm leading-relaxed opacity-90">Visitas, búsquedas que te encuentran, idiomas de los clientes, horas pico. Datos que sirven, sin gráficos absurdos.</p>
+      </article>
+      <article class="bg-tomate text-cream rounded-3xl p-7">
+        <h3 class="display text-xl font-semibold">Precio fundador</h3>
+        <p class="mt-2 text-sm leading-relaxed opacity-95">69 EUR/mes bloqueado para siempre si entras en los primeros 100. Sin subidas, sin sorpresas.</p>
+      </article>
+    </div>
+
+    <p class="mt-10 text-base opacity-75">
+      Cero comisión sobre reservas o pedidos. Cancelas cuando quieras. Tus datos son tuyos.
+    </p>
+  </div>
+</section>
+
+<div class="squiggle" role="presentation"></div>
+
+<!-- =========================== FOUNDERS =========================== -->
+<section class="bg-azulejo text-cream px-5 sm:px-8 py-20 sm:py-28">
+  <div class="max-w-5xl mx-auto">
+    <p class="uppercase tracking-[0.2em] text-sm font-semibold opacity-80">Quiénes somos</p>
+    <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)]">
+      Samu y Max.
+      <span class="block it font-light text-mostaza">Veinte años. Dos países. Una idea.</span>
+    </h2>
+
+    <div class="mt-14 grid md:grid-cols-2 gap-10 text-base sm:text-lg leading-relaxed">
+      <div>
+        <h3 class="display text-2xl font-semibold mb-2">Samu</h3>
+        <p>Lleva <strong>El Mesón Smashburgers</strong> en Valencia. Conoce el mundo de los restaurantes desde dentro. Si te visita en persona con un QR, eres uno de los primeros 100.</p>
+      </div>
+      <div>
+        <h3 class="display text-2xl font-semibold mb-2">Max</h3>
+        <p>Desarrollador en Alemania. Construye la parte técnica, incluyendo la IA que recomienda tu cocina. Aficionado a la comida, mal cocinero.</p>
+      </div>
+    </div>
+
+    <p class="mt-12 max-w-2xl text-base sm:text-lg opacity-90 leading-relaxed">
+      Construimos FoodMatch porque queremos que exista. No es una multinacional, es un proyecto de dos. Por eso podemos cuidar a los primeros 100 personalmente.
+    </p>
+  </div>
+</section>
+
+<!-- =========================== FORM =========================== -->
+<section id="apuntarme" class="px-5 sm:px-8 py-20 sm:py-28">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-12">
+      <p class="uppercase tracking-[0.2em] text-sm font-semibold text-tomate">Apúntate</p>
+      <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,7vw,5rem)]">
+        60 segundos.
+        <span class="block it font-light">Y entras en la lista.</span>
+      </h2>
+      <p class="mt-5 max-w-xl mx-auto opacity-85 leading-relaxed">
+        Sin tarjeta. Sin contrato. Te llamamos para confirmar y configurar tu ficha. Si después de los dos meses gratis no quieres seguir, no pagas y se acaba ahí.
+      </p>
+    </div>
+
+    <form action="https://formspree.io/f/xanyywwy" method="POST" class="bg-cream border-2 border-tinta rounded-3xl p-6 sm:p-10 space-y-5 shadow-[8px_8px_0_0_#1F1814]">
+      <div>
+        <label for="restaurant" class="field-label">Nombre del restaurante <span class="text-tomate" aria-hidden="true">*</span></label>
+        <input class="field" id="restaurant" name="restaurant" type="text" required placeholder="Ej. Casa Carmela" />
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label for="owner" class="field-label">Tu nombre <span class="text-tomate" aria-hidden="true">*</span></label>
+          <input class="field" id="owner" name="owner" type="text" required placeholder="Ej. Carmen" />
+        </div>
+        <div>
+          <label for="phone" class="field-label">Teléfono o WhatsApp <span class="text-tomate" aria-hidden="true">*</span></label>
+          <input class="field" id="phone" name="phone" type="tel" required placeholder="Ej. 600 123 456" />
+        </div>
+      </div>
+
+      <div>
+        <label for="email" class="field-label">Email <span class="text-tomate" aria-hidden="true">*</span></label>
+        <input class="field" id="email" name="email" type="email" required placeholder="hola@tu-restaurante.com" />
+      </div>
+
+      <div>
+        <label for="neighborhood" class="field-label">Calle o barrio en Valencia <span class="text-tomate" aria-hidden="true">*</span></label>
+        <input class="field" id="neighborhood" name="neighborhood" type="text" required placeholder="Ej. Ruzafa, El Carmen, Cabanyal" />
+      </div>
+
+      <div class="bg-creamy rounded-2xl p-5 border-2 border-dashed border-tinta">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" name="visited_by_samu" value="si" class="mt-1.5 w-5 h-5 accent-tomate cursor-pointer" />
+          <span>
+            <span class="font-semibold block">¿Te visitó Samu en persona?</span>
+            <span class="text-sm opacity-80">Si dijo "soy Samu de El Mesón", marca esta casilla. Es para asegurarnos de no perderte de la lista de los 100.</span>
+          </span>
+        </label>
+      </div>
+
+      <div>
+        <label for="notes" class="field-label">Notas (opcional)</label>
+        <textarea class="field" id="notes" name="notes" rows="3" placeholder="¿Algo que quieres que sepamos? ¿Mejor hora para llamar?"></textarea>
+      </div>
+
+      <input type="hidden" name="_subject" value="Nueva alta FoodMatch - lista de los 100" />
+
+      <div class="pt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <p class="text-xs opacity-70 max-w-sm leading-relaxed">
+          Al enviar aceptas que te contactemos sobre FoodMatch. No vendemos tus datos. Cumplimos GDPR y la AEPD.
+        </p>
+        <button type="submit" class="btn-primary text-base sm:text-lg justify-center sm:justify-start">
+          Apuntarme a la lista
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<div class="squiggle" role="presentation"></div>
+
+<!-- =========================== FAQ =========================== -->
+<section class="px-5 sm:px-8 py-20 sm:py-28">
+  <div class="max-w-3xl mx-auto">
+    <p class="uppercase tracking-[0.2em] text-sm font-semibold text-tomate">Dudas razonables</p>
+    <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)]">
+      Preguntas <span class="it font-light">frecuentes.</span>
+    </h2>
+
+    <div class="mt-10">
+      <details>
+        <summary>¿Cuándo lanzáis? <span class="plus" aria-hidden="true">+</span></summary>
+        <p class="pb-5 leading-relaxed opacity-90">Otoño 2026 en Valencia. Te avisamos en cuanto estemos listos para configurar tu ficha. Mientras tanto, no tienes que hacer nada.</p>
+      </details>
+      <details>
+        <summary>¿Tengo que firmar algún contrato? <span class="plus" aria-hidden="true">+</span></summary>
+        <p class="pb-5 leading-relaxed opacity-90">No. Apuntarte es lista de espera. Cuando entres en la fase gratis, tampoco hay contrato. Si después de los dos meses no quieres seguir, no pagas y se acaba ahí.</p>
+      </details>
+      <details>
+        <summary>¿Por qué solo los primeros 100? <span class="plus" aria-hidden="true">+</span></summary>
+        <p class="pb-5 leading-relaxed opacity-90">Porque somos dos personas. Atender bien a 100 restaurantes con onboarding personal nos lleva tiempo. Después de los primeros 100 abrimos a más, pero el precio fundador queda solo para los primeros.</p>
+      </details>
+      <details>
+        <summary>¿Y mis datos? <span class="plus" aria-hidden="true">+</span></summary>
+        <p class="pb-5 leading-relaxed opacity-90">Respetamos GDPR y la AEPD. No vendemos datos a nadie. Sólo los usamos para contactarte sobre FoodMatch y configurar tu ficha cuando llegue el momento.</p>
+      </details>
+      <details>
+        <summary>¿Cuánto cuesta después? <span class="plus" aria-hidden="true">+</span></summary>
+        <p class="pb-5 leading-relaxed opacity-90">99 EUR/mes para los nuevos restaurantes. 69 EUR/mes bloqueado para siempre si eres uno de los primeros 100. Cero comisión sobre reservas o pedidos.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== FINAL CTA =========================== -->
+<section class="bg-tinta text-cream px-5 sm:px-8 py-20 sm:py-28 text-center">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="display h-very-tight font-bold text-[clamp(2.6rem,9vw,6rem)]">
+      Encuentra tu sabor.
+      <span class="block it font-light text-mostaza">Encuéntranos antes que nadie.</span>
+    </h2>
+    <div class="mt-10">
+      <a href="#apuntarme" class="inline-flex items-center gap-2 bg-cream text-tinta font-semibold rounded-full px-7 py-4 text-lg hover:bg-mostaza transition">
+        Apuntar mi restaurante
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== FOOTER =========================== -->
+<footer class="px-5 sm:px-8 py-10 bg-cream">
+  <div class="max-w-6xl mx-auto flex flex-wrap items-end justify-between gap-6 text-sm">
+    <div>
+      <div class="display text-2xl font-bold tracking-tight">food<span class="text-tomate it">match</span></div>
+      <p class="opacity-70 mt-1">Encuentra tu sabor.</p>
+    </div>
+    <div class="space-y-1">
+      <p><a href="mailto:hola@foodmatch.es" class="underline decoration-tomate decoration-2 underline-offset-4 hover:text-tomate">hola@foodmatch.es</a></p>
+      <p>Valencia. Alemania. Internet.</p>
+    </div>
+    <div class="space-y-1 text-xs opacity-70">
+      <p><a href="/privacidad.html" class="hover:underline">Privacidad</a> · <a href="/cookies.html" class="hover:underline">Cookies</a> · <a href="/terminos.html" class="hover:underline">Términos</a></p>
+      <p>FoodMatch, en pre-lanzamiento. 2026.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Honeypot check (basic spam guard) and analytics-friendly mailto fallback if formspree fails.
+  document.querySelector('form')?.addEventListener('submit', (e) => {
+    const honey = document.querySelector('input[name="_gotcha"]');
+    if (honey && honey.value) e.preventDefault();
+  });
+</script>
+
+</body>
+</html>
