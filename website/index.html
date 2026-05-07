@@ -200,17 +200,241 @@
   .scroll-row::-webkit-scrollbar { height: 6px; }
   .scroll-row::-webkit-scrollbar-thumb { background: rgba(31,24,20,0.2); border-radius: 999px; }
 
+  /* ====== Splashy additions ====== */
+
+  /* Marquee tape */
+  @keyframes marqueeScroll {
+    from { transform: translate3d(0,0,0); }
+    to   { transform: translate3d(-50%,0,0); }
+  }
+  .marquee {
+    overflow: hidden;
+    position: relative;
+  }
+  .marquee-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 2.5rem;
+    padding-right: 2.5rem;
+    white-space: nowrap;
+    animation: marqueeScroll 32s linear infinite;
+    will-change: transform;
+  }
+  .marquee-track:hover { animation-play-state: paused; }
+  .marquee-star { display: inline-block; transform: translateY(-1px); }
+
+  /* Floating background blobs */
+  @keyframes floatA { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(18px,-22px) rotate(8deg); } }
+  @keyframes floatB { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-22px,18px) rotate(-9deg); } }
+  @keyframes floatC { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(12px,28px) rotate(5deg); } }
+  @keyframes drift  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .blob { position: absolute; border-radius: 999px; pointer-events: none; mix-blend-mode: multiply; }
+
+  /* Splash SVG accents */
+  .splash {
+    position: absolute;
+    pointer-events: none;
+    color: currentColor;
+  }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .splash-spin { animation: spin 14s linear infinite; }
+  @keyframes twinkle { 0%,100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.15); } }
+  .splash-twinkle { animation: twinkle 2.6s ease-in-out infinite; }
+
+  /* Hero word stagger on load */
+  @keyframes lineUp {
+    from { opacity: 0; transform: translate3d(0, 24px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  .stagger > * { opacity: 0; animation: lineUp 0.85s cubic-bezier(.2,.7,.2,1) forwards; }
+  .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.18s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.32s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.48s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.62s; }
+
+  /* Stamp gentle wobble */
+  @keyframes wobble {
+    0%,100% { transform: rotate(-6deg); }
+    50%     { transform: rotate(-2deg); }
+  }
+  .stamp { animation: wobble 5s ease-in-out infinite; }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translate3d(0, 28px, 0); transition: opacity .8s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: translate3d(0, 0, 0); }
+  .reveal-stagger.in > * { animation: lineUp .8s cubic-bezier(.2,.7,.2,1) both; }
+  .reveal-stagger.in > *:nth-child(1) { animation-delay: 0.05s; }
+  .reveal-stagger.in > *:nth-child(2) { animation-delay: 0.16s; }
+  .reveal-stagger.in > *:nth-child(3) { animation-delay: 0.28s; }
+  .reveal-stagger.in > *:nth-child(4) { animation-delay: 0.40s; }
+  .reveal-stagger.in > *:nth-child(5) { animation-delay: 0.52s; }
+  .reveal-stagger.in > *:nth-child(6) { animation-delay: 0.64s; }
+
+  /* Card hover lift */
+  .lift { transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease; will-change: transform; }
+  .lift:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 12px 12px 0 0 rgba(31,24,20,0.12); }
+
+  /* Polaroid */
+  .polaroid {
+    background: #fff;
+    padding: 1rem 1rem 0.6rem;
+    box-shadow: 0 1px 0 rgba(31,24,20,0.05), 8px 12px 0 rgba(31,24,20,0.18);
+    transition: transform .4s cubic-bezier(.2,.7,.2,1);
+  }
+  .polaroid:hover { transform: rotate(0deg) translateY(-4px); }
+  .polaroid-photo {
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, #F2A93B 0%, #E63946 100%);
+    display: grid;
+    place-items: center;
+    color: #F8F1E5;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    font-weight: 700;
+    border: 1px solid rgba(31,24,20,0.1);
+  }
+  .polaroid-photo.b { background: linear-gradient(135deg, #3FAE6B 0%, #1F4E5F 100%); }
+  .polaroid-cap {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    text-align: center;
+    color: #1F1814;
+    margin-top: 0.6rem;
+    font-size: 0.95rem;
+  }
+
+  /* Sticky mobile CTA */
+  .sticky-cta {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 50;
+    transform: translateY(120%);
+    transition: transform .5s cubic-bezier(.2,.7,.2,1);
+    display: none;
+  }
+  .sticky-cta.show { transform: translateY(0); }
+  @media (max-width: 768px) {
+    .sticky-cta { display: block; }
+    body { padding-bottom: 5.5rem; }
+  }
+  .sticky-cta a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    background: #E63946;
+    color: #F8F1E5;
+    padding: 1rem 1.2rem;
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 0 12px 28px -8px rgba(230, 57, 70, 0.55), 0 0 0 4px rgba(248, 241, 229, 0.9);
+    font-size: 1.05rem;
+  }
+
+  /* Confetti on form success */
+  @keyframes confetti-fall {
+    0% { transform: translate3d(0, -100vh, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate3d(var(--tx, 0), 100vh, 0) rotate(720deg); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed;
+    top: -10vh;
+    width: 10px; height: 14px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: confetti-fall 1.8s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  /* Mobile-specific tightening */
+  @media (max-width: 640px) {
+    .stagger > * { animation-duration: 0.7s; }
+    .field { font-size: 16px; }  /* prevents iOS zoom on focus */
+    .btn-primary, .btn-secondary { padding: 0.95rem 1.4rem; }
+    details summary { font-size: 1rem; padding: 1.2rem 0; }
+    .squiggle { height: 14px; }
+  }
+
+  /* Hand-drawn dotted underline */
+  .underline-dotty {
+    background-image: radial-gradient(circle, rgba(230,57,70,0.7) 28%, transparent 32%);
+    background-size: 8px 4px;
+    background-repeat: repeat-x;
+    background-position: 0 96%;
+    padding-bottom: 6px;
+  }
+
+  /* Tape label */
+  .tape {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    background: rgba(242, 169, 59, 0.95);
+    color: #1F1814;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.9rem;
+    box-shadow: 0 2px 0 rgba(31,24,20,0.1);
+  }
+  .tape::before, .tape::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 6px;
+    background: repeating-linear-gradient(45deg, rgba(31,24,20,0.15) 0 2px, transparent 2px 4px);
+  }
+  .tape::before { left: 0; }
+  .tape::after { right: 0; }
+
   /* Reduced motion respect */
   @media (prefers-reduced-motion: reduce) {
-    .stamp, .field, .btn-primary, details summary .plus { transition: none; }
+    .stamp, .field, .btn-primary, details summary .plus,
+    .marquee-track, .blob, .splash-spin, .splash-twinkle,
+    .stagger > *, .reveal, .reveal-stagger.in > *,
+    .sticky-cta, .lift, .polaroid {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
     .pulse-dot { animation: none; }
   }
 </style>
 </head>
 <body class="paper">
 
+<!-- =========================== MARQUEE TAPE =========================== -->
+<div class="marquee bg-tinta text-cream py-3" aria-hidden="true">
+  <div class="marquee-track display italic font-light text-base sm:text-lg">
+    <span>Encuentra tu sabor</span>
+    <span class="marquee-star text-tomate">✦</span>
+    <span>Gratis durante 2 meses</span>
+    <span class="marquee-star text-mostaza">✦</span>
+    <span>Solo los primeros 100 restaurantes</span>
+    <span class="marquee-star text-fresco">✦</span>
+    <span>Lanzamiento otoño 2026 en Valencia</span>
+    <span class="marquee-star text-tomate">✦</span>
+    <span>Encuentra tu sabor</span>
+    <span class="marquee-star text-tomate">✦</span>
+    <span>Gratis durante 2 meses</span>
+    <span class="marquee-star text-mostaza">✦</span>
+    <span>Solo los primeros 100 restaurantes</span>
+    <span class="marquee-star text-fresco">✦</span>
+    <span>Lanzamiento otoño 2026 en Valencia</span>
+    <span class="marquee-star text-tomate">✦</span>
+  </div>
+</div>
+
 <!-- =========================== NAV =========================== -->
-<header class="px-5 sm:px-8 py-5 flex items-center justify-between">
+<header class="px-5 sm:px-8 py-5 flex items-center justify-between relative z-10">
   <a href="#" class="flex items-center gap-2.5">
     <span class="display text-2xl font-bold tracking-tight">food<span class="text-tomate it">match</span></span>
   </a>
@@ -222,36 +446,55 @@
 
 <!-- =========================== HERO =========================== -->
 <section class="px-5 sm:px-8 pt-6 sm:pt-12 pb-20 sm:pb-32 relative overflow-hidden">
-  <div class="max-w-6xl mx-auto">
-    <div class="flex items-center gap-2 mb-6 text-sm uppercase tracking-[0.18em] font-semibold">
-      <span class="pulse-dot" aria-hidden="true"></span>
-      <span>Lanzamiento. Otoño 2026. Valencia.</span>
-    </div>
 
-    <h1 class="display h-very-tight font-bold text-[clamp(3rem,11vw,9rem)]">
-      Aparece en
-      <span class="block">FoodMatch.</span>
-      <span class="it text-tomate font-light">Gratis durante</span>
-      <span class="it text-tomate font-light">2 meses.</span>
-    </h1>
+  <!-- Decorative blobs and splashes -->
+  <div class="blob bg-mostaza" style="width:340px;height:340px;top:-90px;left:-90px;opacity:0.55;animation:floatA 9s ease-in-out infinite;" aria-hidden="true"></div>
+  <div class="blob bg-fresco" style="width:220px;height:220px;bottom:-60px;left:30%;opacity:0.35;animation:floatC 11s ease-in-out infinite;" aria-hidden="true"></div>
+  <div class="blob bg-tomate" style="width:180px;height:180px;top:42%;right:-60px;opacity:0.18;animation:floatB 8s ease-in-out infinite;" aria-hidden="true"></div>
 
-    <p class="mt-8 max-w-2xl text-lg sm:text-xl leading-relaxed">
-      La nueva forma de descubrir restaurantes en Valencia. Si tu restaurante es uno de los primeros 100 en apuntarse, entra <span class="ul-accent">sin pagar nada</span> y guarda un precio fundador para siempre.
-    </p>
+  <!-- Sparkles -->
+  <svg class="splash splash-twinkle text-tomate" style="top:18%;left:42%;width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 0 L13.5 9 L22 11 L13.5 13 L12 24 L10.5 13 L2 11 L10.5 9 Z"/>
+  </svg>
+  <svg class="splash splash-twinkle text-mostaza" style="top:62%;left:8%;width:14px;height:14px;animation-delay:0.6s;" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 0 L13.5 9 L22 11 L13.5 13 L12 24 L10.5 13 L2 11 L10.5 9 Z"/>
+  </svg>
+  <svg class="splash splash-spin text-fresco hidden lg:block" style="top:30%;right:18%;width:34px;height:34px;opacity:0.7;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" stroke-dasharray="4 4"/>
+  </svg>
 
-    <div class="mt-10 flex flex-wrap items-center gap-4">
-      <a href="#apuntarme" class="btn-primary text-base sm:text-lg">
-        Apuntar mi restaurante
-        <span aria-hidden="true">→</span>
-      </a>
-      <span class="text-sm opacity-70">60 segundos. Sin tarjeta. Sin compromiso.</span>
+  <div class="max-w-6xl mx-auto relative z-10">
+    <div class="stagger">
+      <div class="flex items-center gap-2 mb-6 text-sm uppercase tracking-[0.18em] font-semibold">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span>Lanzamiento. Otoño 2026. Valencia.</span>
+      </div>
+
+      <h1 class="display h-very-tight font-bold text-[clamp(3rem,11vw,9rem)]">
+        Aparece en
+        <span class="block">FoodMatch.</span>
+        <span class="block it text-tomate font-light">Gratis durante</span>
+        <span class="block it text-tomate font-light">2 meses.</span>
+      </h1>
+
+      <p class="mt-8 max-w-2xl text-lg sm:text-xl leading-relaxed">
+        La nueva forma de descubrir restaurantes en Valencia. Si tu restaurante es uno de los primeros 100 en apuntarse, entra <span class="ul-accent">sin pagar nada</span> y guarda un precio fundador para siempre.
+      </p>
+
+      <div class="mt-10 flex flex-wrap items-center gap-4">
+        <a href="#apuntarme" class="btn-primary text-base sm:text-lg">
+          Apuntar mi restaurante
+          <span aria-hidden="true">→</span>
+        </a>
+        <span class="text-sm opacity-70">60 segundos. Sin tarjeta. Sin compromiso.</span>
+      </div>
     </div>
   </div>
 
-  <!-- Stamp absolutely positioned -->
-  <div class="hidden md:block absolute right-6 top-16 z-10">
-    <div class="stamp display rounded-full w-44 h-44 lg:w-56 lg:h-56 flex flex-col items-center justify-center text-center px-3">
-      <span class="text-[2.6rem] lg:text-[3.4rem] font-black leading-none">100</span>
+  <!-- Stamp absolutely positioned, hidden on small screens -->
+  <div class="hidden md:block absolute right-6 top-24 z-10" style="animation: drift 6s ease-in-out infinite;">
+    <div class="stamp display rounded-full w-44 h-44 lg:w-52 lg:h-52 flex flex-col items-center justify-center text-center px-3">
+      <span class="text-[2.6rem] lg:text-[3.2rem] font-black leading-none">100</span>
       <span class="uppercase text-[0.72rem] lg:text-xs tracking-[0.22em] mt-1.5 font-semibold">primeros</span>
       <span class="uppercase text-[0.72rem] lg:text-xs tracking-[0.22em] font-semibold">gratis</span>
     </div>
@@ -262,12 +505,21 @@
 
 <!-- =========================== 100 FREE CALLOUT =========================== -->
 <section class="bg-tomate text-cream px-5 sm:px-8 py-20 sm:py-28 relative overflow-hidden">
-  <div class="max-w-5xl mx-auto grid md:grid-cols-12 gap-x-12 gap-y-10 items-center">
-    <div class="md:col-span-5 lg:col-span-4">
-      <div class="display text-[clamp(7rem,16vw,13rem)] font-black leading-[0.82] h-very-tight">100</div>
+
+  <!-- Decorative cream blob -->
+  <div class="blob bg-mostaza" style="width:260px;height:260px;top:-80px;right:-60px;opacity:0.25;animation:floatB 10s ease-in-out infinite;" aria-hidden="true"></div>
+
+  <!-- Floating sparkle -->
+  <svg class="splash splash-twinkle text-cream" style="top:18%;left:14%;width:22px;height:22px;animation-delay:0.4s;" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 0 L13.5 9 L22 11 L13.5 13 L12 24 L10.5 13 L2 11 L10.5 9 Z"/>
+  </svg>
+
+  <div class="max-w-5xl mx-auto grid md:grid-cols-12 gap-x-12 gap-y-10 items-center relative z-10">
+    <div class="md:col-span-5 lg:col-span-4 reveal">
+      <div class="display text-[clamp(7rem,16vw,13rem)] font-black leading-[0.82] h-very-tight" data-counter data-target="100">0</div>
       <div class="display text-2xl sm:text-3xl it mt-1">primeros restaurantes.</div>
     </div>
-    <div class="md:col-span-7 lg:col-span-8 space-y-5 text-lg sm:text-xl leading-relaxed">
+    <div class="md:col-span-7 lg:col-span-8 space-y-5 text-lg sm:text-xl leading-relaxed reveal">
       <p>Sólo <strong>cien</strong>. No es marketing. Somos dos personas y queremos arrancar Valencia con cada uno bien atendido. Te llamamos, te configuramos la ficha, te enseñamos cómo funciona.</p>
       <p>Después de los dos meses gratis, los primeros 100 conservan el <strong>precio fundador de 69 EUR/mes para siempre</strong>. El resto pagará 99 EUR/mes.</p>
       <div class="pt-2">
@@ -364,28 +616,38 @@
       </div>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <article class="bg-creamy rounded-3xl p-7">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 reveal-stagger">
+      <article class="bg-creamy rounded-3xl p-7 lift">
+        <div class="display it text-tomate text-3xl mb-2">i.</div>
         <h3 class="display text-xl font-semibold">Panel propio</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Edita tu menú, fotos y horarios en tiempo real. Cuando cambias algo, los clientes lo ven al instante.</p>
       </article>
-      <article class="bg-cream border-2 border-tinta rounded-3xl p-7">
+      <article class="bg-cream border-2 border-tinta rounded-3xl p-7 lift">
+        <div class="display it text-mostaza text-3xl mb-2">ii.</div>
         <h3 class="display text-xl font-semibold">Menú multilingüe</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Tu menú traducido automáticamente a inglés, alemán, francés y holandés. Los turistas leen sin Google Translate.</p>
       </article>
-      <article class="bg-fresco text-cream rounded-3xl p-7">
+      <article class="bg-fresco text-cream rounded-3xl p-7 lift relative">
+        <div class="tape">favorito</div>
+        <div class="display it text-cream text-3xl mb-2">iii.</div>
         <h3 class="display text-xl font-semibold">Recomendado por la IA</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-95">Apareces cuando los clientes preguntan en lenguaje natural. "Algo bueno para grupos, no caro" te encuentra.</p>
       </article>
-      <article class="bg-cream border-2 border-tinta rounded-3xl p-7">
+      <article class="bg-cream border-2 border-tinta rounded-3xl p-7 lift">
+        <div class="display it text-azulejo text-3xl mb-2">iv.</div>
         <h3 class="display text-xl font-semibold">Reviews integradas</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Tu rating de Google visible en la ficha, más nuestro propio sistema de reviews dentro de la app.</p>
       </article>
-      <article class="bg-creamy rounded-3xl p-7">
+      <article class="bg-creamy rounded-3xl p-7 lift">
+        <div class="display it text-fresco text-3xl mb-2">v.</div>
         <h3 class="display text-xl font-semibold">Estadísticas claras</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Visitas, búsquedas que te encuentran, idiomas de los clientes, horas pico. Datos que sirven, sin gráficos absurdos.</p>
       </article>
-      <article class="bg-tomate text-cream rounded-3xl p-7">
+      <article class="bg-tomate text-cream rounded-3xl p-7 lift relative">
+        <svg class="splash splash-spin" style="top:14px;right:14px;width:24px;height:24px;color:#F8F1E5;opacity:0.7;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke-dasharray="3 4"/>
+        </svg>
+        <div class="display it text-mostaza text-3xl mb-2">vi.</div>
         <h3 class="display text-xl font-semibold">Precio fundador</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-95">69 EUR/mes bloqueado para siempre si entras en los primeros 100. Sin subidas, sin sorpresas.</p>
       </article>
@@ -409,13 +671,25 @@
     </h2>
 
     <div class="mt-14 grid md:grid-cols-2 gap-10 text-base sm:text-lg leading-relaxed">
-      <div>
-        <h3 class="display text-2xl font-semibold mb-2">Samu</h3>
-        <p>Lleva <strong>El Mesón Smashburgers</strong> en Valencia. Conoce el mundo de los restaurantes desde dentro. Si te visita en persona con un QR, eres uno de los primeros 100.</p>
+      <div class="flex flex-col sm:flex-row items-start gap-6">
+        <div class="polaroid tilt-l shrink-0 w-44">
+          <div class="polaroid-photo">Samu</div>
+          <div class="polaroid-cap">Valencia, 20</div>
+        </div>
+        <div>
+          <h3 class="display text-2xl font-semibold mb-2 text-cream">Samu</h3>
+          <p class="opacity-95">Lleva <strong>El Mesón Smashburgers</strong> en Valencia. Conoce el mundo de los restaurantes desde dentro. Si te visita en persona con un QR, eres uno de los primeros 100.</p>
+        </div>
       </div>
-      <div>
-        <h3 class="display text-2xl font-semibold mb-2">Max</h3>
-        <p>Desarrollador en Alemania. Construye la parte técnica, incluyendo la IA que recomienda tu cocina. Aficionado a la comida, mal cocinero.</p>
+      <div class="flex flex-col sm:flex-row items-start gap-6">
+        <div class="polaroid tilt-r shrink-0 w-44">
+          <div class="polaroid-photo b">Max</div>
+          <div class="polaroid-cap">Alemania, 20</div>
+        </div>
+        <div>
+          <h3 class="display text-2xl font-semibold mb-2 text-cream">Max</h3>
+          <p class="opacity-95">Desarrollador en Alemania. Construye la parte técnica, incluyendo la IA que recomienda tu cocina. Aficionado a la comida, mal cocinero.</p>
+        </div>
       </div>
     </div>
 
@@ -565,11 +839,86 @@
   </div>
 </footer>
 
+<!-- =========================== STICKY MOBILE CTA =========================== -->
+<div class="sticky-cta" id="stickyCta" role="complementary">
+  <a href="#apuntarme">
+    Apuntar mi restaurante
+    <span aria-hidden="true">→</span>
+  </a>
+</div>
+
 <script>
-  // Honeypot check (basic spam guard) and analytics-friendly mailto fallback if formspree fails.
+  // ---- Scroll reveal via Intersection Observer ----
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach((el) => revealObserver.observe(el));
+
+  // ---- Counter animation for the 100 ----
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.getAttribute('data-target') || '0', 10);
+      const duration = 1400;
+      const start = performance.now();
+      const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / duration);
+        const value = Math.round(easeOut(t) * target);
+        el.textContent = value.toString();
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      counterObserver.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-counter]').forEach((el) => counterObserver.observe(el));
+
+  // ---- Sticky mobile CTA: show after hero, hide near form/footer ----
+  const stickyCta = document.getElementById('stickyCta');
+  const hero = document.querySelector('section');
+  const form = document.getElementById('apuntarme');
+  const updateStickyCta = () => {
+    if (!stickyCta) return;
+    const heroBottom = hero ? hero.getBoundingClientRect().bottom : 0;
+    const formTop = form ? form.getBoundingClientRect().top : Infinity;
+    const scrolledPastHero = heroBottom < 60;
+    const nearForm = formTop < window.innerHeight * 0.6;
+    const show = scrolledPastHero && !nearForm;
+    stickyCta.classList.toggle('show', show);
+  };
+  window.addEventListener('scroll', updateStickyCta, { passive: true });
+  window.addEventListener('resize', updateStickyCta);
+  updateStickyCta();
+
+  // ---- Confetti on form submit ----
+  const confettiColors = ['#E63946', '#F2A93B', '#3FAE6B', '#1F4E5F', '#F8F1E5'];
+  const launchConfetti = (count = 60) => {
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      piece.style.setProperty('--tx', (Math.random() * 240 - 120) + 'px');
+      piece.style.animationDelay = (Math.random() * 0.4) + 's';
+      piece.style.animationDuration = (1.4 + Math.random() * 0.9) + 's';
+      piece.style.borderRadius = Math.random() > 0.5 ? '999px' : '2px';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 2500);
+    }
+  };
+
+  // ---- Form submission handling ----
   document.querySelector('form')?.addEventListener('submit', (e) => {
     const honey = document.querySelector('input[name="_gotcha"]');
-    if (honey && honey.value) e.preventDefault();
+    if (honey && honey.value) { e.preventDefault(); return; }
+    launchConfetti(80);
   });
 </script>
 
