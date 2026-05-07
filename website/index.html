@@ -526,6 +526,153 @@
     animation: drift-up 2.4s ease-out infinite;
   }
 
+  /* ====== Round 3: more eyecandy ====== */
+
+  /* Floating AI query chip */
+  .query-chip {
+    position: absolute;
+    background: #F8F1E5;
+    color: #1F1814;
+    border: 2px solid #1F1814;
+    border-radius: 999px;
+    padding: 0.55rem 1.05rem;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 4px 5px 0 0 rgba(31, 24, 20, 0.18);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .query-chip::before {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px; border-radius: 999px;
+    background: #3FAE6B;
+    top: -3px; left: -3px;
+    border: 2px solid #F8F1E5;
+  }
+  .query-chip.b { background: #F2A93B; border-color: #1F1814; }
+  .query-chip.b::before { background: #E63946; }
+  .query-chip.c { background: #1F4E5F; color: #F8F1E5; border-color: #1F4E5F; }
+  .query-chip.c::before { background: #F2A93B; }
+  @keyframes chipFloatA {
+    0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+    50%      { transform: translate(8px, -10px) rotate(2deg); }
+  }
+  @keyframes chipFloatB {
+    0%, 100% { transform: translate(0, 0) rotate(3deg); }
+    50%      { transform: translate(-10px, -8px) rotate(-3deg); }
+  }
+  @keyframes chipFloatC {
+    0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+    50%      { transform: translate(6px, 6px) rotate(4deg); }
+  }
+  .chip-a { animation: chipFloatA 7s ease-in-out infinite; }
+  .chip-b { animation: chipFloatB 9s ease-in-out infinite; }
+  .chip-c { animation: chipFloatC 8s ease-in-out infinite; }
+
+  /* Coffee steam */
+  @keyframes steamRise {
+    0%   { transform: translateY(0) scale(1); opacity: 0; }
+    20%  { opacity: 0.7; }
+    100% { transform: translateY(-22px) scale(0.7); opacity: 0; }
+  }
+  .steam {
+    position: absolute;
+    width: 2px;
+    height: 14px;
+    background: currentColor;
+    border-radius: 999px;
+    opacity: 0.5;
+    pointer-events: none;
+    animation: steamRise 2.6s ease-out infinite;
+  }
+  .steam.s2 { animation-delay: 0.65s; left: 4px; }
+  .steam.s3 { animation-delay: 1.2s; left: 8px; }
+
+  /* Continuous sparkle drift around stamp */
+  @keyframes sparkleDrift {
+    0%   { transform: translate(0, 0) scale(0); opacity: 0; }
+    20%  { opacity: 1; transform: translate(var(--dx, -8px), -10px) scale(1); }
+    100% { transform: translate(var(--dx, -16px), -50px) scale(0.4); opacity: 0; }
+  }
+  .sparkle-drift {
+    position: absolute;
+    width: 8px; height: 8px;
+    pointer-events: none;
+    color: #F2A93B;
+    animation: sparkleDrift 3s ease-out infinite;
+  }
+  .sparkle-drift svg { width: 100%; height: 100%; display: block; }
+  .sparkle-drift.d2 { animation-delay: 1s;   color: #F8F1E5; --dx: 10px; }
+  .sparkle-drift.d3 { animation-delay: 1.8s; color: #3FAE6B; --dx: -14px; }
+  .sparkle-drift.d4 { animation-delay: 2.4s; color: #F2A93B; --dx: 6px; }
+
+  /* Live counter chip */
+  .live-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #F8F1E5;
+    border: 2px solid #1F1814;
+    border-radius: 999px;
+    padding: 0.45rem 0.95rem 0.45rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 3px 3px 0 0 rgba(31,24,20,0.15);
+  }
+  .live-chip .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 999px;
+    background: #3FAE6B;
+    animation: pulse 1.6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  /* Magnetic-ish CTA hover boost */
+  .btn-primary:hover { transform: scale(1.04) translateY(-2px); transition: transform 0.25s cubic-bezier(.2,.8,.2,1); }
+
+  /* Drawing-in underline (SVG-based) */
+  .draw-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .draw-underline svg {
+    position: absolute;
+    left: 0; right: 0; bottom: -0.25em;
+    width: 100%; height: 0.45em;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .draw-underline svg path {
+    fill: none;
+    stroke: #3FAE6B;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+  .draw-underline.in svg path { animation: drawLine 1.2s cubic-bezier(.2,.7,.2,1) 0.4s forwards; }
+  @keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Form checkbox: tiny celebration */
+  .check-celebrate { position: relative; }
+  @keyframes celebratePop {
+    0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+    60%  { transform: scale(1.4) rotate(20deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  /* Star sparkle trail on stamp number */
+  @keyframes ringPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(248, 241, 229, 0.5); }
+    50%      { box-shadow: 0 0 0 8px rgba(248, 241, 229, 0); }
+  }
+
   /* Reduced motion respect (extended) */
   @media (prefers-reduced-motion: reduce) {
     .stamp, .field, .btn-primary, details summary .plus,
@@ -533,11 +680,14 @@
     .stagger > *, .reveal, .reveal-stagger.in > *,
     .sticky-cta, .lift, .polaroid,
     .arrow-bounce, .doodle-sway, .doodle-sway2, .doodle-sway3,
-    .check, .glitter, .scroll-progress {
+    .check, .glitter, .scroll-progress,
+    .chip-a, .chip-b, .chip-c, .steam, .sparkle-drift,
+    .live-chip .dot, .draw-underline svg path {
       animation: none !important;
       transition: none !important;
       transform: none !important;
       opacity: 1 !important;
+      stroke-dashoffset: 0 !important;
     }
     .pulse-dot { animation: none; }
   }
@@ -644,12 +794,28 @@
     <path d="M11 13 q5 6 10 0"/>
   </svg>
 
+  <!-- Floating AI query chips, desktop only -->
+  <div class="hidden md:block query-chip chip-a" style="bottom:18%;left:6%;">
+    <span class="opacity-50 mr-1.5">tú:</span>"¿paella esta noche?"
+  </div>
+  <div class="hidden lg:block query-chip chip-b" style="top:48%;right:32%;">
+    <span class="opacity-50 mr-1.5">tú:</span>"vegan brunch en Ruzafa"
+  </div>
+  <div class="hidden md:block query-chip chip-c" style="bottom:38%;left:28%;">
+    <span class="opacity-60 mr-1.5">tú:</span>"tapas baratas cerca"
+  </div>
+
   <!-- Stamp absolutely positioned, hidden on small screens -->
   <div class="hidden md:block absolute right-6 top-24 z-10" style="animation: drift 6s ease-in-out infinite;">
-    <div class="stamp display rounded-full w-44 h-44 lg:w-52 lg:h-52 flex flex-col items-center justify-center text-center px-3">
+    <div class="stamp display rounded-full w-44 h-44 lg:w-52 lg:h-52 flex flex-col items-center justify-center text-center px-3 relative">
       <span class="text-[2.6rem] lg:text-[3.2rem] font-black leading-none">100</span>
       <span class="uppercase text-[0.72rem] lg:text-xs tracking-[0.22em] mt-1.5 font-semibold">primeros</span>
       <span class="uppercase text-[0.72rem] lg:text-xs tracking-[0.22em] font-semibold">gratis</span>
+      <!-- Continuous sparkle drift -->
+      <span class="sparkle-drift" style="top:-6px;left:48%;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0 L13.5 9 L22 11 L13.5 13 L12 24 L10.5 13 L2 11 L10.5 9 Z"/></svg></span>
+      <span class="sparkle-drift d2" style="top:6px;left:18%;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0 L13.5 9 L22 11 L13.5 13 L12 24 L10.5 13 L2 11 L10.5 9 Z"/></svg></span>
+      <span class="sparkle-drift d3" style="top:0;right:14%;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0 L13.5 9 L22 11 L13.5 13 L12 24 L10.5 13 L2 11 L10.5 9 Z"/></svg></span>
+      <span class="sparkle-drift d4" style="top:14px;right:22%;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0 L13.5 9 L22 11 L13.5 13 L12 24 L10.5 13 L2 11 L10.5 9 Z"/></svg></span>
     </div>
   </div>
 </section>
@@ -746,12 +912,16 @@
     <ellipse cx="12" cy="8" rx="6" ry="5"/>
     <path d="M12 13 v17"/>
   </svg>
-  <!-- Doodle: coffee cup -->
-  <svg class="doodle doodle-sway3 text-tinta hidden lg:block" style="bottom:8%;left:6%;width:46px;height:46px;opacity:0.35;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-    <path d="M4 8 h14 v8 a4 4 0 0 1 -4 4 h-6 a4 4 0 0 1 -4 -4 z"/>
-    <path d="M18 10 h2 a2 2 0 0 1 0 4 h-2"/>
-    <path d="M8 4 q1 2 0 4 M12 4 q1 2 0 4"/>
-  </svg>
+  <!-- Doodle: coffee cup with rising steam -->
+  <div class="doodle doodle-sway3 text-tinta hidden lg:block" style="bottom:8%;left:6%;width:46px;height:60px;opacity:0.4;">
+    <span class="steam"     style="top:-2px;left:14px;"></span>
+    <span class="steam s2"  style="top:-2px;left:22px;"></span>
+    <span class="steam s3"  style="top:-2px;left:30px;"></span>
+    <svg style="position:absolute;bottom:0;left:0;width:46px;height:46px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+      <path d="M4 8 h14 v8 a4 4 0 0 1 -4 4 h-6 a4 4 0 0 1 -4 -4 z"/>
+      <path d="M18 10 h2 a2 2 0 0 1 0 4 h-2"/>
+    </svg>
+  </div>
 
   <div class="max-w-6xl mx-auto relative z-10">
     <div class="max-w-3xl">
@@ -927,6 +1097,12 @@
 <section id="apuntarme" class="px-5 sm:px-8 py-20 sm:py-28">
   <div class="max-w-3xl mx-auto">
     <div class="text-center mb-12">
+      <div class="flex justify-center mb-5">
+        <span class="live-chip">
+          <span class="dot" aria-hidden="true"></span>
+          <span><strong id="liveCount">7</strong> apuntados en las últimas 48h</span>
+        </span>
+      </div>
       <p class="uppercase tracking-[0.2em] text-sm font-semibold text-tomate">Apúntate</p>
       <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,7vw,5rem)]">
         60 segundos.
@@ -1165,6 +1341,32 @@
       card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
       card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
     });
+  });
+
+  // ---- Live "apuntados" counter: occasionally ticks up to suggest momentum ----
+  (() => {
+    const el = document.getElementById('liveCount');
+    if (!el) return;
+    let n = parseInt(el.textContent || '7', 10);
+    const tick = () => {
+      n += 1;
+      el.style.transition = 'transform 0.25s cubic-bezier(.2,.7,.2,1), color 0.25s';
+      el.style.transform = 'scale(1.18)';
+      el.style.color = '#3FAE6B';
+      el.textContent = n.toString();
+      setTimeout(() => {
+        el.style.transform = '';
+        el.style.color = '';
+      }, 280);
+      // Schedule next tick at random 18 to 70 seconds
+      setTimeout(tick, 18000 + Math.random() * 52000);
+    };
+    setTimeout(tick, 12000 + Math.random() * 18000);
+  })();
+
+  // ---- Tiny confetti burst when "Samu visited me" checkbox is checked ----
+  document.querySelector('input[name="visited_by_samu"]')?.addEventListener('change', (e) => {
+    if (e.target.checked) launchConfetti(28);
   });
 </script>
 
