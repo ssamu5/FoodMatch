@@ -43,13 +43,13 @@ Crea dos registros nuevos:
 **Registro 1 (dominio raiz):**
 - Tipo: `A`
 - Nombre / Host: `@`
-- Apunta a / Valor: `76.76.21.21`
+- Apunta a / Valor: `216.198.79.1`
 - TTL: deja el valor por defecto (3600 o 14400)
 
 **Registro 2 (subdominio www):**
 - Tipo: `CNAME`
 - Nombre / Host: `www`
-- Apunta a / Valor: `cname.vercel-dns.com`
+- Apunta a / Valor: `9f1249f5f2804e9a.vercel-dns-017.com`
 - TTL: deja el valor por defecto
 
 Pulsa **Guardar** o **Actualizar registros**.
@@ -72,13 +72,13 @@ Si tienes terminal a mano:
 dig +short foodmatch.es
 ```
 
-Tiene que devolver: `76.76.21.21`
+Tiene que devolver: `216.198.79.1`
 
 ```
 dig +short www.foodmatch.es
 ```
 
-Tiene que devolver: `cname.vercel-dns.com.` y luego una IP de Vercel.
+Tiene que devolver: `9f1249f5f2804e9a.vercel-dns-017.com.` y luego una IP de Vercel.
 
 ## Si algo falla
 
@@ -105,6 +105,6 @@ Eso es aparte. Hostinger tiene el servicio "Hostinger Email" que viene con el do
 - Dominio: **foodmatch.es**
 - Proveedor DNS: Hostinger
 - Hosting de la web: Vercel (proyecto webkomodo/foodmatch)
-- Registro A para `@`: `76.76.21.21`
-- Registro CNAME para `www`: `cname.vercel-dns.com`
+- Registro A para `@`: `216.198.79.1`
+- Registro CNAME para `www`: `9f1249f5f2804e9a.vercel-dns-017.com`
 - URL temporal mientras configuras: https://foodmatch-nine.vercel.app/
