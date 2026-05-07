@@ -430,12 +430,12 @@
   .btn-primary:hover { animation-play-state: paused; }
   .sticky-cta a { animation: breathe 3.4s ease-in-out infinite; }
 
-  /* Bouncing arrow next to CTA */
+  /* Bouncing arrow next to CTA: leans toward the CTA on the left */
   @keyframes bounceArrow {
-    0%, 100% { transform: translate(0, 0) rotate(-8deg); }
-    50%      { transform: translate(10px, 4px) rotate(-3deg); }
+    0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+    50%      { transform: translate(-7px, 0) rotate(3deg); }
   }
-  .arrow-bounce { display: inline-block; animation: bounceArrow 1.5s ease-in-out infinite; transform-origin: center; }
+  .arrow-bounce { display: inline-block; animation: bounceArrow 1.6s ease-in-out infinite; transform-origin: 80% 50%; }
 
   /* Section number badge background */
   .section-num {
@@ -623,10 +623,10 @@
           Apuntar mi restaurante
           <span aria-hidden="true">→</span>
         </a>
-        <!-- Bouncing arrow doodle pointing to CTA -->
-        <svg class="arrow-bounce text-tomate hidden sm:block" style="width:48px;height:48px;" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
-          <path d="M44 8 q-12 8 -22 14 q-10 6 -16 18"/>
-          <path d="M10 32 l-4 8 l8 -2"/>
+        <!-- Bouncing arrow doodle pointing back at the CTA -->
+        <svg class="arrow-bounce text-tomate hidden sm:block" style="width:64px;height:36px;" viewBox="0 0 64 36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M58 6 C 50 18, 36 26, 10 18"/>
+          <path d="M18 10 L10 18 L18 26"/>
         </svg>
         <span class="text-sm opacity-70">60 segundos. Sin tarjeta. Sin compromiso.</span>
       </div>
