@@ -394,12 +394,134 @@
   .tape::before { left: 0; }
   .tape::after { right: 0; }
 
-  /* Reduced motion respect */
+  /* ====== Round 2: even more splash ====== */
+
+  /* Top scroll progress bar */
+  .scroll-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #E63946 0%, #F2A93B 40%, #3FAE6B 75%, #1F4E5F 100%);
+    z-index: 100;
+    transition: width 0.12s linear;
+    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(31, 24, 20, 0.12);
+  }
+
+  /* Breathing CTAs */
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+    50%      { transform: scale(1.022); box-shadow: 0 14px 36px -10px rgba(230, 57, 70, 0.5); }
+  }
+  .btn-primary { animation: breathe 3.6s ease-in-out infinite; }
+  .btn-primary:hover { animation-play-state: paused; }
+  .sticky-cta a { animation: breathe 3.4s ease-in-out infinite; }
+
+  /* Bouncing arrow next to CTA */
+  @keyframes bounceArrow {
+    0%, 100% { transform: translate(0, 0) rotate(-8deg); }
+    50%      { transform: translate(10px, 4px) rotate(-3deg); }
+  }
+  .arrow-bounce { display: inline-block; animation: bounceArrow 1.5s ease-in-out infinite; transform-origin: center; }
+
+  /* Section number badge background */
+  .section-num {
+    position: absolute;
+    font-family: 'Fraunces', serif;
+    font-size: clamp(7rem, 16vw, 14rem);
+    font-style: italic;
+    font-weight: 200;
+    color: rgba(31, 24, 20, 0.05);
+    pointer-events: none;
+    line-height: 0.85;
+    z-index: 0;
+    user-select: none;
+    letter-spacing: -0.04em;
+  }
+  .section-num.light { color: rgba(248, 241, 229, 0.13); }
+
+  /* Hand-drawn doodles */
+  .doodle {
+    position: absolute;
+    pointer-events: none;
+    color: currentColor;
+    z-index: 1;
+  }
+  @keyframes doodleSway {
+    0%, 100% { transform: rotate(-10deg) translateY(0); }
+    50%      { transform: rotate(8deg) translateY(-6px); }
+  }
+  @keyframes doodleSway2 {
+    0%, 100% { transform: rotate(15deg) translateY(0); }
+    50%      { transform: rotate(-3deg) translateY(8px); }
+  }
+  @keyframes doodleSway3 {
+    0%, 100% { transform: rotate(-25deg) translate(0,0); }
+    50%      { transform: rotate(-12deg) translate(6px,-4px); }
+  }
+  .doodle-sway  { animation: doodleSway 5.2s ease-in-out infinite; }
+  .doodle-sway2 { animation: doodleSway2 6.8s ease-in-out infinite; }
+  .doodle-sway3 { animation: doodleSway3 4.6s ease-in-out infinite; }
+
+  /* Pop-in check */
+  @keyframes checkPop {
+    0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+    60%  { transform: scale(1.25) rotate(8deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem; height: 1.4rem;
+    background: #3FAE6B;
+    color: #F8F1E5;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transform: scale(0);
+    opacity: 0;
+  }
+  .reveal-stagger.in .check { animation: checkPop 0.6s cubic-bezier(.2,.7,.2,1) both; animation-delay: 0.4s; }
+
+  /* Hover splash on cards (subtle gradient flash) */
+  .lift::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(242, 169, 59, 0.16), transparent 50%);
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+  }
+  .lift { position: relative; }
+  .lift:hover::after { opacity: 1; }
+
+  /* Glitter trail under hero CTA group */
+  @keyframes drift-up {
+    0%   { opacity: 0; transform: translate(0, 10px); }
+    50%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--gx,12px), -28px); }
+  }
+  .glitter {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    pointer-events: none;
+    animation: drift-up 2.4s ease-out infinite;
+  }
+
+  /* Reduced motion respect (extended) */
   @media (prefers-reduced-motion: reduce) {
     .stamp, .field, .btn-primary, details summary .plus,
     .marquee-track, .blob, .splash-spin, .splash-twinkle,
     .stagger > *, .reveal, .reveal-stagger.in > *,
-    .sticky-cta, .lift, .polaroid {
+    .sticky-cta, .lift, .polaroid,
+    .arrow-bounce, .doodle-sway, .doodle-sway2, .doodle-sway3,
+    .check, .glitter, .scroll-progress {
       animation: none !important;
       transition: none !important;
       transform: none !important;
@@ -410,6 +532,9 @@
 </style>
 </head>
 <body class="paper">
+
+<!-- =========================== SCROLL PROGRESS =========================== -->
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
 <!-- =========================== MARQUEE TAPE =========================== -->
 <div class="marquee bg-tinta text-cream py-3" aria-hidden="true">
@@ -481,15 +606,31 @@
         La nueva forma de descubrir restaurantes en Valencia. Si tu restaurante es uno de los primeros 100 en apuntarse, entra <span class="ul-accent">sin pagar nada</span> y guarda un precio fundador para siempre.
       </p>
 
-      <div class="mt-10 flex flex-wrap items-center gap-4">
+      <div class="mt-10 flex flex-wrap items-center gap-4 relative">
         <a href="#apuntarme" class="btn-primary text-base sm:text-lg">
           Apuntar mi restaurante
           <span aria-hidden="true">→</span>
         </a>
+        <!-- Bouncing arrow doodle pointing to CTA -->
+        <svg class="arrow-bounce text-tomate hidden sm:block" style="width:48px;height:48px;" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M44 8 q-12 8 -22 14 q-10 6 -16 18"/>
+          <path d="M10 32 l-4 8 l8 -2"/>
+        </svg>
         <span class="text-sm opacity-70">60 segundos. Sin tarjeta. Sin compromiso.</span>
       </div>
     </div>
   </div>
+
+  <!-- Hand-drawn food doodles in hero -->
+  <svg class="doodle doodle-sway text-tomate hidden md:block" style="top:14%;right:8%;width:48px;height:60px;" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <path d="M10 4 q3 -2 5 1 q-1 3 -3 4"/>
+    <path d="M9 8 q3 0 5 4 q3 6 -1 16 q-6 0 -8 -8 q0 -8 4 -12"/>
+  </svg>
+  <svg class="doodle doodle-sway2 text-azulejo hidden lg:block" style="bottom:14%;right:34%;width:54px;height:54px;" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <circle cx="16" cy="16" r="14"/>
+    <circle cx="16" cy="16" r="10"/>
+    <path d="M11 13 q5 6 10 0"/>
+  </svg>
 
   <!-- Stamp absolutely positioned, hidden on small screens -->
   <div class="hidden md:block absolute right-6 top-24 z-10" style="animation: drift 6s ease-in-out infinite;">
@@ -533,8 +674,19 @@
 </section>
 
 <!-- =========================== WHAT WE DO =========================== -->
-<section class="px-5 sm:px-8 py-20 sm:py-28">
-  <div class="max-w-6xl mx-auto">
+<section class="px-5 sm:px-8 py-20 sm:py-28 relative overflow-hidden">
+
+  <!-- Decorative section number -->
+  <div class="section-num" style="top:1rem;right:5%;">02</div>
+
+  <!-- Doodle: fork -->
+  <svg class="doodle doodle-sway2 text-mostaza hidden md:block" style="top:8%;left:4%;width:36px;height:54px;" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <path d="M8 4 v9 M12 4 v11 M16 4 v9"/>
+    <path d="M7 13 q5 4 10 0"/>
+    <path d="M12 15 v15"/>
+  </svg>
+
+  <div class="max-w-6xl mx-auto relative z-10">
     <div class="max-w-3xl">
       <p class="uppercase tracking-[0.2em] text-sm font-semibold text-tomate">Qué hacemos</p>
       <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)]">
@@ -572,8 +724,24 @@
 <div class="squiggle" role="presentation"></div>
 
 <!-- =========================== HOW IT WORKS =========================== -->
-<section class="bg-mostaza px-5 sm:px-8 py-20 sm:py-28">
-  <div class="max-w-6xl mx-auto">
+<section class="bg-mostaza px-5 sm:px-8 py-20 sm:py-28 relative overflow-hidden">
+
+  <!-- Section number -->
+  <div class="section-num" style="top:1rem;right:5%;color:rgba(31,24,20,0.08);">03</div>
+
+  <!-- Doodle: spoon -->
+  <svg class="doodle doodle-sway text-tinta hidden md:block" style="top:6rem;right:12%;width:36px;height:54px;opacity:0.35;" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <ellipse cx="12" cy="8" rx="6" ry="5"/>
+    <path d="M12 13 v17"/>
+  </svg>
+  <!-- Doodle: coffee cup -->
+  <svg class="doodle doodle-sway3 text-tinta hidden lg:block" style="bottom:8%;left:6%;width:46px;height:46px;opacity:0.35;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <path d="M4 8 h14 v8 a4 4 0 0 1 -4 4 h-6 a4 4 0 0 1 -4 -4 z"/>
+    <path d="M18 10 h2 a2 2 0 0 1 0 4 h-2"/>
+    <path d="M8 4 q1 2 0 4 M12 4 q1 2 0 4"/>
+  </svg>
+
+  <div class="max-w-6xl mx-auto relative z-10">
     <div class="max-w-3xl">
       <p class="uppercase tracking-[0.2em] text-sm font-semibold">Cómo funciona</p>
       <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)] text-tinta">
@@ -602,8 +770,22 @@
 </section>
 
 <!-- =========================== WHAT YOU GET =========================== -->
-<section class="px-5 sm:px-8 py-20 sm:py-28">
-  <div class="max-w-6xl mx-auto">
+<section class="px-5 sm:px-8 py-20 sm:py-28 relative overflow-hidden">
+
+  <!-- Section number -->
+  <div class="section-num" style="top:1rem;right:5%;">04</div>
+
+  <!-- Doodle: croissant -->
+  <svg class="doodle doodle-sway text-mostaza hidden md:block" style="top:9rem;right:8%;width:64px;height:48px;" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <path d="M4 12 q12 -10 24 0 q-12 10 -24 0"/>
+    <path d="M10 9 v6 M14 8 v8 M18 8 v8 M22 9 v6"/>
+  </svg>
+  <!-- Doodle: heart (small, hand-drawn) -->
+  <svg class="doodle doodle-sway2 text-tomate hidden lg:block" style="bottom:18%;left:4%;width:30px;height:30px;opacity:0.55;" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 21 C 5 16 2 12 2 8 a5 5 0 0 1 10 0 a5 5 0 0 1 10 0 c 0 4 -3 8 -10 13"/>
+  </svg>
+
+  <div class="max-w-6xl mx-auto relative z-10">
     <div class="grid md:grid-cols-12 gap-8 items-end mb-14">
       <div class="md:col-span-7">
         <p class="uppercase tracking-[0.2em] text-sm font-semibold text-tomate">Lo que recibes</p>
@@ -618,28 +800,43 @@
 
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 reveal-stagger">
       <article class="bg-creamy rounded-3xl p-7 lift">
-        <div class="display it text-tomate text-3xl mb-2">i.</div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="check" aria-hidden="true">✓</span>
+          <div class="display it text-tomate text-3xl">i.</div>
+        </div>
         <h3 class="display text-xl font-semibold">Panel propio</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Edita tu menú, fotos y horarios en tiempo real. Cuando cambias algo, los clientes lo ven al instante.</p>
       </article>
       <article class="bg-cream border-2 border-tinta rounded-3xl p-7 lift">
-        <div class="display it text-mostaza text-3xl mb-2">ii.</div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="check" aria-hidden="true">✓</span>
+          <div class="display it text-mostaza text-3xl">ii.</div>
+        </div>
         <h3 class="display text-xl font-semibold">Menú multilingüe</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Tu menú traducido automáticamente a inglés, alemán, francés y holandés. Los turistas leen sin Google Translate.</p>
       </article>
       <article class="bg-fresco text-cream rounded-3xl p-7 lift relative">
         <div class="tape">favorito</div>
-        <div class="display it text-cream text-3xl mb-2">iii.</div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="check" aria-hidden="true">✓</span>
+          <div class="display it text-cream text-3xl">iii.</div>
+        </div>
         <h3 class="display text-xl font-semibold">Recomendado por la IA</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-95">Apareces cuando los clientes preguntan en lenguaje natural. "Algo bueno para grupos, no caro" te encuentra.</p>
       </article>
       <article class="bg-cream border-2 border-tinta rounded-3xl p-7 lift">
-        <div class="display it text-azulejo text-3xl mb-2">iv.</div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="check" aria-hidden="true">✓</span>
+          <div class="display it text-azulejo text-3xl">iv.</div>
+        </div>
         <h3 class="display text-xl font-semibold">Reviews integradas</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Tu rating de Google visible en la ficha, más nuestro propio sistema de reviews dentro de la app.</p>
       </article>
       <article class="bg-creamy rounded-3xl p-7 lift">
-        <div class="display it text-fresco text-3xl mb-2">v.</div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="check" aria-hidden="true">✓</span>
+          <div class="display it text-fresco text-3xl">v.</div>
+        </div>
         <h3 class="display text-xl font-semibold">Estadísticas claras</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-90">Visitas, búsquedas que te encuentran, idiomas de los clientes, horas pico. Datos que sirven, sin gráficos absurdos.</p>
       </article>
@@ -647,7 +844,10 @@
         <svg class="splash splash-spin" style="top:14px;right:14px;width:24px;height:24px;color:#F8F1E5;opacity:0.7;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="12" cy="12" r="9" stroke-dasharray="3 4"/>
         </svg>
-        <div class="display it text-mostaza text-3xl mb-2">vi.</div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="check" aria-hidden="true">✓</span>
+          <div class="display it text-mostaza text-3xl">vi.</div>
+        </div>
         <h3 class="display text-xl font-semibold">Precio fundador</h3>
         <p class="mt-2 text-sm leading-relaxed opacity-95">69 EUR/mes bloqueado para siempre si entras en los primeros 100. Sin subidas, sin sorpresas.</p>
       </article>
@@ -662,8 +862,18 @@
 <div class="squiggle" role="presentation"></div>
 
 <!-- =========================== FOUNDERS =========================== -->
-<section class="bg-azulejo text-cream px-5 sm:px-8 py-20 sm:py-28">
-  <div class="max-w-5xl mx-auto">
+<section class="bg-azulejo text-cream px-5 sm:px-8 py-20 sm:py-28 relative overflow-hidden">
+
+  <!-- Section number (light) -->
+  <div class="section-num light" style="top:1rem;right:5%;">05</div>
+
+  <!-- Doodle: wine glass -->
+  <svg class="doodle doodle-sway2 text-cream hidden md:block" style="top:7rem;left:6%;width:34px;height:48px;opacity:0.45;" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true">
+    <path d="M6 4 h12 v6 q0 6 -6 8 q-6 -2 -6 -8 z"/>
+    <path d="M12 18 v8 M8 28 h8"/>
+  </svg>
+
+  <div class="max-w-5xl mx-auto relative z-10">
     <p class="uppercase tracking-[0.2em] text-sm font-semibold opacity-80">Quiénes somos</p>
     <h2 class="display h-tight font-bold mt-3 text-[clamp(2.4rem,6vw,4.8rem)]">
       Samu y Max.
@@ -919,6 +1129,28 @@
     const honey = document.querySelector('input[name="_gotcha"]');
     if (honey && honey.value) { e.preventDefault(); return; }
     launchConfetti(80);
+  });
+
+  // ---- Scroll progress bar ----
+  const progressEl = document.getElementById('scrollProgress');
+  const updateProgress = () => {
+    if (!progressEl) return;
+    const scrolled = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? Math.min(100, (scrolled / max) * 100) : 0;
+    progressEl.style.width = pct + '%';
+  };
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('resize', updateProgress);
+  updateProgress();
+
+  // ---- Card hover splash (radial gradient follows cursor) ----
+  document.querySelectorAll('.lift').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
   });
 </script>
 
