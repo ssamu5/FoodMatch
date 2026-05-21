@@ -1,0 +1,96 @@
+// Seed/demo data shape for the MVP.
+// When the backend lands, this maps 1:1 to the API restaurant resource.
+
+export type PriceLevel = 1 | 2 | 3 | 4
+
+export type Area =
+  | 'Ruzafa'
+  | 'El Carmen'
+  | 'Canovas'
+  | 'Benimaclet'
+  | 'City center'
+  | 'Marina / beach'
+
+export type Cuisine =
+  | 'Spanish tapas'
+  | 'paella'
+  | 'sushi'
+  | 'burgers'
+  | 'pizza'
+  | 'pasta'
+  | 'healthy bowls'
+  | 'vegan'
+  | 'vegetarian'
+  | 'brunch'
+  | 'coffee'
+  | 'Mexican'
+  | 'Indian'
+  | 'Asian fusion'
+  | 'Mediterranean'
+  | 'seafood'
+  | 'steak'
+
+export type Vibe =
+  | 'romantic'
+  | 'casual'
+  | 'lively'
+  | 'quiet'
+  | 'date'
+  | 'group'
+  | 'solo'
+  | 'family'
+  | 'work'
+  | 'late night'
+  | 'outdoor'
+  | 'view'
+  | 'cozy'
+  | 'cheap eats'
+
+export interface OpeningInfo {
+  // Simplified opening info for MVP.
+  // dayOfWeek 0 = Sunday, 6 = Saturday
+  weeklySchedule: Array<{
+    dayOfWeek: number
+    open: string  // "HH:MM" 24h
+    close: string // "HH:MM" 24h, may wrap past midnight
+  }>
+  notes?: string
+}
+
+export interface Restaurant {
+  id: string
+  slug: string
+  name: string
+  description: string
+
+  cuisine: Cuisine
+  secondaryCuisines?: Cuisine[]
+  tags: string[]
+  vibe: Vibe[]
+  bestFor: string[]      // "first dates", "groups of 6", "long lunch", etc
+
+  area: Area
+  city: string           // always "Valencia" for V1 seed
+  address: string
+
+  priceLevel: PriceLevel // 1 = cheap, 4 = high-end
+  averageSpend: number   // EUR per person
+
+  rating: number         // 0-5
+  reviewCount: number
+
+  imagePlaceholder: string // gradient seed (lime variants) for now
+
+  website?: string
+  instagram?: string
+  phone?: string
+
+  opening?: OpeningInfo
+
+  // Dietary
+  vegetarianFriendly: boolean
+  veganFriendly: boolean
+  glutenFreeOptions: boolean
+
+  isPartner: boolean    // FoodMatch partner with verified content
+}
