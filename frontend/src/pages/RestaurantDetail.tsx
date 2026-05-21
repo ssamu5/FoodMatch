@@ -5,6 +5,7 @@ import EmptyState from '../components/EmptyState'
 import { api } from '../lib/api'
 import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
 import { track } from '../lib/analytics'
+import { hapticSuccess, hapticTap, shareNative } from '../lib/native'
 
 function priceMark(level: 1 | 2 | 3 | 4): string {
   return '€'.repeat(level)
@@ -59,20 +60,22 @@ export default function RestaurantDetail() {
       unsaveRestaurant(r.id)
       setSaved(false)
       track('restaurant_unsaved', { restaurantId: r.id })
+      void hapticTap()
     } else {
       saveRestaurant(r.id)
       setSaved(true)
       track('restaurant_saved', { restaurantId: r.id })
+      void hapticSuccess()
     }
   }
 
   function share() {
-    const url = window.location.href
-    if (navigator.share) {
-      navigator.share({ title: r!.name, url }).catch(() => {})
-    } else {
-      navigator.clipboard.writeText(url).catch(() => {})
-    }
+    if (!r) return
+    void shareNative({
+      title: r.name,
+      text: `${r.name} on FoodMatch`,
+      url: window.location.href,
+    })
   }
 
   function sendFeedback(label: string) {
