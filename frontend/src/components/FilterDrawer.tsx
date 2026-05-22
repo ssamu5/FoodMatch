@@ -108,21 +108,21 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
       <button
         type="button"
         aria-label="Close filters"
-        className="absolute inset-0 bg-ink-950/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-tinta/70 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="relative w-full animate-fade-up rounded-t-4xl border-t border-white/10 bg-ink-900 px-5 pb-6 pt-3 sm:mx-auto sm:max-w-md sm:rounded-4xl sm:border sm:mb-6">
-        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-white/15" />
+      <div className="relative w-full animate-fade-up rounded-t-4xl border-t border-tinta/15 bg-creamy px-5 pb-6 pt-3 sm:mx-auto sm:max-w-md sm:rounded-4xl sm:border sm:mb-6">
+        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-tinta/20" />
 
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-[18px] font-semibold text-cream">Filters &amp; sort</h2>
-          <button onClick={onClose} className="text-[12px] text-ink-200 hover:text-cream">Close</button>
+          <h2 className="font-display text-[18px] font-semibold text-tinta">Filters &amp; sort</h2>
+          <button onClick={onClose} className="text-[12px] text-tinta/70 hover:text-tinta">Close</button>
         </div>
 
         <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Sort</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Sort</h3>
             <div className="flex flex-wrap gap-1.5">
               {SORTS.map((s) => (
                 <button
@@ -138,7 +138,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Cuisine</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Cuisine</h3>
             <div className="flex flex-wrap gap-1.5">
               {CUISINE_OPTIONS.map((c) => (
                 <button
@@ -154,7 +154,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Area</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Area</h3>
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
@@ -177,7 +177,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Budget</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Budget</h3>
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
@@ -200,7 +200,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Vibe</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Vibe</h3>
             <div className="flex flex-wrap gap-1.5">
               {VIBE_OPTIONS.map((v) => (
                 <button
@@ -216,7 +216,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Dietary</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Dietary</h3>
             <div className="flex flex-wrap gap-1.5">
               {(['vegetarian', 'vegan', 'gluten-free'] as const).map((d) => (
                 <button
@@ -232,7 +232,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Availability</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Availability</h3>
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"

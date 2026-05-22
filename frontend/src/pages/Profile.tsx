@@ -49,14 +49,14 @@ export default function Profile() {
   return (
     <AppShell>
       <section className="pt-2">
-        <h1 className="font-display text-[28px] font-bold leading-tight text-cream">Your taste</h1>
-        <p className="mt-1 text-[13px] text-ink-200">
+        <h1 className="font-display text-[28px] font-bold leading-tight text-tinta">Your taste</h1>
+        <p className="mt-1 text-[13px] text-tinta/70">
           Tell FoodMatch what you usually love. We use it as a soft signal on every search.
         </p>
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Favorite cuisines</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Favorite cuisines</h2>
         <div className="flex flex-wrap gap-1.5">
           {CUISINES.map((c) => (
             <button
@@ -76,7 +76,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Budget comfort</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Budget comfort</h2>
         <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
@@ -107,7 +107,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Preferred areas</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Preferred areas</h2>
         <div className="flex flex-wrap gap-1.5">
           {AREAS.map((a) => (
             <button
@@ -127,7 +127,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Dietary</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Dietary</h2>
         <div className="flex flex-wrap gap-1.5">
           {(['vegetarian', 'vegan', 'gluten-free'] as const).map((d) => (
             <button
@@ -147,7 +147,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Vibe</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Vibe</h2>
         <div className="flex flex-wrap gap-1.5">
           {VIBES.map((v) => (
             <button
@@ -167,8 +167,8 @@ export default function Profile() {
       </section>
 
       <section className="mt-6 rounded-2xl glass p-4">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-ink-300">Weekly Valencia picks</h2>
-        <p className="mt-1 text-[13px] text-ink-200">
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Weekly Valencia picks</h2>
+        <p className="mt-1 text-[13px] text-tinta/70">
           Optional. Email me one short list of best spots per week. Unsubscribe anytime.
         </p>
         <div className="mt-3 flex gap-2">
@@ -183,7 +183,7 @@ export default function Profile() {
             Subscribe
           </button>
         </div>
-        {savedAt && <p className="mt-2 text-[11px] text-ink-200">Saved at {savedAt}.</p>}
+        {savedAt && <p className="mt-2 text-[11px] text-tinta/70">Saved at {savedAt}.</p>}
         {/* Ignore unused update fn to satisfy TS */}
         <span hidden>{typeof update}</span>
       </section>

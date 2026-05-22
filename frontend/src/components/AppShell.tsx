@@ -23,17 +23,17 @@ export default function AppShell({
       <header className="relative z-20 safe-top">
         <div className="mx-auto flex max-w-md items-center justify-between px-5 py-3">
           <Link to="/" className="group inline-flex items-center gap-2" aria-label="FoodMatch home">
-            <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-lime/20 ring-1 ring-lime/30">
-              <span className="h-2 w-2 rounded-full bg-lime shadow-glow" />
+            <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-tomate/15 ring-1 ring-tomate/40">
+              <span className="h-2 w-2 rounded-full bg-tomate shadow-glow" />
             </span>
-            <span className="font-display text-[17px] font-semibold tracking-tight text-cream">
-              food<span className="text-lime">match</span>
+            <span className="font-display text-[19px] font-bold tracking-tight text-tinta">
+              food<span className="text-tomate italic">match</span>
             </span>
           </Link>
           <div className="flex items-center gap-2">
             {headerSlot}
             {!isHome && (
-              <Link to="/restaurants" className="hidden text-xs text-ink-200 hover:text-cream sm:inline-block">
+              <Link to="/restaurants" className="hidden text-xs text-tinta/70 hover:text-tinta sm:inline-block">
                 For restaurants
               </Link>
             )}

@@ -10,7 +10,7 @@ const links = [
 export default function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/5 bg-ink-950/85 backdrop-blur-md safe-bottom"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t-2 border-tinta bg-paper/95 backdrop-blur-md safe-bottom"
       aria-label="Primary"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2 pt-2">
@@ -25,8 +25,8 @@ export default function BottomNav() {
                   [
                     'flex flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium',
                     isActive
-                      ? 'text-lime'
-                      : 'text-ink-200 hover:text-cream',
+                      ? 'text-tomate'
+                      : 'text-tinta/70 hover:text-tinta',
                   ].join(' ')
                 }
               >

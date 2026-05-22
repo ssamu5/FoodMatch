@@ -94,12 +94,12 @@ export default function Ask() {
       {query && (
         <section className="mt-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-[12px] uppercase tracking-[0.18em] text-ink-300">
+            <h2 className="text-[12px] uppercase tracking-[0.18em] text-tinta/50">
               {results.length} match{results.length === 1 ? '' : 'es'}
             </h2>
             <button
               onClick={() => navigate(`/results?q=${encodeURIComponent(query)}`)}
-              className="text-[12px] text-ink-200 hover:text-cream"
+              className="text-[12px] text-tinta/70 hover:text-tinta"
             >
               See all &rarr;
             </button>
@@ -123,7 +123,7 @@ export default function Ask() {
 
           {shortlist.length > 0 && (
             <div>
-              <h3 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-ink-300">Shortlist</h3>
+              <h3 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-tinta/50">Shortlist</h3>
               <div className="space-y-2">
                 {shortlist.map((r, idx) => {
                   const s = rankedResults.find((rr) => rr.restaurantId === r.id)?.score

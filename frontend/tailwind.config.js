@@ -4,48 +4,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ChatGPT-style warm gray surfaces. Neutral, calm, high readability.
-        ink: {
-          950: '#1a1a1a',  // page background
-          900: '#1f1f1f',  // alt section background
-          800: '#262626',  // card background
-          700: '#2f2f2f',  // elevated surface (inputs, sticky bars)
-          600: '#3a3a3a',  // hover surface
-          500: '#525252',  // dividers
-          400: '#737373',
-          300: '#929292',
-          200: '#b3b3b3',  // secondary text
-          100: '#d4d4d4',  // muted primary text
-        },
-        // Neon lime accent (Hyperliquid-inspired)
-        lime: {
-          DEFAULT: '#a3ff12',
-          50: '#f4ffe5',
-          100: '#e8ffcc',
-          200: '#d4ff99',
-          300: '#bdff5e',
-          400: '#a3ff12',
-          500: '#8ee500',
-          600: '#73b800',
-          700: '#5a8e00',
-          800: '#3f6300',
-          900: '#243800',
-        },
-        cream: '#ececec',  // ChatGPT-style off-white for primary text
-        warn: '#f0b864',
-        bad: '#f87171',
+        // Brand palette: same tokens as foodmatch.es marketing site.
+        paper: '#f8f1e5',     // page background, warm cream
+        cream: '#f8f1e5',
+        creamy: '#f2e9d8',    // alt surface for cards / inputs
+        tinta: '#1f1814',     // primary text and primary CTA
+        tinta2: '#2a2218',    // slightly lighter tinta
+        tomate: '#e63946',    // primary brand accent
+        tomateDeep: '#b72c39',
+        mostaza: '#f2a93b',   // secondary accent
+        oliva: '#5c6b2f',
+        fresco: '#3fae6b',    // positive / match indicator
+        azulejo: '#1f4e5f',   // deep accent surface
+        ceramica: '#d9694d',
+        // Compat: keep lime token so any stale ref renders sensibly during transition.
+        lime: '#3fae6b',
       },
       fontFamily: {
-        display: ['"Geist"', 'system-ui', '-apple-system', 'sans-serif'],
-        body: ['"Geist"', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Fraunces"', 'ui-serif', 'Georgia', 'serif'],
+        body: ['"Bricolage Grotesque"', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        glass: '0 1px 0 0 rgba(255,255,255,0.04) inset, 0 0 0 1px rgba(255,255,255,0.05)',
-        glow: '0 0 16px -8px rgba(163, 255, 18, 0.25)',
-      },
-      backdropBlur: {
-        xs: '2px',
+        stamp: '6px 6px 0 0 rgba(31, 24, 20, 0.18)',
+        stampLg: '10px 10px 0 0 rgba(31, 24, 20, 0.18)',
+        warm: '0 14px 36px -12px rgba(230, 57, 70, 0.4)',
+        glow: '0 0 18px -6px rgba(230, 57, 70, 0.45)',
+        glass: '0 1px 0 0 rgba(31,24,20,0.04) inset, 0 0 0 1px rgba(31,24,20,0.06)',
       },
       borderRadius: {
         '4xl': '2rem',

@@ -94,11 +94,11 @@ export default function Results() {
         />
 
         <div className="flex items-center justify-between rounded-2xl glass px-3 py-2 text-[12px]">
-          <span className="truncate text-cream">{summary}</span>
+          <span className="truncate text-tinta">{summary}</span>
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
-            className="ml-2 inline-flex items-center gap-1.5 text-ink-200 hover:text-cream"
+            className="ml-2 inline-flex items-center gap-1.5 text-tinta/70 hover:text-tinta"
           >
             <FilterIcon className="h-3.5 w-3.5" />
             Filters

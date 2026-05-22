@@ -54,11 +54,11 @@ export default function PromptComposer({
           onKeyDown={handleKey}
           rows={compact ? 1 : 2}
           placeholder={placeholder}
-          className="w-full resize-none bg-transparent text-[17px] leading-snug text-cream placeholder:text-ink-300 focus:outline-none"
+          className="w-full resize-none bg-transparent text-[17px] leading-snug text-tinta placeholder:text-tinta/50 focus:outline-none"
         />
 
         <div className="flex items-center justify-between pb-1.5">
-          <span className="text-[11px] uppercase tracking-[0.15em] text-ink-300">
+          <span className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">
             Valencia
           </span>
           <button

@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   ios: {
     contentInset: 'always',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f8f1e5',
     scheme: 'FoodMatch',
     limitsNavigationsToAppBoundDomains: false,
   },
@@ -17,7 +17,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 1200,
-      backgroundColor: '#1a1a1a',
+      backgroundColor: '#f8f1e5',
       showSpinner: false,
       iosSpinnerStyle: 'small',
       splashFullScreen: true,
@@ -25,7 +25,7 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: 'DARK',
-      backgroundColor: '#1a1a1a',
+      backgroundColor: '#f8f1e5',
       overlaysWebView: false,
     },
   },

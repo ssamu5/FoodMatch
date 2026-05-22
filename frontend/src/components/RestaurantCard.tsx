@@ -45,12 +45,12 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen }: Rest
           aria-hidden="true"
         >
           {restaurant.isPartner && (
-            <span className="absolute left-1 top-1 rounded-full bg-lime/95 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-ink-900">
+            <span className="absolute left-1 top-1 rounded-full bg-tomate px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-cream">
               Partner
             </span>
           )}
           {typeof rank === 'number' && (
-            <span className="absolute bottom-1 right-1 rounded-full bg-ink-950/70 px-2 py-0.5 text-[10px] font-medium text-cream backdrop-blur-sm">
+            <span className="absolute bottom-1 right-1 rounded-full bg-tinta/70 px-2 py-0.5 text-[10px] font-medium text-cream backdrop-blur-sm">
               #{rank}
             </span>
           )}
@@ -58,21 +58,21 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen }: Rest
 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <h3 className="truncate font-display text-[15px] font-semibold leading-tight text-cream">
+            <h3 className="truncate font-display text-[15px] font-semibold leading-tight text-tinta">
               {restaurant.name}
             </h3>
             {score && (
-              <span className="shrink-0 rounded-full bg-lime/10 px-2 py-0.5 text-[11px] font-semibold text-lime-300">
+              <span className="shrink-0 rounded-full bg-tomate/10 px-2 py-0.5 text-[11px] font-semibold text-fresco">
                 {score.score}
               </span>
             )}
           </div>
 
-          <p className="mt-0.5 truncate text-[12px] text-ink-200">
+          <p className="mt-0.5 truncate text-[12px] text-tinta/70">
             {restaurant.cuisine} · {restaurant.area}
           </p>
 
-          <div className="mt-1.5 flex items-center gap-3 text-[11px] text-ink-200">
+          <div className="mt-1.5 flex items-center gap-3 text-[11px] text-tinta/70">
             <span className="font-mono">{priceMark(restaurant.priceLevel)}</span>
             <span aria-hidden>·</span>
             <span>★ {restaurant.rating.toFixed(1)}</span>
@@ -81,7 +81,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen }: Rest
           </div>
 
           {score && score.reasons.length > 0 && (
-            <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-ink-100">
+            <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-tinta">
               {score.reasons.slice(0, 2).join(' · ')}
             </p>
           )}

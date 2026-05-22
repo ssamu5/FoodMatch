@@ -32,18 +32,18 @@ export default function RestaurantPartner() {
     return (
       <AppShell>
         <section className="pt-10 text-center">
-          <h1 className="font-display text-[32px] font-bold leading-tight text-cream">Got it.</h1>
-          <p className="mt-2 text-[14px] text-ink-200">
+          <h1 className="font-display text-[32px] font-bold leading-tight text-tinta">Got it.</h1>
+          <p className="mt-2 text-[14px] text-tinta/70">
             We'll be in touch within 48 hours to walk through how FoodMatch can put your restaurant in front of the right diners.
           </p>
           <div className="mt-8 rounded-3xl glass p-5 text-left">
-            <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">What you submitted</h2>
-            <div className="space-y-1 text-[13px] text-cream">
-              <p><span className="text-ink-200">Restaurant:</span> {form.restaurantName}</p>
-              <p><span className="text-ink-200">Owner:</span> {form.ownerName}</p>
-              <p><span className="text-ink-200">Email:</span> {form.email}</p>
-              {form.phone && <p><span className="text-ink-200">Phone:</span> {form.phone}</p>}
-              {form.area && <p><span className="text-ink-200">Area:</span> {form.area}, {form.city}</p>}
+            <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">What you submitted</h2>
+            <div className="space-y-1 text-[13px] text-tinta">
+              <p><span className="text-tinta/70">Restaurant:</span> {form.restaurantName}</p>
+              <p><span className="text-tinta/70">Owner:</span> {form.ownerName}</p>
+              <p><span className="text-tinta/70">Email:</span> {form.email}</p>
+              {form.phone && <p><span className="text-tinta/70">Phone:</span> {form.phone}</p>}
+              {form.area && <p><span className="text-tinta/70">Area:</span> {form.area}, {form.city}</p>}
             </div>
           </div>
         </section>
@@ -54,29 +54,29 @@ export default function RestaurantPartner() {
   return (
     <AppShell>
       <section className="pt-2">
-        <h1 className="font-display text-[30px] font-bold leading-tight text-cream">
-          Get your restaurant <span className="text-lime">found</span>.
+        <h1 className="font-display text-[30px] font-bold leading-tight text-tinta">
+          Get your restaurant <span className="text-tomate">found</span>.
         </h1>
-        <p className="mt-2 text-[14px] leading-relaxed text-ink-200">
+        <p className="mt-2 text-[14px] leading-relaxed text-tinta/70">
           FoodMatch sends curious, hungry diners straight to the best fit for their craving. Zero commission, flat monthly subscription, founder pricing for the first 100 partners in Valencia.
         </p>
       </section>
 
       <section className="mt-5 grid grid-cols-2 gap-2 text-[13px]">
         <div className="rounded-2xl glass p-3">
-          <div className="font-display text-[18px] font-bold text-lime">0%</div>
-          <p className="mt-1 text-ink-200">commission on bookings</p>
+          <div className="font-display text-[18px] font-bold text-tomate">0%</div>
+          <p className="mt-1 text-tinta/70">commission on bookings</p>
         </div>
         <div className="rounded-2xl glass p-3">
-          <div className="font-display text-[18px] font-bold text-lime">2 months</div>
-          <p className="mt-1 text-ink-200">free for the first 100</p>
+          <div className="font-display text-[18px] font-bold text-tomate">2 months</div>
+          <p className="mt-1 text-tinta/70">free for the first 100</p>
         </div>
       </section>
 
       <section className="mt-6">
         <form onSubmit={handleSubmit} className="space-y-3 rounded-3xl glass p-5">
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">Restaurant name *</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Restaurant name *</label>
             <input
               required
               value={form.restaurantName}
@@ -87,7 +87,7 @@ export default function RestaurantPartner() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">Your name *</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Your name *</label>
               <input
                 required
                 value={form.ownerName}
@@ -97,7 +97,7 @@ export default function RestaurantPartner() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">Phone / WhatsApp</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Phone / WhatsApp</label>
               <input
                 value={form.phone}
                 onChange={(e) => update('phone', e.target.value)}
@@ -107,7 +107,7 @@ export default function RestaurantPartner() {
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">Email *</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Email *</label>
             <input
               required
               type="email"
@@ -118,7 +118,7 @@ export default function RestaurantPartner() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">Instagram or website</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Instagram or website</label>
             <input
               value={form.instagramOrWebsite}
               onChange={(e) => update('instagramOrWebsite', e.target.value)}
@@ -128,7 +128,7 @@ export default function RestaurantPartner() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">Area</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Area</label>
               <input
                 value={form.area}
                 onChange={(e) => update('area', e.target.value)}
@@ -137,7 +137,7 @@ export default function RestaurantPartner() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">City</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">City</label>
               <input
                 value={form.city}
                 onChange={(e) => update('city', e.target.value)}
@@ -146,7 +146,7 @@ export default function RestaurantPartner() {
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-ink-300">Message (optional)</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Message (optional)</label>
             <textarea
               value={form.message}
               onChange={(e) => update('message', e.target.value)}
@@ -158,7 +158,7 @@ export default function RestaurantPartner() {
           <button type="submit" className="btn-lime h-12 w-full">
             Apply for FoodMatch Partners
           </button>
-          <p className="text-center text-[11px] text-ink-300">
+          <p className="text-center text-[11px] text-tinta/50">
             We respond within 48 hours. GDPR friendly, data stays in EU.
           </p>
         </form>

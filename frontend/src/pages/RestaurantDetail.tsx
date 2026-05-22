@@ -94,31 +94,31 @@ export default function RestaurantDetail() {
         style={{ background: gradientFor(r.imagePlaceholder) }}
         aria-hidden="true"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-ink-950/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-tinta/20 to-tinta/80" />
         {r.isPartner && (
-          <span className="absolute left-3 top-3 rounded-full bg-lime/95 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-900">
+          <span className="absolute left-3 top-3 rounded-full bg-tomate px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream">
             Partner
           </span>
         )}
       </div>
 
       <section className="mt-4 space-y-2">
-        <h1 className="font-display text-[26px] font-bold leading-tight text-cream">{r.name}</h1>
-        <p className="text-[13px] text-ink-200">
+        <h1 className="font-display text-[26px] font-bold leading-tight text-tinta">{r.name}</h1>
+        <p className="text-[13px] text-tinta/70">
           {r.cuisine} · {r.area} · {priceMark(r.priceLevel)} · ★ {r.rating.toFixed(1)} ({r.reviewCount})
         </p>
-        <p className="text-[14px] leading-relaxed text-ink-100">{r.description}</p>
+        <p className="text-[14px] leading-relaxed text-tinta">{r.description}</p>
       </section>
 
       <section className="mt-4 rounded-2xl glass p-4">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-ink-300">Why FoodMatch picks it</h2>
-        <p className="mt-2 text-[14px] leading-relaxed text-cream">
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Why FoodMatch picks it</h2>
+        <p className="mt-2 text-[14px] leading-relaxed text-tinta">
           {r.bestFor.length > 0 ? `Best for ${r.bestFor.slice(0, 2).join(' and ')}. ` : ''}
           Typical spend ~€{r.averageSpend}. Vibe: {r.vibe.slice(0, 3).join(', ')}.
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {r.bestFor.slice(0, 4).map((b) => (
-            <span key={b} className="rounded-full bg-lime/10 px-2.5 py-1 text-[11px] font-medium text-lime-300">
+            <span key={b} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
               {b}
             </span>
           ))}
@@ -176,18 +176,18 @@ export default function RestaurantDetail() {
       </section>
 
       <section className="mt-5 space-y-2">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-ink-300">Practical info</h2>
-        <div className="rounded-2xl glass p-4 text-[13px] text-cream">
-          <div className="flex justify-between gap-3 border-b border-white/5 py-2">
-            <span className="text-ink-200">Address</span>
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Practical info</h2>
+        <div className="rounded-2xl glass p-4 text-[13px] text-tinta">
+          <div className="flex justify-between gap-3 border-b border-tinta/12 py-2">
+            <span className="text-tinta/70">Address</span>
             <span className="text-right">{r.address}</span>
           </div>
-          <div className="flex justify-between gap-3 border-b border-white/5 py-2">
-            <span className="text-ink-200">Price level</span>
+          <div className="flex justify-between gap-3 border-b border-tinta/12 py-2">
+            <span className="text-tinta/70">Price level</span>
             <span>{priceMark(r.priceLevel)} · ~€{r.averageSpend}</span>
           </div>
-          <div className="flex justify-between gap-3 border-b border-white/5 py-2">
-            <span className="text-ink-200">Dietary</span>
+          <div className="flex justify-between gap-3 border-b border-tinta/12 py-2">
+            <span className="text-tinta/70">Dietary</span>
             <span className="text-right">
               {r.vegetarianFriendly ? 'veg ' : ''}
               {r.veganFriendly ? '· vegan ' : ''}
@@ -197,7 +197,7 @@ export default function RestaurantDetail() {
           </div>
           {r.opening?.notes && (
             <div className="flex justify-between gap-3 py-2">
-              <span className="text-ink-200">Note</span>
+              <span className="text-tinta/70">Note</span>
               <span className="text-right">{r.opening.notes}</span>
             </div>
           )}
@@ -205,7 +205,7 @@ export default function RestaurantDetail() {
       </section>
 
       <section className="mt-5">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-ink-300">Feedback</h2>
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Feedback</h2>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {FEEDBACK.map((f) => (
             <button
@@ -220,12 +220,12 @@ export default function RestaurantDetail() {
           ))}
         </div>
         {feedbackSent && (
-          <p className="mt-2 text-[12px] text-ink-200">Thanks. Logged: {feedbackSent}.</p>
+          <p className="mt-2 text-[12px] text-tinta/70">Thanks. Logged: {feedbackSent}.</p>
         )}
       </section>
 
       <div className="mt-6">
-        <Link to="/ask" className="text-[13px] text-ink-200 hover:text-cream">
+        <Link to="/ask" className="text-[13px] text-tinta/70 hover:text-tinta">
           &larr; Back to results
         </Link>
       </div>

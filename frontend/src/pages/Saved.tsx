@@ -21,14 +21,14 @@ export default function Saved() {
   return (
     <AppShell>
       <section className="pt-2">
-        <h1 className="font-display text-[28px] font-bold leading-tight text-cream">Saved</h1>
-        <p className="mt-1 text-[13px] text-ink-200">
+        <h1 className="font-display text-[28px] font-bold leading-tight text-tinta">Saved</h1>
+        <p className="mt-1 text-[13px] text-tinta/70">
           Your bookmarked restaurants and recent searches, stored on this device.
         </p>
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Restaurants</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Restaurants</h2>
         {saved.length === 0 ? (
           <EmptyState
             title="Nothing saved yet"
@@ -44,7 +44,7 @@ export default function Saved() {
       </section>
 
       <section className="mt-7">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Recent searches</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Recent searches</h2>
         {recent.length === 0 ? (
           <EmptyState title="No recent searches" hint="Ask FoodMatch what you're craving to start." />
         ) : (
@@ -53,11 +53,11 @@ export default function Saved() {
               <li key={e.id}>
                 <Link
                   to={`/ask?q=${encodeURIComponent(e.query)}`}
-                  className="block rounded-2xl glass glass-hover p-3 text-[13px] text-cream"
+                  className="block rounded-2xl glass glass-hover p-3 text-[13px] text-tinta"
                 >
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate">{e.query}</span>
-                    <span className="shrink-0 text-[11px] text-ink-200">{e.resultCount} results</span>
+                    <span className="shrink-0 text-[11px] text-tinta/70">{e.resultCount} results</span>
                   </div>
                 </Link>
               </li>

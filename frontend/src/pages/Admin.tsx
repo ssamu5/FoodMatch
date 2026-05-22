@@ -27,8 +27,8 @@ export default function Admin() {
     return (
       <AppShell>
         <section className="pt-10">
-          <h1 className="font-display text-[28px] font-bold text-cream">Admin</h1>
-          <p className="mt-2 text-[13px] text-ink-200">
+          <h1 className="font-display text-[28px] font-bold text-tinta">Admin</h1>
+          <p className="mt-2 text-[13px] text-tinta/70">
             MVP-only soft lock. Type the code to view internal stats.
           </p>
           <div className="mt-5 flex gap-2">
@@ -73,10 +73,10 @@ export default function Admin() {
     <AppShell>
       <section className="pt-2">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-[28px] font-bold text-cream">Admin</h1>
+          <h1 className="font-display text-[28px] font-bold text-tinta">Admin</h1>
           <button
             type="button"
-            className="text-[12px] text-ink-200 hover:text-bad"
+            className="text-[12px] text-tinta/70 hover:text-bad"
             onClick={() => {
               if (confirm('Clear all analytics events on this device?')) {
                 clearEvents()
@@ -87,7 +87,7 @@ export default function Admin() {
             Clear events
           </button>
         </div>
-        <p className="mt-1 text-[12px] text-ink-200">
+        <p className="mt-1 text-[12px] text-tinta/70">
           MVP stats from local event buffer. Replace with Supabase queries once the backend lands.
         </p>
       </section>
@@ -100,39 +100,39 @@ export default function Admin() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Top cuisines (searched)</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Top cuisines (searched)</h2>
         <KvList rows={topRows(summary.cuisineCounts)} />
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Top areas (searched)</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Top areas (searched)</h2>
         <KvList rows={topRows(summary.areaCounts)} />
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Most opened restaurants</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Most opened restaurants</h2>
         <div className="rounded-2xl glass p-3">
-          {topClicks.length === 0 && <p className="text-[13px] text-ink-200">No restaurant opens yet.</p>}
+          {topClicks.length === 0 && <p className="text-[13px] text-tinta/70">No restaurant opens yet.</p>}
           {topClicks.map(({ count, restaurant }, i) => (
-            <div key={(restaurant?.id || 'x') + i} className="flex items-baseline justify-between border-b border-white/5 py-1.5 last:border-0">
-              <span className="text-[13px] text-cream">
+            <div key={(restaurant?.id || 'x') + i} className="flex items-baseline justify-between border-b border-tinta/12 py-1.5 last:border-0">
+              <span className="text-[13px] text-tinta">
                 {restaurant ? restaurant.name : 'Unknown'}{' '}
-                {restaurant && <span className="text-ink-200">· {restaurant.area}</span>}
+                {restaurant && <span className="text-tinta/70">· {restaurant.area}</span>}
               </span>
-              <span className="font-mono text-[12px] text-lime">{count}</span>
+              <span className="font-mono text-[12px] text-tomate">{count}</span>
             </div>
           ))}
         </div>
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">No-result searches</h2>
-        <div className="rounded-2xl glass p-3 text-[13px] text-cream">
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">No-result searches</h2>
+        <div className="rounded-2xl glass p-3 text-[13px] text-tinta">
           {summary.noResultQueries.length === 0 ? (
-            <p className="text-ink-200">None.</p>
+            <p className="text-tinta/70">None.</p>
           ) : (
             summary.noResultQueries.map((q, i) => (
-              <div key={q + i} className="border-b border-white/5 py-1.5 last:border-0">
+              <div key={q + i} className="border-b border-tinta/12 py-1.5 last:border-0">
                 "{q}"
               </div>
             ))
@@ -146,13 +146,13 @@ export default function Admin() {
       </section>
 
       <section className="mt-3">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-ink-300">Recent restaurant leads</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Recent restaurant leads</h2>
         <div className="rounded-2xl glass p-3">
-          {restaurantLeads.length === 0 && <p className="text-[13px] text-ink-200">No partner applications yet.</p>}
+          {restaurantLeads.length === 0 && <p className="text-[13px] text-tinta/70">No partner applications yet.</p>}
           {restaurantLeads.slice(0, 6).map((lead) => (
-            <div key={lead.createdAt + lead.email} className="border-b border-white/5 py-1.5 text-[12px] last:border-0">
-              <p className="text-cream">{lead.restaurantName} · {lead.ownerName}</p>
-              <p className="text-ink-200">{lead.email}{lead.phone ? ` · ${lead.phone}` : ''}{lead.area ? ` · ${lead.area}` : ''}</p>
+            <div key={lead.createdAt + lead.email} className="border-b border-tinta/12 py-1.5 text-[12px] last:border-0">
+              <p className="text-tinta">{lead.restaurantName} · {lead.ownerName}</p>
+              <p className="text-tinta/70">{lead.email}{lead.phone ? ` · ${lead.phone}` : ''}{lead.area ? ` · ${lead.area}` : ''}</p>
             </div>
           ))}
         </div>
@@ -164,8 +164,8 @@ export default function Admin() {
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl glass p-3">
-      <div className="text-[10px] uppercase tracking-[0.15em] text-ink-300">{label}</div>
-      <div className="mt-1 font-display text-[24px] font-bold text-cream">{value}</div>
+      <div className="text-[10px] uppercase tracking-[0.15em] text-tinta/50">{label}</div>
+      <div className="mt-1 font-display text-[24px] font-bold text-tinta">{value}</div>
     </div>
   )
 }
@@ -173,15 +173,15 @@ function Metric({ label, value }: { label: string; value: number }) {
 function KvList({ rows }: { rows: { key: string; value: number }[] }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl glass p-3 text-[13px] text-ink-200">No data yet.</div>
+      <div className="rounded-2xl glass p-3 text-[13px] text-tinta/70">No data yet.</div>
     )
   }
   return (
     <div className="rounded-2xl glass p-3">
       {rows.map(({ key, value }) => (
-        <div key={key} className="flex items-baseline justify-between border-b border-white/5 py-1.5 last:border-0">
-          <span className="text-[13px] text-cream">{key}</span>
-          <span className="font-mono text-[12px] text-lime">{value}</span>
+        <div key={key} className="flex items-baseline justify-between border-b border-tinta/12 py-1.5 last:border-0">
+          <span className="text-[13px] text-tinta">{key}</span>
+          <span className="font-mono text-[12px] text-tomate">{value}</span>
         </div>
       ))}
     </div>
