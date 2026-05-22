@@ -2,11 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <meta name="theme-color" content="#070a09" />
     <meta name="description" content="FoodMatch. AI restaurant discovery for Valencia. Tell us what you crave, we find the table." />
+
     <title>FoodMatch. Find your match for Valencia</title>
+
+    <!-- Web App Manifest (Android/Chrome/Edge) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- iOS PWA support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FoodMatch" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="256x256" href="/icons/icon-256.png" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+
+    <!-- Splash background while loading on iOS standalone -->
+    <style>
+      html, body { background: #070a09; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
