@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import BottomNav from './BottomNav'
+import ThemeToggle from './ThemeToggle'
 
 interface AppShellProps {
   children: ReactNode
@@ -37,6 +38,7 @@ export default function AppShell({
                 For restaurants
               </Link>
             )}
+            <ThemeToggle />
           </div>
         </div>
       </header>

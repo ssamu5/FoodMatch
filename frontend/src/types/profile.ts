@@ -44,6 +44,7 @@ export type AnalyticsEventType =
   | 'restaurant_lead_submitted'
   | 'filter_applied'
   | 'feedback_submitted'
+  | 'theme_changed'
 
 export interface AnalyticsEvent {
   type: AnalyticsEventType

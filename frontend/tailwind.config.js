@@ -1,23 +1,34 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         // Brand palette: same tokens as foodmatch.es marketing site.
-        paper: '#f8f1e5',     // page background, warm cream
+        // Dynamic tokens (flip with theme) use CSS variables so existing
+        // utility classes (bg-paper, text-tinta, etc.) work in both modes.
+        paper: 'rgb(var(--paper) / <alpha-value>)',     // page background
+        creamy: 'rgb(var(--creamy) / <alpha-value>)',   // alt surface for cards
+        tinta: 'rgb(var(--tinta) / <alpha-value>)',     // primary text
+        tinta2: 'rgb(var(--tinta2) / <alpha-value>)',   // slightly lighter tinta
+
+        // Static tokens (never flip) used for elements over image gradients.
+        // cream stays light so text-cream and bg-cream remain readable on
+        // dark image overlays regardless of theme.
         cream: '#f8f1e5',
-        creamy: '#f2e9d8',    // alt surface for cards / inputs
-        tinta: '#1f1814',     // primary text and primary CTA
-        tinta2: '#2a2218',    // slightly lighter tinta
-        tomate: '#e63946',    // primary brand accent
+        ink: '#1f1814',       // permanent warm-dark for badges over images
+
+        // Brand accents (kept static so brand identity is consistent).
+        tomate: '#e63946',
         tomateDeep: '#b72c39',
-        mostaza: '#f2a93b',   // secondary accent
+        mostaza: '#f2a93b',
         oliva: '#5c6b2f',
-        fresco: '#3fae6b',    // positive / match indicator
-        azulejo: '#1f4e5f',   // deep accent surface
+        fresco: '#3fae6b',
+        azulejo: '#1f4e5f',
         ceramica: '#d9694d',
-        // Compat: keep lime token so any stale ref renders sensibly during transition.
+        warn: '#d9694d',
+        // Compat: keep lime token so any stale ref renders sensibly.
         lime: '#3fae6b',
       },
       fontFamily: {

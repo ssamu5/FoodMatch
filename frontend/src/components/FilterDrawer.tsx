@@ -108,7 +108,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
       <button
         type="button"
         aria-label="Close filters"
-        className="absolute inset-0 bg-tinta/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-ink/70 backdrop-blur-sm"
         onClick={onClose}
       />
 

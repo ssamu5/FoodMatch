@@ -50,7 +50,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen }: Rest
             </span>
           )}
           {typeof rank === 'number' && (
-            <span className="absolute bottom-1 right-1 rounded-full bg-tinta/70 px-2 py-0.5 text-[10px] font-medium text-cream backdrop-blur-sm">
+            <span className="absolute bottom-1 right-1 rounded-full bg-ink/70 px-2 py-0.5 text-[10px] font-medium text-cream backdrop-blur-sm">
               #{rank}
             </span>
           )}

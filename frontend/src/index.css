@@ -4,6 +4,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens. RGB triplets (space-separated) so Tailwind's `<alpha-value>`
+   substitution works (e.g. `bg-paper/80`). */
+:root {
+  --paper: 248 241 229;       /* #f8f1e5 warm cream page bg */
+  --creamy: 242 233 216;      /* #f2e9d8 alt surface */
+  --tinta: 31 24 20;          /* #1f1814 primary text / borders */
+  --tinta2: 42 34 24;         /* #2a2218 slightly lifted tinta */
+  --surface-input: 255 255 255; /* input field background */
+  --dot: 31 24 20;            /* page dot texture color */
+  --dot-alpha: 0.035;
+}
+
+.dark {
+  --paper: 20 17 15;          /* #14110f deep warm dark */
+  --creamy: 31 26 22;         /* #1f1a16 elevated card surface */
+  --tinta: 244 234 216;       /* #f4ead8 cream text */
+  --tinta2: 227 214 192;      /* #e3d6c0 slightly dimmer */
+  --surface-input: 36 30 25;  /* #241e19 input field on dark */
+  --dot: 244 234 216;
+  --dot-alpha: 0.04;
+}
+
+/* Match native browser UI to the theme. */
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -13,8 +43,9 @@ html,
 body,
 #root {
   height: 100%;
-  background: #f8f1e5;
-  color: #1f1814;
+  background: rgb(var(--paper));
+  color: rgb(var(--tinta));
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 body {
@@ -27,7 +58,7 @@ body {
 
 ::selection {
   background: rgba(230, 57, 70, 0.25);
-  color: #1f1814;
+  color: rgb(var(--tinta));
 }
 
 #root { position: relative; z-index: 1; }
@@ -39,7 +70,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background-image: radial-gradient(rgba(31, 24, 20, 0.035) 1px, transparent 1px);
+  background-image: radial-gradient(rgb(var(--dot) / var(--dot-alpha)) 1px, transparent 1px);
   background-size: 24px 24px;
   background-position: 0 0;
 }
@@ -50,8 +81,8 @@ body::before {
 
 /* Card surface */
 .glass {
-  background: #f8f1e5;
-  border: 1px solid rgba(31, 24, 20, 0.12);
+  background: rgb(var(--paper));
+  border: 1px solid rgb(var(--tinta) / 0.12);
   border-radius: inherit;
 }
 
@@ -59,27 +90,27 @@ body::before {
   transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 .glass-hover:hover {
-  background: #f2e9d8;
-  border-color: rgba(31, 24, 20, 0.22);
+  background: rgb(var(--creamy));
+  border-color: rgb(var(--tinta) / 0.22);
 }
 
 /* Bordered card with offset shadow (the website's signature) */
 .stamp-card {
-  background: #f8f1e5;
-  border: 2px solid #1f1814;
+  background: rgb(var(--paper));
+  border: 2px solid rgb(var(--tinta));
   border-radius: 1.5rem;
-  box-shadow: 6px 6px 0 0 #1f1814;
+  box-shadow: 6px 6px 0 0 rgb(var(--tinta));
 }
 
 /* Inputs */
 .liquid-input {
-  background: #ffffff;
-  border: 2px solid #1f1814;
-  color: #1f1814;
+  background: rgb(var(--surface-input));
+  border: 2px solid rgb(var(--tinta));
+  color: rgb(var(--tinta));
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.15s ease;
 }
 .liquid-input::placeholder {
-  color: rgba(31, 24, 20, 0.45);
+  color: rgb(var(--tinta) / 0.45);
 }
 .liquid-input:focus {
   outline: none;
@@ -97,16 +128,16 @@ body::before {
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 500;
-  background: #f8f1e5;
-  border: 1px solid rgba(31, 24, 20, 0.20);
-  color: #1f1814;
+  background: rgb(var(--paper));
+  border: 1px solid rgb(var(--tinta) / 0.20);
+  color: rgb(var(--tinta));
   transition: all 0.18s ease;
   cursor: pointer;
   white-space: nowrap;
 }
 .chip:hover {
-  background: #f2e9d8;
-  border-color: rgba(31, 24, 20, 0.35);
+  background: rgb(var(--creamy));
+  border-color: rgb(var(--tinta) / 0.35);
 }
 .chip.active {
   background: rgba(230, 57, 70, 0.10);
@@ -114,27 +145,31 @@ body::before {
   color: #b72c39;
   font-weight: 600;
 }
+.dark .chip.active {
+  color: #ff6f7c;
+}
 
-/* Primary button: dark with cream text (same as website's btn-primary) */
+/* Primary button: tinta with paper text (flips with theme) */
 .btn-primary,
 .btn-lime {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #1f1814;
-  color: #f8f1e5;
+  background: rgb(var(--tinta));
+  color: rgb(var(--paper));
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.85rem 1.3rem;
   border-radius: 999px;
-  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
   cursor: pointer;
   border: 0;
 }
 .btn-primary:hover,
 .btn-lime:hover {
   background: #e63946;
+  color: #f8f1e5;
   box-shadow: 0 12px 28px -10px rgba(230, 57, 70, 0.5);
   transform: translateY(-1px);
 }
@@ -148,7 +183,7 @@ body::before {
   cursor: not-allowed;
 }
 
-/* Tomato button: full brand red (used for high-impact CTAs and sticky CTAs) */
+/* Tomato button: full brand red (theme-independent) */
 .btn-tomate {
   display: inline-flex;
   align-items: center;
@@ -174,19 +209,19 @@ body::before {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #f8f1e5;
-  color: #1f1814;
+  background: rgb(var(--paper));
+  color: rgb(var(--tinta));
   font-weight: 500;
   font-size: 0.92rem;
   padding: 0.8rem 1.2rem;
   border-radius: 999px;
-  border: 2px solid #1f1814;
+  border: 2px solid rgb(var(--tinta));
   transition: all 0.18s ease;
   cursor: pointer;
 }
-.btn-ghost:hover { background: #f2e9d8; }
+.btn-ghost:hover { background: rgb(var(--creamy)); }
 
-/* Squiggle divider (matches the website) */
+/* Squiggle divider (matches the website). Light + dark variants. */
 .squiggle {
   height: 18px;
   width: 100%;
@@ -194,6 +229,9 @@ body::before {
   background-repeat: repeat-x;
   background-size: 80px 18px;
   opacity: 0.55;
+}
+.dark .squiggle {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 18' preserveAspectRatio='none'><path d='M0 9 Q10 0 20 9 T40 9 T60 9 T80 9' stroke='%23F4EAD8' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
 }
 
 /* Underline accent (fresco green) for inline emphasis */
