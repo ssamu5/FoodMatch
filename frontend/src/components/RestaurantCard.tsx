@@ -17,16 +17,16 @@ function priceMark(level: 1 | 2 | 3 | 4): string {
 function gradientFor(seed: string): string {
   switch (seed) {
     case 'lime-bright':
-      return 'linear-gradient(135deg, #a3ff12 0%, #5a8e00 60%, #243800 100%)'
+      return 'linear-gradient(135deg, #a3ff12 0%, #6b9300 55%, #2f2f2f 100%)'
     case 'lime-dark':
-      return 'linear-gradient(135deg, #243800 0%, #131a17 80%)'
+      return 'linear-gradient(135deg, #3a3a3a 0%, #1f1f1f 80%)'
     case 'lime-deep':
-      return 'linear-gradient(135deg, #3f6300 0%, #0d1311 80%)'
+      return 'linear-gradient(135deg, #4a4a4a 0%, #1a1a1a 80%)'
     case 'lime-warm':
-      return 'linear-gradient(135deg, #5a8e00 0%, #1a221e 70%)'
+      return 'linear-gradient(135deg, #5a8e00 0%, #2a2a2a 70%)'
     case 'lime-muted':
     default:
-      return 'linear-gradient(135deg, #2a332e 0%, #131a17 80%)'
+      return 'linear-gradient(135deg, #3a3a3a 0%, #222222 80%)'
   }
 }
 

@@ -13,8 +13,8 @@ html,
 body,
 #root {
   height: 100%;
-  background: #070a09;
-  color: #f1ede4;
+  background: #1a1a1a;
+  color: #ececec;
 }
 
 body {
@@ -27,19 +27,8 @@ body {
 }
 
 ::selection {
-  background: rgba(163, 255, 18, 0.35);
-  color: #f1ede4;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(60% 40% at 50% -10%, rgba(163, 255, 18, 0.08), transparent 60%),
-    radial-gradient(40% 30% at 100% 100%, rgba(163, 255, 18, 0.04), transparent 60%);
+  background: rgba(163, 255, 18, 0.3);
+  color: #ffffff;
 }
 
 #root {
@@ -47,34 +36,39 @@ body::before {
   z-index: 1;
 }
 
+/* Surface primitives - ChatGPT-style flat warm gray, no glow */
 .glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.005));
+  background: #262626;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border-radius: inherit;
 }
 
+.glass-hover {
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
 .glass-hover:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+  background: #2f2f2f;
+  border-color: rgba(255, 255, 255, 0.10);
 }
 
+/* Inputs - matched neutral surface */
 .liquid-input {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: #f1ede4;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  background: #2f2f2f;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #ececec;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 .liquid-input::placeholder {
-  color: rgba(241, 237, 228, 0.35);
+  color: #8a8a8a;
 }
 .liquid-input:focus {
   outline: none;
-  border-color: rgba(163, 255, 18, 0.55);
-  background: rgba(255, 255, 255, 0.045);
-  box-shadow: 0 0 0 3px rgba(163, 255, 18, 0.12);
+  border-color: rgba(163, 255, 18, 0.5);
+  background: #353535;
+  box-shadow: 0 0 0 3px rgba(163, 255, 18, 0.10);
 }
 
+/* Chip */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -83,31 +77,32 @@ body::before {
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: #c8d2cd;
+  background: #2f2f2f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #d4d4d4;
   transition: all 0.18s ease;
   cursor: pointer;
   white-space: nowrap;
 }
 .chip:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: #3a3a3a;
   border-color: rgba(255, 255, 255, 0.12);
-  color: #f1ede4;
+  color: #ececec;
 }
 .chip.active {
-  background: rgba(163, 255, 18, 0.12);
-  border-color: rgba(163, 255, 18, 0.5);
-  color: #bdff5e;
+  background: rgba(163, 255, 18, 0.14);
+  border-color: rgba(163, 255, 18, 0.45);
+  color: #c4ff5e;
 }
 
+/* Primary button - keep lime as brand accent, slightly softer */
 .btn-lime {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   background: #a3ff12;
-  color: #0d1311;
+  color: #1a1a1a;
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.85rem 1.3rem;
@@ -117,8 +112,7 @@ body::before {
   border: 0;
 }
 .btn-lime:hover {
-  background: #bdff5e;
-  box-shadow: 0 0 28px -6px rgba(163, 255, 18, 0.55);
+  background: #b8ff3a;
 }
 .btn-lime:active {
   transform: translateY(1px);
@@ -133,8 +127,8 @@ body::before {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.035);
-  color: #f1ede4;
+  background: #2f2f2f;
+  color: #ececec;
   font-weight: 500;
   font-size: 0.92rem;
   padding: 0.8rem 1.2rem;
@@ -144,8 +138,8 @@ body::before {
   cursor: pointer;
 }
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: #3a3a3a;
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }

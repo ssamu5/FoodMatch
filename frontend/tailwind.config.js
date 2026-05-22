@@ -4,18 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Liquid dark surfaces
+        // ChatGPT-style warm gray surfaces. Neutral, calm, high readability.
         ink: {
-          950: '#070a09',
-          900: '#0d1311',
-          800: '#131a17',
-          700: '#1a221e',
-          600: '#222a26',
-          500: '#2a332e',
-          400: '#3a4540',
-          300: '#5a6660',
-          200: '#9aa6a0',
-          100: '#c8d2cd',
+          950: '#1a1a1a',  // page background
+          900: '#1f1f1f',  // alt section background
+          800: '#262626',  // card background
+          700: '#2f2f2f',  // elevated surface (inputs, sticky bars)
+          600: '#3a3a3a',  // hover surface
+          500: '#525252',  // dividers
+          400: '#737373',
+          300: '#929292',
+          200: '#b3b3b3',  // secondary text
+          100: '#d4d4d4',  // muted primary text
         },
         // Neon lime accent (Hyperliquid-inspired)
         lime: {
@@ -31,9 +31,9 @@ export default {
           800: '#3f6300',
           900: '#243800',
         },
-        cream: '#f1ede4',
-        warn: '#ffb84d',
-        bad: '#ff5a5a',
+        cream: '#ececec',  // ChatGPT-style off-white for primary text
+        warn: '#f0b864',
+        bad: '#f87171',
       },
       fontFamily: {
         display: ['"Geist"', 'system-ui', '-apple-system', 'sans-serif'],
@@ -42,7 +42,7 @@ export default {
       },
       boxShadow: {
         glass: '0 1px 0 0 rgba(255,255,255,0.04) inset, 0 0 0 1px rgba(255,255,255,0.05)',
-        glow: '0 0 24px -4px rgba(163, 255, 18, 0.45)',
+        glow: '0 0 16px -8px rgba(163, 255, 18, 0.25)',
       },
       backdropBlur: {
         xs: '2px',

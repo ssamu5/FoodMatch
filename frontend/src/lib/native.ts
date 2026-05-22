@@ -19,7 +19,7 @@ export async function initNativeShell(): Promise<void> {
   if (!isNative) return
   try {
     await StatusBar.setStyle({ style: Style.Dark })
-    await StatusBar.setBackgroundColor({ color: '#070a09' })
+    await StatusBar.setBackgroundColor({ color: '#1a1a1a' })
   } catch {
     /* status bar plugin may be unavailable in some contexts */
   }
