@@ -41,7 +41,7 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-tinta/30 to-tinta/90" />
         <div className="absolute left-4 right-4 top-4 flex items-center justify-between">
           <span className="rounded-full bg-cream px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-tomate">
-            Best match
+            Foody picks
           </span>
           <span className="rounded-full bg-tomate px-3 py-1 text-[12px] font-semibold text-cream">
             {score.score}/100

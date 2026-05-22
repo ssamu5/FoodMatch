@@ -22,7 +22,7 @@ export default function Home() {
         <div className="space-y-3 animate-fade-up">
           <span className="inline-flex items-center gap-2 rounded-full bg-tomate/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-tomate ring-1 ring-tomate/40">
             <span className="h-1.5 w-1.5 rounded-full bg-tomate animate-pulse-soft" />
-            Valencia · live
+            Foody · Valencia
           </span>
 
           <h1 className="font-display text-[46px] font-bold leading-[0.95] tracking-tight text-tinta">
@@ -31,7 +31,7 @@ export default function Home() {
           </h1>
 
           <p className="max-w-sm pt-1 text-[15px] leading-relaxed text-tinta/70">
-            FoodMatch reads your craving, budget, area, and mood, then picks the few restaurants worth your night.
+            Hey, I'm <span className="font-semibold text-tinta">Foody</span>. Tell me your craving, budget, area, and vibe. I pick the few Valencia spots worth your night.
           </p>
         </div>
 
