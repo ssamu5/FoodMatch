@@ -84,6 +84,9 @@ export interface Restaurant {
   website?: string
   instagram?: string
   phone?: string
+  whatsapp?: string      // verified WhatsApp number (E.164-ish). Absent in seed/demo data.
+
+  menuHighlights?: string[] // 2-4 signature dishes. Falls back to a cuisine preset when absent.
 
   opening?: OpeningInfo
 

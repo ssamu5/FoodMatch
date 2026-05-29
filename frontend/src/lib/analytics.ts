@@ -104,15 +104,39 @@ export function summarizeEvents() {
     }
   }
 
+  // WhatsApp leads broken down by restaurant (the conversion signal partners pay for)
+  const whatsappLeadsByRestaurant: Record<string, number> = {}
+  for (const e of events) {
+    if (e.type === 'whatsapp_lead_clicked') {
+      const id = (e.payload?.restaurantId as string) || 'unknown'
+      whatsappLeadsByRestaurant[id] = (whatsappLeadsByRestaurant[id] || 0) + 1
+    }
+  }
+
   return {
     total: events.length,
     today: todayEvents.length,
     searches: byType['prompt_submitted'] || 0,
     searchesToday: todayEvents.filter((e) => e.type === 'prompt_submitted').length,
+    opens: byType['restaurant_opened'] || 0,
+    saves: byType['restaurant_saved'] || 0,
+    whatsappLeads: byType['whatsapp_lead_clicked'] || 0,
+    shares: byType['share_clicked'] || 0,
     byType,
     restaurantClicks,
+    whatsappLeadsByRestaurant,
     noResultQueries: noResultQueries.slice(-20).reverse(),
     cuisineCounts,
     areaCounts,
   }
+}
+
+// Full local dataset for the admin export/copy action.
+export function exportBundle(): string {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    summary: summarizeEvents(),
+    events: readAll(),
+  }
+  return JSON.stringify(payload, null, 2)
 }

@@ -10,6 +10,7 @@ import type {
   DistancePref,
 } from '../types/search'
 import type { Area, Cuisine, Vibe } from '../types/restaurant'
+import type { TasteProfile } from '../types/profile'
 
 // ---------- Vocab dictionaries ----------
 
@@ -255,6 +256,41 @@ export function parseFoodIntent(query: string, city = 'Valencia'): FoodIntent {
     dietary,
     time,
     mustBeOpenNow,
+  }
+}
+
+// ---------- Preference-based intent ----------
+
+/** True if the saved taste profile carries any usable ranking signal. */
+export function profileHasSignal(p: TasteProfile): boolean {
+  return (
+    p.favoriteCuisines.length > 0 ||
+    p.preferredAreas.length > 0 ||
+    p.dietary.length > 0 ||
+    p.vibePreferences.length > 0 ||
+    p.budgetComfort !== null
+  )
+}
+
+/**
+ * Build a FoodIntent from saved preferences, used to personalise the browse
+ * view when the user opens results without typing a query.
+ */
+export function intentFromProfile(p: TasteProfile, city = 'Valencia'): FoodIntent {
+  return {
+    rawQuery: '',
+    cuisines: p.favoriteCuisines,
+    avoidCuisines: [],
+    budgetLevel: p.budgetComfort,
+    maxSpendEur: null,
+    area: p.preferredAreas[0] ?? null,
+    city,
+    distancePreference: p.preferredAreas.length > 0 ? 'area' : 'anywhere',
+    vibe: p.vibePreferences,
+    occasion: null,
+    dietary: p.dietary,
+    time: null,
+    mustBeOpenNow: false,
   }
 }
 

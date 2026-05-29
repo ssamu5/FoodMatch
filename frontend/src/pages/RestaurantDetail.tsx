@@ -6,8 +6,9 @@ import { api } from '../lib/api'
 import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
 import { parseFoodIntent } from '../lib/foodIntent'
 import { buildMatchExplanation, scoreRestaurant } from '../lib/ranking'
+import { buildWhatsAppUrl, hasVerifiedWhatsApp, lastCraving, menuHighlightsFor } from '../lib/leads'
 import { track } from '../lib/analytics'
-import { hapticSuccess, hapticTap, shareNative } from '../lib/native'
+import { hapticSuccess, hapticTap, openExternal, shareNative } from '../lib/native'
 
 const LAST_QUERY_KEY = 'foodmatch.lastIntentQuery'
 
@@ -92,11 +93,23 @@ export default function RestaurantDetail() {
 
   function share() {
     if (!r) return
+    track('share_clicked', { restaurantId: r.id, source: 'detail' })
     void shareNative({
       title: r.name,
       text: `${r.name} on FoodMatch`,
       url: window.location.href,
     })
+  }
+
+  function sendWhatsAppLead() {
+    if (!r) return
+    track('whatsapp_lead_clicked', {
+      restaurantId: r.id,
+      verifiedNumber: hasVerifiedWhatsApp(r),
+      hadCraving: Boolean(lastCraving()),
+    })
+    void hapticSuccess()
+    openExternal(buildWhatsAppUrl(r, lastCraving()))
   }
 
   function sendFeedback(label: string) {
@@ -107,6 +120,7 @@ export default function RestaurantDetail() {
   const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(`${r.name} ${r.address} ${r.city}`)}`
   const telUrl = r.phone ? `tel:${r.phone.replace(/\s+/g, '')}` : undefined
   const igUrl = r.instagram ? `https://instagram.com/${r.instagram.replace(/^@/, '')}` : undefined
+  const highlights = menuHighlightsFor(r)
 
   return (
     <AppShell>
@@ -129,6 +143,23 @@ export default function RestaurantDetail() {
           {r.cuisine} · {r.area} · {priceMark(r.priceLevel)} · ★ {r.rating.toFixed(1)} ({r.reviewCount})
         </p>
         <p className="text-[14px] leading-relaxed text-tinta">{r.description}</p>
+      </section>
+
+      <section className="mt-4">
+        <button
+          type="button"
+          onClick={sendWhatsAppLead}
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-full font-semibold text-white transition active:scale-[0.99]"
+          style={{ background: '#25D366' }}
+        >
+          <WhatsAppIcon className="h-5 w-5" />
+          Reservar o pedir por WhatsApp
+        </button>
+        <p className="mt-1.5 text-center text-[11px] text-tinta/50">
+          {hasVerifiedWhatsApp(r)
+            ? 'Opens WhatsApp with your craving ready to send.'
+            : 'Opens WhatsApp with a prefilled message. Demo numbers are not connected yet.'}
+        </p>
       </section>
 
       {personalised && (
@@ -170,6 +201,25 @@ export default function RestaurantDetail() {
           ))}
         </div>
       </section>
+
+      {highlights.length > 0 && (
+        <section className="mt-4 rounded-2xl glass p-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Menu highlights</h2>
+            {!r.menuHighlights && (
+              <span className="text-[10px] text-tinta/40">sample</span>
+            )}
+          </div>
+          <ul className="mt-2 space-y-1.5">
+            {highlights.map((dish) => (
+              <li key={dish} className="flex items-center gap-2 text-[14px] text-tinta">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-tomate" aria-hidden="true" />
+                {dish}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-4 grid grid-cols-2 gap-2">
         <a
@@ -276,6 +326,14 @@ export default function RestaurantDetail() {
         </Link>
       </div>
     </AppShell>
+  )
+}
+
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.16 8.16 0 0 1-1.26-4.36c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z" />
+    </svg>
   )
 }
 

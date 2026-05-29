@@ -45,6 +45,9 @@ export type AnalyticsEventType =
   | 'filter_applied'
   | 'feedback_submitted'
   | 'theme_changed'
+  | 'whatsapp_lead_clicked'
+  | 'share_clicked'
+  | 'partner_interest_started'
 
 export interface AnalyticsEvent {
   type: AnalyticsEventType

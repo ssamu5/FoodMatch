@@ -108,6 +108,28 @@ export async function shareNative(opts: { title: string; text?: string; url: str
   }
 }
 
+// --- Open external links / app deep links ---
+
+// Opens a URL outside the app. On native, '_system' hands off to the OS so
+// wa.me / tel: / maps links open the real app (WhatsApp, Phone, Maps).
+// On web, a normal new tab.
+export function openExternal(url: string): void {
+  try {
+    if (isNative) {
+      window.open(url, '_system')
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
+  } catch {
+    // Last resort: same-tab navigation.
+    try {
+      window.location.href = url
+    } catch {
+      /* nothing else to try */
+    }
+  }
+}
+
 // --- Haptics (no-op on web) ---
 
 export async function hapticTap(): Promise<void> {

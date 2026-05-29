@@ -2,6 +2,9 @@ import { useState, type FormEvent } from 'react'
 import AppShell from '../components/AppShell'
 import { api } from '../lib/api'
 import { track } from '../lib/analytics'
+import { openExternal } from '../lib/native'
+
+const FOODMATCH_EMAIL = 'hola@foodmatch.es'
 
 export default function RestaurantPartner() {
   const [form, setForm] = useState({
@@ -26,6 +29,30 @@ export default function RestaurantPartner() {
     api.submitRestaurantLead(form)
     track('restaurant_lead_submitted', { area: form.area, city: form.city })
     setSubmitted(true)
+  }
+
+  function contactEmail() {
+    track('partner_interest_started', { method: 'email' })
+    const subject = encodeURIComponent('FoodMatch Partners - interes de restaurante')
+    const body = encodeURIComponent(
+      [
+        `Restaurante: ${form.restaurantName || ''}`,
+        `Responsable: ${form.ownerName || ''}`,
+        `Telefono/WhatsApp: ${form.phone || ''}`,
+        `Zona: ${form.area || ''}, ${form.city || 'Valencia'}`,
+        '',
+        'Me interesa saber mas sobre FoodMatch Partners.',
+      ].join('\n'),
+    )
+    openExternal(`mailto:${FOODMATCH_EMAIL}?subject=${subject}&body=${body}`)
+  }
+
+  function contactWhatsApp() {
+    track('partner_interest_started', { method: 'whatsapp' })
+    const text = encodeURIComponent(
+      `Hola FoodMatch, soy ${form.ownerName || '...'} de ${form.restaurantName || 'mi restaurante'} en ${form.area || 'Valencia'}. Me interesa FoodMatch Partners.`,
+    )
+    openExternal(`https://wa.me/?text=${text}`)
   }
 
   if (submitted) {
@@ -162,6 +189,22 @@ export default function RestaurantPartner() {
             We respond within 48 hours. GDPR friendly, data stays in EU.
           </p>
         </form>
+      </section>
+
+      <section className="mt-4">
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-tinta/15" />
+          <span className="text-[11px] uppercase tracking-[0.15em] text-tinta/40">or reach us directly</span>
+          <span className="h-px flex-1 bg-tinta/15" />
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <button type="button" onClick={contactWhatsApp} className="btn-ghost h-12">
+            WhatsApp us
+          </button>
+          <button type="button" onClick={contactEmail} className="btn-ghost h-12">
+            Email us
+          </button>
+        </div>
       </section>
     </AppShell>
   )

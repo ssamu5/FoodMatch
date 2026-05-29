@@ -6,8 +6,9 @@ import RestaurantCard from '../components/RestaurantCard'
 import EmptyState from '../components/EmptyState'
 import FilterDrawer, { type SortKey } from '../components/FilterDrawer'
 import { api } from '../lib/api'
-import { parseFoodIntent } from '../lib/foodIntent'
+import { intentFromProfile, parseFoodIntent, profileHasSignal } from '../lib/foodIntent'
 import { rankRestaurants } from '../lib/ranking'
+import { getTasteProfile } from '../lib/storage'
 import { SEED_RESTAURANTS } from '../data/seedRestaurants'
 import { track } from '../lib/analytics'
 import type { FoodIntent } from '../types/search'
@@ -17,10 +18,16 @@ export default function Results() {
   const initialQuery = params.get('q') || ''
   const navigate = useNavigate()
 
+  // When the user browses without a query, personalise from saved taste.
+  const profile = getTasteProfile()
+  const usingPreferences = !initialQuery && profileHasSignal(profile)
+
   const [query, setQuery] = useState(initialQuery)
-  const [intent, setIntent] = useState<FoodIntent>(() =>
-    initialQuery ? parseFoodIntent(initialQuery) : parseFoodIntent(''),
-  )
+  const [intent, setIntent] = useState<FoodIntent>(() => {
+    if (initialQuery) return parseFoodIntent(initialQuery)
+    if (profileHasSignal(profile)) return intentFromProfile(profile)
+    return parseFoodIntent('')
+  })
   const [sort, setSort] = useState<SortKey>('best')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -79,7 +86,7 @@ export default function Results() {
   }
 
   const summary = useMemo(() => {
-    if (!query) return 'Browsing all Valencia restaurants'
+    if (!query) return usingPreferences ? 'Based on your taste' : 'Browsing all Valencia restaurants'
     const parts: string[] = []
     if (intent.cuisines.length) parts.push(intent.cuisines.join(', '))
     if (intent.area) parts.push(`in ${intent.area}`)

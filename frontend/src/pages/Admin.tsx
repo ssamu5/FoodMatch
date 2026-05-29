@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import AppShell from '../components/AppShell'
-import { clearEvents, summarizeEvents } from '../lib/analytics'
+import { clearEvents, exportBundle, summarizeEvents } from '../lib/analytics'
 import { getRestaurantLeads, getUserLeads } from '../lib/storage'
 import { api } from '../lib/api'
+import { openExternal } from '../lib/native'
 
 const ADMIN_CODE = 'foodmatch-2026' // MVP-only soft lock. Replace with real auth before any sensitive data lands.
 const KEY = 'foodmatch.adminUnlocked'
@@ -17,6 +18,7 @@ export default function Admin() {
   })
   const [code, setCode] = useState('')
   const [, setTick] = useState(0)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const id = window.setInterval(() => setTick((t) => t + 1), 5000)
@@ -66,26 +68,55 @@ export default function Admin() {
       count,
       restaurant: restaurants.find((r) => r.id === id),
     }))
+  const topLeads = Object.entries(summary.whatsappLeadsByRestaurant)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([id, count]) => ({
+      count,
+      restaurant: restaurants.find((r) => r.id === id),
+    }))
   const userLeads = getUserLeads()
   const restaurantLeads = getRestaurantLeads()
+
+  async function copyJson() {
+    const json = exportBundle()
+    try {
+      await navigator.clipboard.writeText(json)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      // Clipboard blocked (common in iOS standalone): open as a data URL so
+      // the operator can still copy/save it manually.
+      openExternal('data:application/json;charset=utf-8,' + encodeURIComponent(json))
+    }
+  }
 
   return (
     <AppShell>
       <section className="pt-2">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-[28px] font-bold text-tinta">Admin</h1>
-          <button
-            type="button"
-            className="text-[12px] text-tinta/70 hover:text-bad"
-            onClick={() => {
-              if (confirm('Clear all analytics events on this device?')) {
-                clearEvents()
-                setTick((t) => t + 1)
-              }
-            }}
-          >
-            Clear events
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="text-[12px] font-medium text-fresco hover:underline"
+              onClick={copyJson}
+            >
+              {copied ? 'Copied' : 'Export JSON'}
+            </button>
+            <button
+              type="button"
+              className="text-[12px] text-tinta/70 hover:text-tomate"
+              onClick={() => {
+                if (confirm('Clear all analytics events on this device?')) {
+                  clearEvents()
+                  setTick((t) => t + 1)
+                }
+              }}
+            >
+              Clear events
+            </button>
+          </div>
         </div>
         <p className="mt-1 text-[12px] text-tinta/70">
           MVP stats from local event buffer. Replace with Supabase queries once the backend lands.
@@ -97,6 +128,13 @@ export default function Admin() {
         <Metric label="Today" value={summary.today} />
         <Metric label="Searches" value={summary.searches} />
         <Metric label="Searches today" value={summary.searchesToday} />
+      </section>
+
+      <section className="mt-2 grid grid-cols-4 gap-2">
+        <Metric label="Opens" value={summary.opens} />
+        <Metric label="Saves" value={summary.saves} />
+        <Metric label="WA leads" value={summary.whatsappLeads} />
+        <Metric label="Shares" value={summary.shares} />
       </section>
 
       <section className="mt-5">
@@ -120,6 +158,22 @@ export default function Admin() {
                 {restaurant && <span className="text-tinta/70">· {restaurant.area}</span>}
               </span>
               <span className="font-mono text-[12px] text-tomate">{count}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-5">
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">WhatsApp leads by restaurant</h2>
+        <div className="rounded-2xl glass p-3">
+          {topLeads.length === 0 && <p className="text-[13px] text-tinta/70">No WhatsApp leads yet.</p>}
+          {topLeads.map(({ count, restaurant }, i) => (
+            <div key={(restaurant?.id || 'x') + i} className="flex items-baseline justify-between border-b border-tinta/12 py-1.5 last:border-0">
+              <span className="text-[13px] text-tinta">
+                {restaurant ? restaurant.name : 'Unknown'}{' '}
+                {restaurant && <span className="text-tinta/70">· {restaurant.area}</span>}
+              </span>
+              <span className="font-mono text-[12px] text-fresco">{count}</span>
             </div>
           ))}
         </div>
