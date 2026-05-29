@@ -27,10 +27,6 @@ export default function Profile() {
     return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]
   }
 
-  function update<K extends keyof TasteProfile>(key: K, value: TasteProfile[K]) {
-    setProfile((p) => ({ ...p, [key]: value }))
-  }
-
   function persist(next: TasteProfile = profile) {
     saveTasteProfile(next)
     setSavedAt(new Date().toLocaleTimeString())
@@ -184,8 +180,6 @@ export default function Profile() {
           </button>
         </div>
         {savedAt && <p className="mt-2 text-[11px] text-tinta/70">Saved at {savedAt}.</p>}
-        {/* Ignore unused update fn to satisfy TS */}
-        <span hidden>{typeof update}</span>
       </section>
     </AppShell>
   )

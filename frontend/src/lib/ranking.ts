@@ -21,19 +21,45 @@ function pricelevelFromBudget(maxSpendEur: number | null): 1 | 2 | 3 | 4 | null 
   return 4
 }
 
-function isOpenAt(r: Restaurant, date = new Date()): boolean {
-  if (!r.opening) return true
+// Open/closed status with "soon" hints for the card badge.
+//   open    -> closesSoon true if <= 45 min to close
+//   closed  -> opensSoon  true if opening within <= 60 min today
+//   unknown -> restaurant has no opening data (render nothing)
+export type OpenStatus =
+  | { state: 'open'; closesSoon: boolean }
+  | { state: 'closed'; opensSoon: boolean }
+  | { state: 'unknown' }
+
+const CLOSES_SOON_MIN = 45
+const OPENS_SOON_MIN = 60
+
+function getOpenStatus(r: Restaurant, date = new Date()): OpenStatus {
+  if (!r.opening) return { state: 'unknown' }
   const day = date.getDay()
   const todays = r.opening.weeklySchedule.find((s) => s.dayOfWeek === day)
-  if (!todays || todays.open === todays.close) return false
-  const [oh, om] = todays.open.split(':').map(Number)
-  const [ch, cm] = todays.close.split(':').map(Number)
   const minutesNow = date.getHours() * 60 + date.getMinutes()
-  const openMin = oh * 60 + om
-  let closeMin = ch * 60 + cm
-  if (closeMin <= openMin) closeMin += 24 * 60 // wraps past midnight
-  const effective = minutesNow < openMin ? minutesNow + 24 * 60 : minutesNow
-  return effective >= openMin && effective <= closeMin
+
+  if (todays && todays.open !== todays.close) {
+    const [oh, om] = todays.open.split(':').map(Number)
+    const [ch, cm] = todays.close.split(':').map(Number)
+    const openMin = oh * 60 + om
+    let closeMin = ch * 60 + cm
+    if (closeMin <= openMin) closeMin += 24 * 60 // wraps past midnight
+    const effective = minutesNow < openMin ? minutesNow + 24 * 60 : minutesNow
+    if (effective >= openMin && effective <= closeMin) {
+      return { state: 'open', closesSoon: closeMin - effective <= CLOSES_SOON_MIN }
+    }
+    if (minutesNow < openMin) {
+      return { state: 'closed', opensSoon: openMin - minutesNow <= OPENS_SOON_MIN }
+    }
+  }
+  return { state: 'closed', opensSoon: false }
+}
+
+// Boolean convenience used by scoring + hard filters. Delegates to
+// getOpenStatus; 'unknown' counts as open (no data = don't exclude).
+function isOpenAt(r: Restaurant, date = new Date()): boolean {
+  return getOpenStatus(r, date).state !== 'closed'
 }
 
 // ---------- Score components ----------
@@ -206,4 +232,4 @@ export function buildMatchExplanation(
   return `${lead}.${fit}`
 }
 
-export { isOpenAt }
+export { isOpenAt, getOpenStatus }

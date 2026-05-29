@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import AppShell from '../components/AppShell'
 import EmptyState from '../components/EmptyState'
 import { api } from '../lib/api'
 import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
+import { parseFoodIntent } from '../lib/foodIntent'
+import { buildMatchExplanation, scoreRestaurant } from '../lib/ranking'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap, shareNative } from '../lib/native'
+
+const LAST_QUERY_KEY = 'foodmatch.lastIntentQuery'
 
 function priceMark(level: 1 | 2 | 3 | 4): string {
   return '€'.repeat(level)
@@ -38,6 +42,23 @@ export default function RestaurantDetail() {
 
   useEffect(() => {
     if (r) setSaved(isSaved(r.id))
+  }, [r])
+
+  // If the user arrived from a search this session, explain why THIS
+  // restaurant fits THEIR query. Falls back to null (generic copy only)
+  // when there's no session query, e.g. opened cold from Saved.
+  const personalised = useMemo(() => {
+    if (!r) return null
+    let q: string | null = null
+    try {
+      q = sessionStorage.getItem(LAST_QUERY_KEY)
+    } catch {
+      /* sessionStorage may be blocked */
+    }
+    if (!q || !q.trim()) return null
+    const intent = parseFoodIntent(q)
+    const score = scoreRestaurant(intent, r)
+    return { explanation: buildMatchExplanation(intent, r, score), score }
   }, [r])
 
   if (!r) {
@@ -109,6 +130,31 @@ export default function RestaurantDetail() {
         </p>
         <p className="text-[14px] leading-relaxed text-tinta">{r.description}</p>
       </section>
+
+      {personalised && (
+        <section className="mt-4 rounded-2xl glass p-4">
+          <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Why this fits your search</h2>
+          <p className="mt-2 text-[14px] leading-relaxed text-tinta">{personalised.explanation}</p>
+          {personalised.score.reasons.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {personalised.score.reasons.slice(0, 4).map((x) => (
+                <span key={x} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
+                  {x}
+                </span>
+              ))}
+            </div>
+          )}
+          {personalised.score.warnings.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {personalised.score.warnings.slice(0, 2).map((w) => (
+                <span key={w} className="rounded-full bg-warn/10 px-2.5 py-1 text-[11px] font-medium text-warn">
+                  ! {w}
+                </span>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="mt-4 rounded-2xl glass p-4">
         <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Why FoodMatch picks it</h2>

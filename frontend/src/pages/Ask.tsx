@@ -26,6 +26,12 @@ export default function Ask() {
     // Persist query in URL for shareability
     if (query) {
       setParams({ q: query }, { replace: true })
+      // Carry the query so RestaurantDetail can explain the match.
+      try {
+        sessionStorage.setItem('foodmatch.lastIntentQuery', query)
+      } catch {
+        /* sessionStorage may be blocked */
+      }
     }
   }, [query, setParams])
 

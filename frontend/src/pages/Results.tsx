@@ -59,6 +59,12 @@ export default function Results() {
     void api // ensure import retained
     if (query) {
       setParams({ q: query }, { replace: true })
+      // Carry the query so RestaurantDetail can explain the match.
+      try {
+        sessionStorage.setItem('foodmatch.lastIntentQuery', query)
+      } catch {
+        /* sessionStorage may be blocked */
+      }
     }
   }, [query, setParams])
 

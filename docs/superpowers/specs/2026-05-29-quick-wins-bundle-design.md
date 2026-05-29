@@ -98,28 +98,10 @@ Three taps for a one-tap intent.
 
 ---
 
-## Item 3: Email validation on Profile
+## Item 3: Email validation on Profile — DROPPED
 
-### What
-
-The "Weekly Valencia picks" email field rejects malformed input with an
-inline message ("Enter a valid email") instead of silently accepting
-`asdf`.
-
-### How
-
-- `Profile.tsx`: a `isValidEmail(s)` check using
-  `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`.
-- On submit: if invalid, set an `error` string, render it under the
-  field in `text-tomate`, do not call the API.
-- Clear the error when the user edits the field.
-- The Subscribe button stays disabled on empty (unchanged); validation
-  covers the non-empty-but-invalid case.
-
-### Why this default
-
-One regex, one error line. Standard and good enough for a marketing
-opt-in; no need for a validation library.
+Cut for the MVP. Not worth the surface area at this stage; the email
+field stays as-is. Item numbers below are kept stable to avoid churn.
 
 ---
 
@@ -220,9 +202,7 @@ Manual:
    opening hours; nothing when a restaurant has no hours.
 2. Saved: ✕ removes a restaurant and a recent search instantly;
    "Clear all" empties recents.
-3. Profile: `asdf` shows an error and does not submit; a valid address
-   submits and shows the saved-at line.
-4. Profile: no TS warning, no hidden span in the DOM.
+3. Profile: no TS warning, no hidden span in the DOM.
 5. Detail opened from a search shows the personalised block with chips;
    opened from Saved shows only the generic section.
 6. Heart on a card toggles saved, persists to Saved tab, fires haptic on

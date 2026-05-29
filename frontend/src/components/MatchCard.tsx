@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Restaurant } from '../types/restaurant'
 import type { MatchScore } from '../types/search'
+import OpenBadge from './OpenBadge'
 
 interface MatchCardProps {
   restaurant: Restaurant
@@ -55,6 +56,7 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
             <p className="text-[12px] text-cream/85">
               {restaurant.cuisine} · {restaurant.area}
             </p>
+            <OpenBadge restaurant={restaurant} onImage className="mt-1" />
           </div>
           <div className="text-right text-[12px] text-cream/85">
             <div className="font-mono">{priceMark(restaurant.priceLevel)} · ~€{restaurant.averageSpend}</div>

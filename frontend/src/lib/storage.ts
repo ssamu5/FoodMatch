@@ -69,6 +69,12 @@ export function addRecentSearch(event: SearchEvent): SearchEvent[] {
   return updated
 }
 
+export function removeRecentSearch(query: string): SearchEvent[] {
+  const updated = getRecentSearches().filter((e) => e.query !== query)
+  safeSet(KEY_RECENT_SEARCHES, updated)
+  return updated
+}
+
 export function clearRecentSearches(): void {
   safeSet(KEY_RECENT_SEARCHES, [])
 }
