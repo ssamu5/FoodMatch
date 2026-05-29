@@ -101,7 +101,7 @@ export default function Results() {
       <section className="space-y-3">
         <PromptComposer
           initialValue={query}
-          placeholder="Tell Foody what you're craving..."
+          placeholder="Tell FoodMatch what you're craving..."
           onSubmit={handleSubmit}
           compact
         />

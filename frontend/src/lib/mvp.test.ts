@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { SEED_RESTAURANTS } from '../data/seedRestaurants'
 import { parseFoodIntent, intentFromProfile, profileHasSignal } from './foodIntent'
 import { buildLeadMessage, buildWhatsAppUrl, hasVerifiedWhatsApp, menuHighlightsFor } from './leads'
 import { rankRestaurants } from './ranking'
+import { getSavedIds, saveRestaurant, unsaveRestaurant } from './storage'
 import type { TasteProfile } from '../types/profile'
 
 const bySlug = (slug: string) => {
@@ -75,5 +76,30 @@ describe('FoodMatch MVP lead generation', () => {
 
     expect(menuHighlightsFor(restaurant).length).toBeGreaterThanOrEqual(2)
     expect(menuHighlightsFor(restaurant).join(' ')).toMatch(/burger|fries|beer/i)
+  })
+})
+
+describe('FoodMatch MVP local state', () => {
+  it('keeps saves usable in-session when localStorage is blocked', () => {
+    const getSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError')
+    })
+    const setSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError')
+    })
+
+    try {
+      const id = bySlug('burger-republik').id
+      unsaveRestaurant(id)
+
+      saveRestaurant(id)
+      expect(getSavedIds()).toContain(id)
+
+      unsaveRestaurant(id)
+      expect(getSavedIds()).not.toContain(id)
+    } finally {
+      getSpy.mockRestore()
+      setSpy.mockRestore()
+    }
   })
 })

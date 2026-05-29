@@ -60,7 +60,7 @@ export default function PromptComposer({
         <div className="flex items-center justify-between pb-1.5">
           <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.15em] text-tinta/50">
             <span className="h-1.5 w-1.5 rounded-full bg-tomate" aria-hidden="true" />
-            Foody · Valencia
+            FoodMatch · Valencia
           </span>
           <button
             type="submit"

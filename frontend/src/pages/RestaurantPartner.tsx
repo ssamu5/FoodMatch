@@ -57,14 +57,14 @@ export default function RestaurantPartner() {
 
   if (submitted) {
     return (
-      <AppShell>
+      <AppShell hideNav>
         <section className="pt-10 text-center">
           <h1 className="font-display text-[32px] font-bold leading-tight text-tinta">Got it.</h1>
           <p className="mt-2 text-[14px] text-tinta/70">
             We'll be in touch within 48 hours to walk through how FoodMatch can put your restaurant in front of the right diners.
           </p>
           <div className="mt-8 rounded-3xl glass p-5 text-left">
-            <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">What you submitted</h2>
+            <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/65">What you submitted</h2>
             <div className="space-y-1 text-[13px] text-tinta">
               <p><span className="text-tinta/70">Restaurant:</span> {form.restaurantName}</p>
               <p><span className="text-tinta/70">Owner:</span> {form.ownerName}</p>
@@ -79,7 +79,7 @@ export default function RestaurantPartner() {
   }
 
   return (
-    <AppShell>
+    <AppShell hideNav>
       <section className="pt-2">
         <h1 className="font-display text-[30px] font-bold leading-tight text-tinta">
           Get your restaurant <span className="text-tomate">found</span>.
@@ -96,14 +96,14 @@ export default function RestaurantPartner() {
         </div>
         <div className="rounded-2xl glass p-3">
           <div className="font-display text-[18px] font-bold text-tomate">€69/mo</div>
-          <p className="mt-1 text-tinta/70">founder price locked for 24 months</p>
+          <p className="mt-1 text-tinta/75">+VAT where applicable. Locked for 24 months</p>
         </div>
       </section>
 
       <section className="mt-6">
         <form onSubmit={handleSubmit} className="space-y-3 rounded-3xl glass p-5">
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Restaurant name *</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Restaurant name *</label>
             <input
               required
               value={form.restaurantName}
@@ -112,9 +112,9 @@ export default function RestaurantPartner() {
               placeholder="Casa Carmela"
             />
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Your name *</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Your name *</label>
               <input
                 required
                 value={form.ownerName}
@@ -124,7 +124,7 @@ export default function RestaurantPartner() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Phone / WhatsApp</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Phone / WhatsApp</label>
               <input
                 value={form.phone}
                 onChange={(e) => update('phone', e.target.value)}
@@ -134,7 +134,7 @@ export default function RestaurantPartner() {
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Email *</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Email *</label>
             <input
               required
               type="email"
@@ -145,7 +145,7 @@ export default function RestaurantPartner() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Instagram or website</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Instagram or website</label>
             <input
               value={form.instagramOrWebsite}
               onChange={(e) => update('instagramOrWebsite', e.target.value)}
@@ -153,9 +153,9 @@ export default function RestaurantPartner() {
               placeholder="@casacarmela_vlc"
             />
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Area</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Area</label>
               <input
                 value={form.area}
                 onChange={(e) => update('area', e.target.value)}
@@ -164,7 +164,7 @@ export default function RestaurantPartner() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">City</label>
+              <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">City</label>
               <input
                 value={form.city}
                 onChange={(e) => update('city', e.target.value)}
@@ -173,7 +173,7 @@ export default function RestaurantPartner() {
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/50">Message (optional)</label>
+            <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Message (optional)</label>
             <textarea
               value={form.message}
               onChange={(e) => update('message', e.target.value)}
@@ -183,10 +183,10 @@ export default function RestaurantPartner() {
             />
           </div>
           <button type="submit" className="btn-lime h-12 w-full">
-            Apply for FoodMatch Partners
+            Apply for €69/mo founder pricing
           </button>
-          <p className="text-center text-[11px] text-tinta/50">
-            We respond within 48 hours. GDPR friendly, data stays in EU.
+          <p className="text-center text-[11px] text-tinta/65">
+            We respond within 48 hours. GDPR friendly: we only use this to contact you about FoodMatch Partners.
           </p>
         </form>
       </section>

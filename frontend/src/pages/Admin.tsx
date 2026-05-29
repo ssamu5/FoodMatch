@@ -27,7 +27,7 @@ export default function Admin() {
 
   if (!unlocked) {
     return (
-      <AppShell>
+      <AppShell hideNav>
         <section className="pt-10">
           <h1 className="font-display text-[28px] font-bold text-tinta">Admin</h1>
           <p className="mt-2 text-[13px] text-tinta/70">
@@ -92,7 +92,7 @@ export default function Admin() {
   }
 
   return (
-    <AppShell>
+    <AppShell hideNav>
       <section className="pt-2">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-[28px] font-bold text-tinta">Admin</h1>

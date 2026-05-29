@@ -78,7 +78,7 @@ export default function Ask() {
       <section className="pt-2">
         <PromptComposer
           initialValue={query}
-          placeholder="Tell Foody what you're craving..."
+          placeholder="Tell FoodMatch what you're craving..."
           starterChips={!query ? undefined : undefined}
           refinementChips={query ? REFINEMENTS : undefined}
           onSubmit={handleSubmit}
@@ -91,7 +91,7 @@ export default function Ask() {
       {!query && (
         <section className="mt-8 space-y-3">
           <EmptyState
-            title="Hey, I'm Foody."
+            title="FoodMatch is ready."
             hint='Tell me what you crave in Valencia. Try "vegan brunch in Russafa under €15", "date night quiet paella by the sea", or "tapas open now near me".'
           />
         </section>
@@ -101,7 +101,7 @@ export default function Ask() {
         <section className="mt-6 space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-[12px] uppercase tracking-[0.18em] text-tinta/50">
-              Foody found {results.length} match{results.length === 1 ? '' : 'es'}
+              FoodMatch found {results.length} match{results.length === 1 ? '' : 'es'}
             </h2>
             <button
               onClick={() => navigate(`/results?q=${encodeURIComponent(query)}`)}

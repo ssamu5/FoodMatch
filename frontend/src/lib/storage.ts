@@ -10,21 +10,31 @@ const KEY_PROFILE = 'foodmatch.tasteProfile'
 const KEY_USER_LEADS = 'foodmatch.userLeads'
 const KEY_RESTAURANT_LEADS = 'foodmatch.restaurantLeads'
 
+const memoryStore = new Map<string, string>()
+
 function safeGet<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(key)
+    const raw = localStorage.getItem(key) ?? memoryStore.get(key)
     if (!raw) return fallback
     return JSON.parse(raw) as T
   } catch {
-    return fallback
+    try {
+      const raw = memoryStore.get(key)
+      if (!raw) return fallback
+      return JSON.parse(raw) as T
+    } catch {
+      return fallback
+    }
   }
 }
 
 function safeSet(key: string, value: unknown): void {
+  const serialized = JSON.stringify(value)
+  memoryStore.set(key, serialized)
   try {
-    localStorage.setItem(key, JSON.stringify(value))
+    localStorage.setItem(key, serialized)
   } catch {
-    /* quota exceeded or storage blocked */
+    /* quota exceeded or storage blocked; in-memory fallback keeps this session usable */
   }
 }
 
