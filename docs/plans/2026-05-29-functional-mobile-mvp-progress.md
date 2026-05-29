@@ -202,3 +202,81 @@ Max asked to correctly finish the MVP and instruct the Claude Code session to co
   - Hermes re-attempted it: FAILS because macOS cannot locate a Java Runtime. Install JDK 17 before expecting an APK.
 - Run a mobile smoke preview and update this progress file with final demo-readiness status.
 
+---
+
+## Claude finishing pass (2026-05-29)
+
+Picked up Hermes' handoff (`2026-05-29-final-mvp-finish-handoff.md`),
+preserved all local changes, completed the remaining items.
+
+### Verification (re-run, all green)
+
+| Check | Command | Result |
+|-------|---------|--------|
+| Lint | `npm run lint` | PASS |
+| Tests | `npm test` (vitest) | PASS, 6/6 |
+| Build | `npm run build` | PASS, 280.01 kB (gzip 85.51 kB), ~0.62s |
+| Cap sync | `npx cap sync` | PASS, iOS + Android, 6 plugins each |
+| APK | `npm run android:apk` | FAIL (no JDK) - blocker unchanged, see below |
+
+### Stale-copy sweep (repo-wide)
+
+Searched `2 months`, `months free`, `free for the first`, `€69`, `69/mo`,
+`24 months`, `founder price` across `frontend/src` and `website`.
+
+- App: NO stale "2 months free" remains. Partner page shows `€69/mo` +
+  "founder price locked for 24 months" (verified live in preview).
+- Website (`website/index.html`): intentionally describes the full public
+  offer = 2-month free trial THEN €69/mo for 24 months for the first 100,
+  €99/mo after. This is internally consistent and explained, not stale.
+  Left unchanged. See decision note below.
+
+### Smoke test (mobile preview, 375x812)
+
+- `/restaurants`: €69/mo + 24 months copy, no stale text, WhatsApp/Email
+  fallback buttons present.
+- Query "date night sushi in Ruzafa": top match Kintaro Sushi, sushi
+  shortlist (Sumi Omakase, Sushi Go VLC). "Foody found 35 matches".
+- Console: no errors.
+- (Prior round verified the full craving -> detail -> WhatsApp wedge,
+  menu highlights, admin export/funnel, preference browse.)
+
+### Untracked-file decisions
+
+- `.claude/launch.json`: local-only Vite preview helper. Added `.claude/`
+  to `.gitignore`. Not committed.
+- `FOUNDERS_DOCUMENT_V2.pdf`: page 1 reads "Internal working document".
+  Contains strategy/pricing/competitive analysis. The repo is on GitHub
+  (`ssamu5/FoodMatch`), so this is NOT committed. Added to `.gitignore`
+  (force-add if you decide to publish). File preserved locally.
+- `USER_GUIDE_V2.pdf`: marketing explainer, a deliverable but not MVP code.
+  Also gitignored, preserved locally. Force-add if you want it tracked.
+
+### APK status (honest): NOT BUILT - blocked on local tooling
+
+`./gradlew assembleDebug` fails: "Unable to locate a Java Runtime."
+`/usr/libexec/java_home` confirms no JDK. No Android SDK either. The
+Android Capacitor project exists and syncs cleanly; only the native
+compile is blocked. To build on a tooled machine:
+1. `brew install --cask temurin@17` (JDK 17) + Android Studio / cmdline-tools.
+2. Set `ANDROID_HOME`, run `sdkmanager --licenses`.
+3. `cd frontend && npm run build && npx cap sync android && npm run android:apk`.
+4. APK output: `frontend/android/app/build/outputs/apk/debug/app-debug.apk`.
+
+### Non-code decisions for Max
+
+1. **PDFs**: keep gitignored (current choice) or commit as deliverables?
+   The founders doc is internal; recommend keeping it out of a public repo.
+2. **Free-trial messaging**: the marketing site offers a 2-month free trial
+   before the €69 founder price; the in-app partner page only shows the
+   €69/24mo headline. If you want them identical, add the free-trial line
+   to the app partner page (or drop it from the site). Left as-is.
+3. **APK**: install JDK/Android SDK locally (or use CI / Android Studio) to
+   produce the debug APK. iOS device build needs Xcode signing.
+
+### Demo-readiness: READY for demo/review (web + iOS sync).
+
+Full investor-demo loop works end-to-end on mobile web. iOS project
+syncs (Xcode 26.2 present). Android project exists and syncs; APK pending
+JDK/SDK. No PR opened and nothing pushed, per instruction.
+
