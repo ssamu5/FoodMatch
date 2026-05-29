@@ -1,77 +1,102 @@
 import { useCallback, useEffect, useState } from 'react'
 
+/** What the user picked. Persisted. */
+export type ThemeMode = 'light' | 'dark' | 'system'
+/** What is actually applied to the DOM right now. */
 export type Theme = 'light' | 'dark'
 
 const STORAGE_KEY = 'fm.theme'
+const CYCLE: ThemeMode[] = ['light', 'dark', 'system']
 
-/** Read the currently-applied theme. Source of truth is the .dark class on
- *  <html>, which the pre-paint script in index.html sets before mount. */
-function readTheme(): Theme {
-  if (typeof document === 'undefined') return 'light'
-  return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+function prefersDark(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    !!window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
 }
 
-function applyTheme(theme: Theme) {
+/** Resolve a mode to the concrete theme that should be on screen. */
+function resolveTheme(mode: ThemeMode): Theme {
+  if (mode === 'system') return prefersDark() ? 'dark' : 'light'
+  return mode
+}
+
+/** Read the user's stored preference. Falls back to 'system'. */
+function readMode(): ThemeMode {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY)
+    if (v === 'light' || v === 'dark' || v === 'system') return v
+  } catch {
+    /* localStorage may be blocked */
+  }
+  // Pre-paint script mirrors the resolved mode onto <html data-mode>.
+  if (typeof document !== 'undefined') {
+    const attr = document.documentElement.getAttribute('data-mode')
+    if (attr === 'light' || attr === 'dark' || attr === 'system') return attr
+  }
+  return 'system'
+}
+
+function applyTheme(theme: Theme, mode: ThemeMode) {
   const root = document.documentElement
   if (theme === 'dark') root.classList.add('dark')
   else root.classList.remove('dark')
   root.setAttribute('data-theme', theme)
-}
-
-function userHasExplicitChoice(): boolean {
-  try {
-    const v = localStorage.getItem(STORAGE_KEY)
-    return v === 'light' || v === 'dark'
-  } catch {
-    return false
-  }
+  root.setAttribute('data-mode', mode)
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => readTheme())
+  const [mode, setModeState] = useState<ThemeMode>(() => readMode())
+  const [theme, setThemeState] = useState<Theme>(() => resolveTheme(readMode()))
 
-  // Persist + apply on change
-  const setTheme = useCallback((next: Theme) => {
-    applyTheme(next)
+  const setMode = useCallback((next: ThemeMode) => {
+    const nextTheme = resolveTheme(next)
+    applyTheme(nextTheme, next)
     try {
       localStorage.setItem(STORAGE_KEY, next)
     } catch {
       /* localStorage may be blocked */
     }
-    setThemeState(next)
+    setModeState(next)
+    setThemeState(nextTheme)
   }, [])
 
-  const toggle = useCallback(() => {
-    setTheme(readTheme() === 'dark' ? 'light' : 'dark')
-  }, [setTheme])
+  const cycle = useCallback(() => {
+    const i = CYCLE.indexOf(readMode())
+    const next = CYCLE[(i + 1) % CYCLE.length]
+    setMode(next)
+  }, [setMode])
 
-  // If the user hasn't picked explicitly, follow OS changes live.
+  // While in 'system' mode, follow OS preference changes live.
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = (e: MediaQueryListEvent) => {
-      if (userHasExplicitChoice()) return
-      const next: Theme = e.matches ? 'dark' : 'light'
-      applyTheme(next)
+    const onChange = () => {
+      if (readMode() !== 'system') return
+      const next: Theme = mq.matches ? 'dark' : 'light'
+      applyTheme(next, 'system')
       setThemeState(next)
     }
     mq.addEventListener?.('change', onChange)
     return () => mq.removeEventListener?.('change', onChange)
   }, [])
 
-  // Cross-tab sync: if the user toggles in one tab, mirror it in others.
+  // Cross-tab sync: mirror a preference change made in another tab.
   useEffect(() => {
     function onStorage(e: StorageEvent) {
       if (e.key !== STORAGE_KEY) return
       const v = e.newValue
-      if (v === 'light' || v === 'dark') {
-        applyTheme(v)
-        setThemeState(v)
+      if (v === 'light' || v === 'dark' || v === 'system') {
+        const nextTheme = resolveTheme(v)
+        applyTheme(nextTheme, v)
+        setModeState(v)
+        setThemeState(nextTheme)
       }
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  return { theme, setTheme, toggle }
+  return { mode, theme, setMode, cycle }
 }

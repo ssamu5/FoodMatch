@@ -1,21 +1,26 @@
-import { useTheme } from '../lib/theme'
+import { useTheme, type ThemeMode } from '../lib/theme'
 import { track } from '../lib/analytics'
 
 interface ThemeToggleProps {
   className?: string
 }
 
+// Cycle order and the human label for "what tapping does next".
+const NEXT: Record<ThemeMode, { next: ThemeMode; label: string }> = {
+  light: { next: 'dark', label: 'Switch to dark mode' },
+  dark: { next: 'system', label: 'Switch to system mode' },
+  system: { next: 'light', label: 'Switch to light mode' },
+}
+
 export default function ThemeToggle({ className }: ThemeToggleProps) {
-  const { theme, toggle } = useTheme()
-  const isDark = theme === 'dark'
-  const label = isDark ? 'Switch to light mode' : 'Switch to dark mode'
+  const { mode, cycle } = useTheme()
+  const { next, label } = NEXT[mode]
 
   return (
     <button
       type="button"
       onClick={() => {
-        const next = isDark ? 'light' : 'dark'
-        toggle()
+        cycle()
         try {
           track('theme_changed', { to: next })
         } catch {
@@ -32,7 +37,9 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
         className || '',
       ].join(' ')}
     >
-      {isDark ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+      {mode === 'light' && <SunIcon className="h-4 w-4" />}
+      {mode === 'dark' && <MoonIcon className="h-4 w-4" />}
+      {mode === 'system' && <MonitorIcon className="h-4 w-4" />}
     </button>
   )
 }
@@ -68,6 +75,24 @@ function MoonIcon({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z" />
+    </svg>
+  )
+}
+
+function MonitorIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M8 20h8M12 16v4" />
     </svg>
   )
 }
