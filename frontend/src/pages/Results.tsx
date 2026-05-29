@@ -94,7 +94,7 @@ export default function Results() {
     if (intent.mustBeOpenNow) parts.push('open now')
     if (intent.dietary.length) parts.push(intent.dietary.join('+'))
     return parts.join(' · ') || query
-  }, [intent, query])
+  }, [intent, query, usingPreferences])
 
   return (
     <AppShell>

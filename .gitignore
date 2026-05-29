@@ -32,3 +32,11 @@ Thumbs.db
 logs/
 *.log
 npm-debug.log*
+
+# Local editor/agent helpers (preview launch config etc.)
+.claude/
+
+# Business documents kept local, not in the (public) code repo.
+# Internal founders doc + marketing user guide. Force-add if intentionally publishing.
+/FOUNDERS_DOCUMENT_V2.pdf
+/USER_GUIDE_V2.pdf

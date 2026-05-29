@@ -95,8 +95,8 @@ export default function RestaurantPartner() {
           <p className="mt-1 text-tinta/70">commission on bookings</p>
         </div>
         <div className="rounded-2xl glass p-3">
-          <div className="font-display text-[18px] font-bold text-tomate">2 months</div>
-          <p className="mt-1 text-tinta/70">free for the first 100</p>
+          <div className="font-display text-[18px] font-bold text-tomate">€69/mo</div>
+          <p className="mt-1 text-tinta/70">founder price locked for 24 months</p>
         </div>
       </section>
 

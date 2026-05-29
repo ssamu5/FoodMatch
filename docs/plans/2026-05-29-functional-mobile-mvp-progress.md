@@ -155,14 +155,50 @@ Alternatively open in Android Studio: `npm run android:open`, then Run.
   restaurant before any non-demo use.
 - **APK not built here** (see above). iOS requires Xcode signing for a
   device/TestFlight build; simulator run works without signing.
-- **Partner pricing copy** on `/restaurants` still says "2 months free"
-  which predates the €69/24-month founder decision. Left unchanged (not
-  in scope); flag for Samuel's review.
-- **No automated test harness** in the repo; verification is lint + build
-  + manual preview. Adding Vitest + a few ranking/leads unit tests is the
-  natural next step.
+- **Partner pricing copy** on `/restaurants` was updated from the stale
+  “2 months free” version to the current €69/month founder price locked
+  for 24 months.
+- **No automated test harness** existed initially; Hermes added Vitest and a
+  minimal MVP unit suite for ranking, preferences, WhatsApp leads, and menu
+  fallbacks.
 - 2 moderate npm audit advisories (transitive, dev). Not addressed to
   avoid `--force` breaking changes mid-MVP.
 
 ### Status: ready for review on `feat/functional-mobile-mvp`. No PR opened
 (per instruction) until you confirm the Android/APK approach.
+
+---
+
+## Hermes final hardening pass (2026-05-29)
+
+Max asked to correctly finish the MVP and instruct the Claude Code session to continue the final pass. Hermes applied the first cleanup before handoff:
+
+- Updated restaurant partner pricing copy from stale “2 months free” to the current founder offer: `€69/mo`, founder price locked for 24 months.
+- Added `vitest` and `npm test` for a minimal reproducible MVP test harness.
+- Added `frontend/src/lib/mvp.test.ts` covering the core investor-demo loop:
+  - craving parser extracts burger/Ruzafa/€20 signals;
+  - ranking chooses Burger Republik for a burger/Ruzafa query;
+  - saved taste profile drives browse-without-query to Kintaro Sushi;
+  - WhatsApp lead messages include restaurant + craving;
+  - demo restaurants fall back to numberless WhatsApp links;
+  - menu highlight fallback returns useful cuisine samples.
+- Fixed `Results.tsx` summary memo dependency to include `usingPreferences`.
+- Wrote final Claude handoff plan: `docs/plans/2026-05-29-final-mvp-finish-handoff.md`.
+
+### Verification after Hermes hardening
+
+| Check | Result |
+|-------|--------|
+| `npm run lint` | PASS |
+| `npm test` | PASS, 6 tests |
+| `npm run build` | PASS, 280.01 kB (gzip 85.51 kB), ~0.60s |
+| `npx cap sync` | PASS, iOS + Android, 6 plugins each platform |
+
+### Remaining final-pass items for Claude
+
+- Sweep for any remaining stale partner/pricing copy in pages/docs.
+- Inspect `.claude/launch.json`, `FOUNDERS_DOCUMENT_V2.pdf`, and `USER_GUIDE_V2.pdf` and decide commit vs ignore/remove.
+- Re-attempt/document `npm run android:apk` only if Android/JDK tooling is available; otherwise keep the tooling blocker explicit.
+  - Hermes re-attempted it: FAILS because macOS cannot locate a Java Runtime. Install JDK 17 before expecting an APK.
+- Run a mobile smoke preview and update this progress file with final demo-readiness status.
+
