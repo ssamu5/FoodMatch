@@ -117,6 +117,12 @@ export default function Results() {
             Filters
           </button>
         </div>
+
+        {!query && (
+          <p className="px-1 text-[11px] leading-relaxed text-tinta/55">
+            Listings are built from public Valencia restaurant information. Restaurants can claim and enhance theirs.
+          </p>
+        )}
       </section>
 
       {ranked.length === 0 && (

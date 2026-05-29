@@ -80,6 +80,7 @@ export interface Restaurant {
   reviewCount: number
 
   imagePlaceholder: string // gradient seed (lime variants) for now
+  heroImage?: string        // real photo URL when a restaurant claims its listing. Falls back to a generated cuisine cover.
 
   website?: string
   instagram?: string

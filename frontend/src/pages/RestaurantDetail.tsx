@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import AppShell from '../components/AppShell'
 import EmptyState from '../components/EmptyState'
+import RestaurantCover from '../components/RestaurantCover'
 import { api } from '../lib/api'
 import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
 import { parseFoodIntent } from '../lib/foodIntent'
 import { buildMatchExplanation, scoreRestaurant } from '../lib/ranking'
 import { buildWhatsAppUrl, hasVerifiedWhatsApp, lastCraving, menuHighlightsFor } from '../lib/leads'
+import { listingTierLabel, PUBLIC_LISTING_NOTE, VERIFIED_LISTING_NOTE } from '../lib/listings'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap, openExternal, shareNative } from '../lib/native'
 
@@ -14,21 +16,6 @@ const LAST_QUERY_KEY = 'foodmatch.lastIntentQuery'
 
 function priceMark(level: 1 | 2 | 3 | 4): string {
   return '€'.repeat(level)
-}
-
-function gradientFor(seed: string): string {
-  switch (seed) {
-    case 'lime-bright':
-      return 'linear-gradient(135deg, #a3ff12 0%, #6b9300 55%, #2f2f2f 100%)'
-    case 'lime-dark':
-      return 'linear-gradient(135deg, #3a3a3a 0%, #1f1f1f 80%)'
-    case 'lime-deep':
-      return 'linear-gradient(135deg, #4a4a4a 0%, #1a1a1a 80%)'
-    case 'lime-warm':
-      return 'linear-gradient(135deg, #5a8e00 0%, #2a2a2a 70%)'
-    default:
-      return 'linear-gradient(135deg, #3a3a3a 0%, #222222 80%)'
-  }
 }
 
 const FEEDBACK = ['Good match', 'Too expensive', 'Too far', 'Not my vibe'] as const
@@ -124,17 +111,17 @@ export default function RestaurantDetail() {
 
   return (
     <AppShell>
-      <div
-        className="relative h-40 w-full overflow-hidden rounded-3xl sm:h-56"
-        style={{ background: gradientFor(r.imagePlaceholder) }}
-        aria-hidden="true"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-tinta/20 to-tinta/80" />
-        {r.isPartner && (
-          <span className="absolute left-3 top-3 rounded-full bg-tomate px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream">
-            Partner
-          </span>
-        )}
+      <div className="relative h-40 w-full overflow-hidden rounded-3xl sm:h-56">
+        <RestaurantCover restaurant={r} variant="hero" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ink/20 to-ink/80" aria-hidden="true" />
+        <span
+          className={[
+            'absolute left-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+            r.isPartner ? 'bg-tomate text-cream' : 'bg-ink/55 text-cream backdrop-blur-sm',
+          ].join(' ')}
+        >
+          {listingTierLabel(r)}
+        </span>
       </div>
 
       <section className="mt-4 space-y-2">
@@ -298,6 +285,41 @@ export default function RestaurantDetail() {
             </div>
           )}
         </div>
+      </section>
+
+      <section className="mt-5 rounded-2xl glass p-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">How this listing works</h2>
+          <span
+            className={[
+              'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+              r.isPartner ? 'bg-tomate/15 text-tomate' : 'bg-tinta/10 text-tinta/70',
+            ].join(' ')}
+          >
+            {listingTierLabel(r)}
+          </span>
+        </div>
+        <p className="mt-2 text-[13px] leading-relaxed text-tinta/70">
+          {r.isPartner ? VERIFIED_LISTING_NOTE : PUBLIC_LISTING_NOTE}
+        </p>
+        {!r.isPartner && (
+          <>
+            <Link
+              to="/restaurants"
+              onClick={() => track('listing_claim_clicked', { restaurantId: r.id })}
+              className="btn-ghost mt-3 h-11 w-full text-[13px]"
+            >
+              Claim or update this listing →
+            </Link>
+            <p className="mt-2 text-[11px] leading-relaxed text-tinta/50">
+              See wrong info? Email {''}
+              <a href="mailto:hola@foodmatch.es?subject=FoodMatch%20listing%20correction" className="underline underline-offset-2 hover:text-tinta">
+                hola@foodmatch.es
+              </a>{' '}
+              to correct or remove this listing.
+            </p>
+          </>
+        )}
       </section>
 
       <section className="mt-5">

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { Restaurant } from '../types/restaurant'
 import type { MatchScore } from '../types/search'
 import OpenBadge from './OpenBadge'
+import RestaurantCover from './RestaurantCover'
 
 interface MatchCardProps {
   restaurant: Restaurant
@@ -13,33 +14,15 @@ function priceMark(level: 1 | 2 | 3 | 4): string {
   return '€'.repeat(level)
 }
 
-function gradientFor(seed: string): string {
-  switch (seed) {
-    case 'lime-bright':
-      return 'linear-gradient(135deg, #a3ff12 0%, #6b9300 55%, #2f2f2f 100%)'
-    case 'lime-dark':
-      return 'linear-gradient(135deg, #3a3a3a 0%, #1f1f1f 80%)'
-    case 'lime-deep':
-      return 'linear-gradient(135deg, #4a4a4a 0%, #1a1a1a 80%)'
-    case 'lime-warm':
-      return 'linear-gradient(135deg, #5a8e00 0%, #2a2a2a 70%)'
-    default:
-      return 'linear-gradient(135deg, #3a3a3a 0%, #222222 80%)'
-  }
-}
-
 export default function MatchCard({ restaurant, score, explanation }: MatchCardProps) {
   return (
     <Link
       to={`/restaurant/${restaurant.slug}`}
       className="group block animate-fade-up overflow-hidden rounded-4xl glass shadow-glass transition hover:shadow-glow"
     >
-      <div
-        className="relative h-44 w-full sm:h-56"
-        style={{ background: gradientFor(restaurant.imagePlaceholder) }}
-        aria-hidden="true"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-tinta/30 to-tinta/90" />
+      <div className="relative h-44 w-full sm:h-56" aria-hidden="true">
+        <RestaurantCover restaurant={restaurant} variant="hero" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ink/30 to-ink/90" />
         <div className="absolute left-4 right-4 top-4 flex items-center justify-between">
           <span className="rounded-full bg-cream px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-tomate">
             Best pick

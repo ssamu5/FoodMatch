@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import type { Restaurant } from '../types/restaurant'
 import type { MatchScore } from '../types/search'
 import OpenBadge from './OpenBadge'
+import RestaurantCover from './RestaurantCover'
 import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap } from '../lib/native'
@@ -19,23 +20,6 @@ interface RestaurantCardProps {
 
 function priceMark(level: 1 | 2 | 3 | 4): string {
   return '€'.repeat(level)
-}
-
-// Picks a gradient based on the imagePlaceholder hint.
-function gradientFor(seed: string): string {
-  switch (seed) {
-    case 'lime-bright':
-      return 'linear-gradient(135deg, #a3ff12 0%, #6b9300 55%, #2f2f2f 100%)'
-    case 'lime-dark':
-      return 'linear-gradient(135deg, #3a3a3a 0%, #1f1f1f 80%)'
-    case 'lime-deep':
-      return 'linear-gradient(135deg, #4a4a4a 0%, #1a1a1a 80%)'
-    case 'lime-warm':
-      return 'linear-gradient(135deg, #5a8e00 0%, #2a2a2a 70%)'
-    case 'lime-muted':
-    default:
-      return 'linear-gradient(135deg, #3a3a3a 0%, #222222 80%)'
-  }
 }
 
 export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemove }: RestaurantCardProps) {
@@ -63,10 +47,8 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
       className="group block w-full rounded-3xl glass glass-hover transition active:scale-[0.99]"
     >
       <div className="flex gap-4 p-3.5">
-        <div
-          className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/5"
-          style={{ background: gradientFor(restaurant.imagePlaceholder) }}
-        >
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl ring-1 ring-tinta/10">
+          <RestaurantCover restaurant={restaurant} variant="thumb" />
           {restaurant.isPartner && (
             <span className="absolute left-1 top-1 rounded-full bg-tomate px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-cream">
               Partner

@@ -1,5 +1,13 @@
 import type { Cuisine, Area, Vibe } from './restaurant'
 
+// Lightweight local "account" for the pilot. Not real auth; stored on-device
+// so the app feels like a product and we can personalise greetings/saves.
+export interface Account {
+  displayName: string
+  email: string | null
+  createdAt: string
+}
+
 export interface TasteProfile {
   favoriteCuisines: Cuisine[]
   budgetComfort: 1 | 2 | 3 | 4 | null  // typical comfortable spend level
@@ -48,6 +56,9 @@ export type AnalyticsEventType =
   | 'whatsapp_lead_clicked'
   | 'share_clicked'
   | 'partner_interest_started'
+  | 'account_created'
+  | 'account_signed_out'
+  | 'listing_claim_clicked'
 
 export interface AnalyticsEvent {
   type: AnalyticsEventType

@@ -1,7 +1,7 @@
 // Typed localStorage wrappers for FoodMatch MVP state.
 // Saves and recent searches live entirely client-side until Supabase backend exists.
 
-import type { TasteProfile, UserLead, RestaurantLead } from '../types/profile'
+import type { Account, TasteProfile, UserLead, RestaurantLead } from '../types/profile'
 import type { SearchEvent } from '../types/search'
 
 const KEY_SAVED = 'foodmatch.savedRestaurants'
@@ -9,6 +9,7 @@ const KEY_RECENT_SEARCHES = 'foodmatch.recentSearches'
 const KEY_PROFILE = 'foodmatch.tasteProfile'
 const KEY_USER_LEADS = 'foodmatch.userLeads'
 const KEY_RESTAURANT_LEADS = 'foodmatch.restaurantLeads'
+const KEY_ACCOUNT = 'foodmatch.account'
 
 const memoryStore = new Map<string, string>()
 
@@ -107,6 +108,25 @@ export function getTasteProfile(): TasteProfile {
 
 export function saveTasteProfile(profile: TasteProfile): void {
   safeSet(KEY_PROFILE, { ...profile, updatedAt: new Date().toISOString() })
+}
+
+// ---------- Account (local demo identity for the pilot) ----------
+
+export function getAccount(): Account | null {
+  return safeGet<Account | null>(KEY_ACCOUNT, null)
+}
+
+export function saveAccount(account: Account): void {
+  safeSet(KEY_ACCOUNT, account)
+}
+
+export function clearAccount(): void {
+  try {
+    localStorage.removeItem(KEY_ACCOUNT)
+  } catch {
+    /* ignore */
+  }
+  memoryStore.delete(KEY_ACCOUNT)
 }
 
 // ---------- Leads (stored locally until backend exists) ----------
