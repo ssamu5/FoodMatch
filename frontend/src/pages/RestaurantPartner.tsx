@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import AppShell from '../components/AppShell'
 import { api } from '../lib/api'
 import { track } from '../lib/analytics'
@@ -107,7 +108,26 @@ export default function RestaurantPartner() {
         </p>
       </section>
 
-      <section className="mt-5 grid grid-cols-2 gap-2 text-[13px]">
+      {/* Primary path: guided assistant. The "almost done for you" route for
+          non-technical owners. */}
+      <section className="mt-5">
+        <Link
+          to="/restaurants/setup"
+          onClick={() => track('partner_interest_started', { method: 'assistant_cta' })}
+          className="flex items-center gap-3 rounded-3xl bg-tomate p-4 text-cream shadow-warm transition active:scale-[0.99]"
+        >
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cream/15 font-display text-[19px] font-bold">
+            F
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-[17px] font-bold leading-tight">Móntalo con Foody en 1 minuto</span>
+            <span className="block text-[12px] text-cream/85">Te pregunto lo justo. Nosotros montamos la ficha. No subes nada.</span>
+          </span>
+          <span aria-hidden="true" className="text-[18px]">&rarr;</span>
+        </Link>
+      </section>
+
+      <section className="mt-3 grid grid-cols-2 gap-2 text-[13px]">
         <div className="rounded-2xl glass p-3">
           <div className="font-display text-[18px] font-bold text-tomate">0%</div>
           <p className="mt-1 text-tinta/70">commission on bookings</p>
@@ -171,6 +191,11 @@ export default function RestaurantPartner() {
       </section>
 
       <section className="mt-6">
+        <div className="mb-2 flex items-center gap-3">
+          <span className="h-px flex-1 bg-tinta/15" />
+          <span className="text-[11px] uppercase tracking-[0.15em] text-tinta/45">o rellénalo tú</span>
+          <span className="h-px flex-1 bg-tinta/15" />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-3 rounded-3xl glass p-5">
           <div>
             <label className="mb-1 block text-[11px] uppercase tracking-[0.15em] text-tinta/65">Restaurant name *</label>

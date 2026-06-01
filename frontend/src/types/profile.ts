@@ -34,6 +34,13 @@ export interface RestaurantLead {
   city: string
   message?: string
   createdAt: string
+  // Extra fields captured by the guided onboarding assistant (all optional
+  // so the classic form still produces a valid lead).
+  cuisine?: string
+  priceBand?: string
+  menuLink?: string
+  hasPhotos?: boolean
+  source?: 'form' | 'assistant'
 }
 
 export type AnalyticsEventType =
@@ -59,6 +66,9 @@ export type AnalyticsEventType =
   | 'account_created'
   | 'account_signed_out'
   | 'listing_claim_clicked'
+  | 'onboarding_started'
+  | 'onboarding_step'
+  | 'onboarding_completed'
 
 export interface AnalyticsEvent {
   type: AnalyticsEventType
