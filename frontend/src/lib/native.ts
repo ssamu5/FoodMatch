@@ -3,7 +3,6 @@
 // to know which platform it's running on.
 
 import { Capacitor } from '@capacitor/core'
-import { Geolocation } from '@capacitor/geolocation'
 import { Share } from '@capacitor/share'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { SplashScreen } from '@capacitor/splash-screen'
@@ -38,29 +37,14 @@ export interface NativePosition {
   accuracyMeters: number
 }
 
+// Note: the native @capacitor/geolocation plugin was removed. The MVP's
+// "near me" is text/area-based ranking, not real GPS, so shipping the iOS
+// location entitlement only triggered an App Store warning (ITMS-90683)
+// for an unused capability. This helper now uses the standard web
+// geolocation API, which needs no iOS usage string, and resolves null if
+// unavailable. Re-add the Capacitor plugin (and the Info.plist purpose
+// strings) only when real device location is actually used.
 export async function getCurrentPosition(): Promise<NativePosition | null> {
-  if (isNative) {
-    try {
-      const perm = await Geolocation.checkPermissions()
-      if (perm.location !== 'granted') {
-        const req = await Geolocation.requestPermissions()
-        if (req.location !== 'granted') return null
-      }
-      const pos = await Geolocation.getCurrentPosition({
-        enableHighAccuracy: false,
-        timeout: 8000,
-      })
-      return {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        accuracyMeters: pos.coords.accuracy,
-      }
-    } catch {
-      return null
-    }
-  }
-
-  // Web fallback
   return new Promise((resolve) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       resolve(null)

@@ -37,6 +37,8 @@ const COVER_THEMES: Record<Cuisine, CoverTheme> = {
   vegetarian: { from: '#3f7a2f', to: '#13240f', accent: '#9fe07f' },
   brunch: { from: '#8a6a2f', to: '#2a1f0c', accent: '#f2c14e' },
   coffee: { from: '#5a3a22', to: '#1e120a', accent: '#c79a6b' },
+  'menú del día': { from: '#9a5a1c', to: '#2c1808', accent: '#f2c14e' },
+  bar: { from: '#6a2f3a', to: '#1c0c12', accent: '#e6739f' },
 }
 
 const DEFAULT_THEME: CoverTheme = { from: '#3a3a3a', to: '#1a1a1a', accent: '#f2a93b' }
@@ -45,7 +47,9 @@ const CONNECTORS = new Set(['la', 'el', 'los', 'las', 'de', 'del', 'y', 'the', '
 
 function monogram(name: string): string {
   const words = name
-    .replace(/[^A-Za-z0-9\s]/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
     .split(/\s+/)
     .filter(Boolean)
   const significant = words.filter((w) => !CONNECTORS.has(w.toLowerCase()))
@@ -63,7 +67,9 @@ export default function RestaurantCover({ restaurant, variant = 'thumb', classNa
         src={restaurant.heroImage}
         alt=""
         aria-hidden="true"
-        loading="lazy"
+        loading={isHero ? 'eager' : 'lazy'}
+        fetchPriority={isHero ? 'high' : 'auto'}
+        decoding="async"
         className={['absolute inset-0 h-full w-full object-cover', className || ''].join(' ')}
       />
     )

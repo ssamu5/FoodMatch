@@ -47,10 +47,6 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FoodMatch uses your location to find restaurants near you when you ask for nearby options.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>FoodMatch optionally lets you share or save restaurant images.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>

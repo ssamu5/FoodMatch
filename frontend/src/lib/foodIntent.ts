@@ -33,6 +33,8 @@ const CUISINE_KEYWORDS: Array<{ canonical: Cuisine; keywords: string[] }> = [
   { canonical: 'Mediterranean', keywords: ['mediterranean', 'mediterránea', 'mediterranea'] },
   { canonical: 'seafood', keywords: ['seafood', 'fish', 'mariscos', 'pescado', 'octopus', 'squid', 'prawns'] },
   { canonical: 'steak', keywords: ['steak', 'steakhouse', 'asador', 'parrilla', 'grill', 'carne'] },
+  { canonical: 'menú del día', keywords: ['menu del dia', 'menu of the day', 'daily menu', 'set menu', 'menu', 'lunch menu', 'menu economico'] },
+  { canonical: 'bar', keywords: ['bar', 'bars', 'cerveza', 'beer', 'cana', 'wine bar', 'vermut', 'vermouth', 'cocktail', 'cocktails', 'copas'] },
 ]
 
 const AREA_KEYWORDS: Array<{ canonical: Area; keywords: string[] }> = [

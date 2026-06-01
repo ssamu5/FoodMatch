@@ -29,6 +29,8 @@ export type Cuisine =
   | 'Mediterranean'
   | 'seafood'
   | 'steak'
+  | 'menú del día'
+  | 'bar'
 
 export type Vibe =
   | 'romantic'

@@ -12,8 +12,8 @@ function initialsOf(name: string): string {
 }
 
 const CUISINES: Cuisine[] = [
-  'Spanish tapas', 'paella', 'sushi', 'burgers', 'pizza', 'pasta',
-  'healthy bowls', 'vegan', 'vegetarian', 'brunch', 'coffee',
+  'Spanish tapas', 'paella', 'menú del día', 'sushi', 'burgers', 'pizza', 'pasta',
+  'healthy bowls', 'vegan', 'vegetarian', 'brunch', 'coffee', 'bar',
   'Mexican', 'Indian', 'Asian fusion', 'Mediterranean', 'seafood', 'steak',
 ]
 const AREAS: Area[] = ['Ruzafa', 'El Carmen', 'Canovas', 'Benimaclet', 'City center', 'Marina / beach']

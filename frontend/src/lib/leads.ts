@@ -72,6 +72,8 @@ const HIGHLIGHTS_BY_CUISINE: Record<Cuisine, string[]> = {
   Mediterranean: ['Hummus plate', 'Grilled octopus', 'Mezze board'],
   seafood: ['Grilled catch of the day', 'Clams marinera', 'Fried calamari'],
   steak: ['Ribeye a la brasa', 'Entrecot', 'Grilled vegetables'],
+  'menú del día': ['Menú del día (3 platos)', 'Plato del día', 'Postre casero'],
+  bar: ['Caña + tapa', 'Bravas', 'Bocadillo de calamares'],
 }
 
 /** 2-4 menu highlights for a restaurant. Explicit data wins; cuisine preset is the fallback. */
