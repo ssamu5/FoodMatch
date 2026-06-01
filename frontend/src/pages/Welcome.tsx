@@ -65,30 +65,28 @@ export default function Welcome() {
         </div>
 
         {step === 'intro' ? (
-          <div className="mt-8 space-y-3 animate-fade-up">
-            <div className="space-y-2.5">
+          <div className="mt-10 animate-fade-up">
+            <ul className="space-y-3.5">
               {[
-                ['Buscas por antojo', 'Hamburguesa cerca de Ruzafa, menú del día, cena romántica...'],
+                ['Buscas por antojo', 'Dilo como a un amigo: "hamburguesa por Ruzafa, menú del día, cena tranquila".'],
                 ['Foody elige por ti', 'La mejor opción y una lista corta, con el porqué de cada una.'],
-                ['Guarda y reserva', 'Guarda tus sitios y reserva o pide por WhatsApp en un toque.'],
-              ].map(([title, body], i) => (
-                <div key={title} className="flex gap-3 rounded-2xl glass p-3.5">
-                  <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-tomate/12 text-[12px] font-bold text-tomate">
-                    {i + 1}
-                  </span>
+                ['Guarda y reserva', 'Guarda tus sitios y reserva por WhatsApp en un toque.'],
+              ].map(([title, body]) => (
+                <li key={title} className="flex gap-3">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-tomate" aria-hidden="true" />
                   <div>
-                    <p className="text-[14px] font-semibold text-tinta">{title}</p>
-                    <p className="text-[12px] leading-relaxed text-tinta/65">{body}</p>
+                    <p className="text-[15px] font-semibold text-tinta">{title}</p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-tinta/60">{body}</p>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <div className="pt-2">
+            <div className="mt-9">
               <button onClick={() => setStep('signup')} className="btn-tomate h-12 w-full text-[15px]">
                 Crear mi perfil
               </button>
-              <button onClick={skip} className="mt-2 h-11 w-full text-[13px] text-tinta/60 hover:text-tinta">
+              <button onClick={skip} className="mt-2 h-11 w-full text-[13px] text-tinta/55 hover:text-tinta">
                 Entrar sin perfil
               </button>
             </div>
