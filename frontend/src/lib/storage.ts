@@ -129,6 +129,19 @@ export function clearAccount(): void {
   memoryStore.delete(KEY_ACCOUNT)
 }
 
+// First-run welcome: shown once. Set when the user signs in OR skips, so we
+// never nag on later launches.
+const KEY_WELCOME_SEEN = 'foodmatch.welcomeSeen'
+
+export function hasSeenWelcome(): boolean {
+  if (getAccount()) return true
+  return safeGet<boolean>(KEY_WELCOME_SEEN, false) === true
+}
+
+export function markWelcomeSeen(): void {
+  safeSet(KEY_WELCOME_SEEN, true)
+}
+
 // ---------- Leads (stored locally until backend exists) ----------
 
 export function getUserLeads(): UserLead[] {
