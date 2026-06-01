@@ -10,7 +10,7 @@ const links = [
 export default function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t-2 border-tinta bg-paper/95 backdrop-blur-md safe-bottom"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-tinta/8 bg-surface/90 backdrop-blur-xl safe-bottom"
       aria-label="Primary"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2 pt-2">

@@ -5,25 +5,37 @@
 @tailwind utilities;
 
 /* Theme tokens. RGB triplets (space-separated) so Tailwind's `<alpha-value>`
-   substitution works (e.g. `bg-paper/80`). */
+   substitution works (e.g. `bg-paper/80`).
+
+   Design language: warm + calm (Uber x ChatGPT). The page is cream; cards
+   and inputs sit on a slightly lifted WARM off-white surface, never stark
+   white. Elevation comes from soft diffuse shadows + hairline borders, not
+   from brutalist hard offsets. */
 :root {
-  --paper: 248 241 229;       /* #f8f1e5 warm cream page bg */
-  --creamy: 242 233 216;      /* #f2e9d8 alt surface */
+  --paper: 247 239 225;       /* #f7efe1 warm cream page bg */
+  --surface: 251 246 236;     /* #fbf6ec lifted warm surface for cards/inputs (not white) */
+  --creamy: 241 232 214;      /* #f1e8d6 deeper warm (hover, received chat bubbles) */
   --tinta: 31 24 20;          /* #1f1814 primary text / borders */
   --tinta2: 42 34 24;         /* #2a2218 slightly lifted tinta */
-  --surface-input: 255 255 255; /* input field background */
+  --surface-input: 251 246 236; /* = surface, warm not white */
   --dot: 31 24 20;            /* page dot texture color */
-  --dot-alpha: 0.035;
+  --dot-alpha: 0.02;
+  /* soft elevation */
+  --shadow-sm: 0 1px 2px rgba(31, 24, 20, 0.04), 0 1px 3px rgba(31, 24, 20, 0.05);
+  --shadow-md: 0 6px 20px -6px rgba(31, 24, 20, 0.12), 0 2px 6px -2px rgba(31, 24, 20, 0.06);
 }
 
 .dark {
-  --paper: 20 17 15;          /* #14110f deep warm dark */
-  --creamy: 31 26 22;         /* #1f1a16 elevated card surface */
+  --paper: 18 16 14;          /* #12100e deep warm dark */
+  --surface: 32 28 23;        /* #201c17 lifted warm-dark surface */
+  --creamy: 41 35 29;         /* #29231d deeper surface (hover, bubbles) */
   --tinta: 244 234 216;       /* #f4ead8 cream text */
   --tinta2: 227 214 192;      /* #e3d6c0 slightly dimmer */
-  --surface-input: 36 30 25;  /* #241e19 input field on dark */
+  --surface-input: 32 28 23;  /* = surface */
   --dot: 244 234 216;
-  --dot-alpha: 0.04;
+  --dot-alpha: 0.03;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.5), 0 2px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 /* Match native browser UI to the theme. */
@@ -79,44 +91,46 @@ body::before {
 .display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
 .it { font-style: italic; }
 
-/* Card surface */
+/* Card surface: warm lifted surface, hairline border, soft diffuse shadow. */
 .glass {
-  background: rgb(var(--paper));
-  border: 1px solid rgb(var(--tinta) / 0.12);
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--tinta) / 0.07);
   border-radius: inherit;
+  box-shadow: var(--shadow-sm);
 }
 
 .glass-hover {
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 .glass-hover:hover {
-  background: rgb(var(--creamy));
-  border-color: rgb(var(--tinta) / 0.22);
+  background: rgb(var(--surface));
+  border-color: rgb(var(--tinta) / 0.12);
+  box-shadow: var(--shadow-md);
 }
 
-/* Bordered card with offset shadow (the website's signature) */
+/* Elevated feature card: soft elevation, hairline border (no brutalist offset). */
 .stamp-card {
-  background: rgb(var(--paper));
-  border: 2px solid rgb(var(--tinta));
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--tinta) / 0.08);
   border-radius: 1.5rem;
-  box-shadow: 6px 6px 0 0 rgb(var(--tinta));
+  box-shadow: var(--shadow-md);
 }
 
-/* Inputs */
+/* Inputs: warm surface (never white), thin border, soft focus ring. */
 .liquid-input {
   background: rgb(var(--surface-input));
-  border: 2px solid rgb(var(--tinta));
+  border: 1px solid rgb(var(--tinta) / 0.14);
   color: rgb(var(--tinta));
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.15s ease;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 .liquid-input::placeholder {
-  color: rgb(var(--tinta) / 0.45);
+  color: rgb(var(--tinta) / 0.4);
 }
 .liquid-input:focus {
   outline: none;
-  border-color: #e63946;
-  box-shadow: 6px 6px 0 0 #e63946;
-  transform: translate(-3px, -3px);
+  border-color: rgb(230 57 70 / 0.55);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.14);
 }
 
 /* Chip */
@@ -128,16 +142,17 @@ body::before {
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 500;
-  background: rgb(var(--paper));
-  border: 1px solid rgb(var(--tinta) / 0.20);
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--tinta) / 0.10);
   color: rgb(var(--tinta));
-  transition: all 0.18s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.16s ease;
   cursor: pointer;
   white-space: nowrap;
 }
 .chip:hover {
   background: rgb(var(--creamy));
-  border-color: rgb(var(--tinta) / 0.35);
+  border-color: rgb(var(--tinta) / 0.18);
 }
 .chip.active {
   background: rgba(230, 57, 70, 0.10);
@@ -203,23 +218,27 @@ body::before {
 .btn-tomate:hover { background: #b72c39; }
 .btn-tomate:active { transform: translateY(1px); }
 
-/* Secondary button */
+/* Secondary button: warm surface, hairline border, soft shadow. */
 .btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgb(var(--paper));
+  background: rgb(var(--surface));
   color: rgb(var(--tinta));
   font-weight: 500;
   font-size: 0.92rem;
   padding: 0.8rem 1.2rem;
   border-radius: 999px;
-  border: 2px solid rgb(var(--tinta));
-  transition: all 0.18s ease;
+  border: 1px solid rgb(var(--tinta) / 0.14);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.16s ease;
   cursor: pointer;
 }
-.btn-ghost:hover { background: rgb(var(--creamy)); }
+.btn-ghost:hover {
+  background: rgb(var(--creamy));
+  box-shadow: var(--shadow-md);
+}
 
 /* Squiggle divider (matches the website). Light + dark variants. */
 .squiggle {
@@ -228,7 +247,7 @@ body::before {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 18' preserveAspectRatio='none'><path d='M0 9 Q10 0 20 9 T40 9 T60 9 T80 9' stroke='%231F1814' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
   background-repeat: repeat-x;
   background-size: 80px 18px;
-  opacity: 0.55;
+  opacity: 0.25;
 }
 .dark .squiggle {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 18' preserveAspectRatio='none'><path d='M0 9 Q10 0 20 9 T40 9 T60 9 T80 9' stroke='%23F4EAD8' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");

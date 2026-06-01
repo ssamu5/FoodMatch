@@ -8,8 +8,9 @@ export default {
         // Brand palette: same tokens as foodmatch.es marketing site.
         // Dynamic tokens (flip with theme) use CSS variables so existing
         // utility classes (bg-paper, text-tinta, etc.) work in both modes.
-        paper: 'rgb(var(--paper) / <alpha-value>)',     // page background
-        creamy: 'rgb(var(--creamy) / <alpha-value>)',   // alt surface for cards
+        paper: 'rgb(var(--paper) / <alpha-value>)',     // page background (cream)
+        surface: 'rgb(var(--surface) / <alpha-value>)', // lifted warm surface for cards/inputs (not white)
+        creamy: 'rgb(var(--creamy) / <alpha-value>)',   // deeper warm (hover, bubbles)
         tinta: 'rgb(var(--tinta) / <alpha-value>)',     // primary text
         tinta2: 'rgb(var(--tinta2) / <alpha-value>)',   // slightly lighter tinta
 
@@ -42,6 +43,9 @@ export default {
         warm: '0 14px 36px -12px rgba(230, 57, 70, 0.4)',
         glow: '0 0 18px -6px rgba(230, 57, 70, 0.45)',
         glass: '0 1px 0 0 rgba(31,24,20,0.04) inset, 0 0 0 1px rgba(31,24,20,0.06)',
+        // Soft diffuse elevation (Uber x ChatGPT calm). Use over hard offsets.
+        soft: 'var(--shadow-sm)',
+        softMd: 'var(--shadow-md)',
       },
       borderRadius: {
         '4xl': '2rem',
