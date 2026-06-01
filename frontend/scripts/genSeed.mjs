@@ -41,26 +41,29 @@ const STREETS = {
 
 // category -> config
 // weight controls how many of the 200 fall in each category.
+// Names are built as `first` + ' ' + `second`, ALWAYS in that order (never
+// reversed). An empty-string second means the first stands alone. Every
+// first/second pair is curated to read as a real, grammatical name.
 const CATEGORIES = [
-  { cuisine: 'burgers',        weight: 16, price: [1,2], vibes: ['casual','lively','group','cheap eats'], best: ['groups','quick bite','casual dinner'], prefix: ['Smash','Brava','Patilla','Doble','Brasa','La','El'], noun: ['Burger','Smash Co','Grill','Burger Bar','Burgers','Burger House'] },
-  { cuisine: 'pizza',          weight: 16, price: [1,3], vibes: ['casual','family','group','cozy'], best: ['families','sharing','casual dinner'], prefix: ['Forno','Bella','Da','La','Napoli','Vera'], noun: ['Pizza','Pizzería','Forno','Napoletana','Pizza Co'] },
-  { cuisine: 'sushi',          weight: 12, price: [2,4], vibes: ['date','quiet','romantic'], best: ['date night','special occasions'], prefix: ['Kenko','Sakura','Umi','Nori','Kaito','Hana'], noun: ['Sushi','Omakase','Sushi Bar','Izakaya','Nikkei'] },
-  { cuisine: 'Spanish tapas',  weight: 20, price: [2,3], vibes: ['lively','date','cozy','group'], best: ['sharing','wine night','long dinners'], prefix: ['Casa','La','El','Bodega','Taberna','Tasca'], noun: ['Tapas','de Pepe','del Mercat','de l\'Avi','Tradició','de Barri'] },
-  { cuisine: 'menú del día',   weight: 18, price: [1,2], vibes: ['casual','work','solo'], best: ['weekday lunch','work lunch','quick lunch'], prefix: ['Casa','El','La','Restaurante','Cantina'], noun: ['Menú','del Día','Mercat','Cuina','de Sempre','Familiar'] },
-  { cuisine: 'cafeteria',      weight: 0,  price: [1,2], vibes: [], best: [], prefix: [], noun: [] }, // mapped into coffee below
-  { cuisine: 'coffee',         weight: 16, price: [1,2], vibes: ['work','quiet','casual','solo'], best: ['coffee & laptop','breakfast','casual meetup'], prefix: ['Cafè','Tostado','Origen','Grano','Lento','Bruna'], noun: ['Coffee','Café','Tostadero','Roasters','Coffee Bar','Cafetería'] },
-  { cuisine: 'brunch',         weight: 14, price: [2,3], vibes: ['casual','family','outdoor','cozy'], best: ['weekend brunch','breakfast','catch-ups'], prefix: ['Sunny','Almorzar','Bruna','Daily','Honey','Citrus'], noun: ['Brunch','Brunch Club','Kitchen','& Co','Breakfast'] },
-  { cuisine: 'bar',            weight: 18, price: [1,3], vibes: ['lively','late night','group','outdoor'], best: ['drinks','after work','night out'], prefix: ['Bar','La','El','Vermutería','Cervecería','Tasca'], noun: ['Bar','de Copas','Vermut','Cervesa','Nocturna','de Vins'] },
-  { cuisine: 'healthy bowls',  weight: 10, price: [2,3], vibes: ['casual','work','solo','outdoor'], best: ['healthy lunch','post-gym','light bite'], prefix: ['Verde','Fresh','Raíz','Bowl','Nutre','Vital'], noun: ['Bowls','Poke','Healthy Co','Green','Kitchen'] },
-  { cuisine: 'Mexican',        weight: 8,  price: [1,3], vibes: ['lively','group','casual'], best: ['groups','margaritas','casual dinner'], prefix: ['El','La','Taquería','Casa','Mero'], noun: ['Taquería','Mexicana','Cantina','Tacos','Mezcal'] },
-  { cuisine: 'Asian fusion',   weight: 8,  price: [2,3], vibes: ['casual','date','lively'], best: ['sharing','date night','casual dinner'], prefix: ['Wok','Bao','Mango','Lucky','Bambú','Zen'], noun: ['Asian','Fusion','Noodle Bar','Wok','Street Food'] },
-  { cuisine: 'paella',         weight: 10, price: [2,4], vibes: ['family','outdoor','view','group'], best: ['Sunday lunch','families','tourists'], prefix: ['Casa','La','El Palmar','Arrocería','Barraca'], noun: ['Arrocería','Paella','de l\'Albufera','del Mar','Valenciana'] },
-  { cuisine: 'seafood',        weight: 8,  price: [2,4], vibes: ['date','view','family'], best: ['fresh fish','date night','sea view'], prefix: ['La','El','Mar','Lonja','Cala'], noun: ['Marisquería','del Puerto','Mar','Pescados','de la Lonja'] },
-  { cuisine: 'Mediterranean',  weight: 8,  price: [2,3], vibes: ['date','cozy','outdoor'], best: ['date night','long lunch','sharing'], prefix: ['Oliva','Sal','Mare','Terra','Mediterrània'], noun: ['Mediterránea','Kitchen','Taula','& Co','Cuina'] },
-  { cuisine: 'vegan',          weight: 6,  price: [2,3], vibes: ['casual','cozy','outdoor'], best: ['plant-based','healthy lunch','brunch'], prefix: ['Raíz','Verde','Bloom','Planta','Bruma'], noun: ['Vegana','Plant Kitchen','Green','Veggie','& Roots'] },
-  { cuisine: 'steak',          weight: 6,  price: [3,4], vibes: ['date','group','cozy'], best: ['meat lovers','date night','celebrations'], prefix: ['La','El','Brasa','Fuego','Asador'], noun: ['Asador','Steakhouse','Parrilla','a la Brasa','Grill'] },
-  { cuisine: 'Indian',         weight: 5,  price: [1,3], vibes: ['casual','family','group'], best: ['spice lovers','groups','casual dinner'], prefix: ['Taj','Mumbai','Spice','Bombay','Masala'], noun: ['Indian','Tandoori','Curry House','Masala','Kitchen'] },
-  { cuisine: 'pasta',          weight: 9,  price: [2,3], vibes: ['date','cozy','casual'], best: ['date night','comfort food','casual dinner'], prefix: ['Mamma','Vero','Bella','Trattoria','Nonna'], noun: ['Pasta','Trattoria','Cucina','Italiana','& Co'] },
+  { cuisine: 'burgers',        weight: 16, price: [1,2], vibes: ['casual','lively','group','cheap eats'], best: ['groups','quick bite','casual dinner'], first: ['Smash','Brava','Doble','Goloso','Patilla','La Brasa'], second: ['Burger','Burgers','Burger House','& Co',''] },
+  { cuisine: 'pizza',          weight: 16, price: [1,3], vibes: ['casual','family','group','cozy'], best: ['families','sharing','casual dinner'], first: ['Forno','Bella','Da Vero','Napoli','Vesuvio','La'], second: ['Pizza','Pizzería','Napoletana','Pizza Co',''] },
+  { cuisine: 'sushi',          weight: 12, price: [2,4], vibes: ['date','quiet','romantic'], best: ['date night','special occasions'], first: ['Kenko','Sakura','Umi','Nori','Kaito','Hana','Kintaro'], second: ['Sushi','Omakase','Sushi Bar','Izakaya',''] },
+  { cuisine: 'Spanish tapas',  weight: 20, price: [2,3], vibes: ['lively','date','cozy','group'], best: ['sharing','wine night','long dinners'], first: ['Casa','Bar','Bodega','Taberna','Tasca','Mesón'], second: ['Pepe','Manolo','Carmela','del Mercat','del Carmen','de Ruzafa','Tradició'] },
+  { cuisine: 'menú del día',   weight: 18, price: [1,2], vibes: ['casual','work','solo'], best: ['weekday lunch','work lunch','quick lunch'], first: ['Casa','Restaurante','Cantina','El Racó','La Cuina','Mesón'], second: ['Familiar','del Mercat','de Sempre','Pepe','Carmela',''] },
+  { cuisine: 'cafeteria',      weight: 0,  price: [1,2], vibes: [], best: [], first: [], second: [] }, // mapped into coffee below
+  { cuisine: 'coffee',         weight: 16, price: [1,2], vibes: ['work','quiet','casual','solo'], best: ['coffee & laptop','breakfast','casual meetup'], first: ['Origen','Tostado','Grano','Lento','Bruna','Mistela'], second: ['Café','Coffee','Roasters','Coffee Bar','Tostadero'] },
+  { cuisine: 'brunch',         weight: 14, price: [2,3], vibes: ['casual','family','outdoor','cozy'], best: ['weekend brunch','breakfast','catch-ups'], first: ['Sunny','Honey','Citrus','Bruna','Daily','Almorzar'], second: ['Brunch','Brunch Club','Kitchen','& Co',''] },
+  { cuisine: 'bar',            weight: 18, price: [1,3], vibes: ['lively','late night','group','outdoor'], best: ['drinks','after work','night out'], first: ['Bar','Vermutería','Cervecería','Tasca','La Tasca','El Rincón'], second: ['Manolo','Central','de Copas','Nocturna','del Barri',''] },
+  { cuisine: 'healthy bowls',  weight: 10, price: [2,3], vibes: ['casual','work','solo','outdoor'], best: ['healthy lunch','post-gym','light bite'], first: ['Verde','Fresh','Raíz','Nutre','Vital','Bloom'], second: ['Bowls','Poke','Kitchen','& Greens',''] },
+  { cuisine: 'Mexican',        weight: 8,  price: [1,3], vibes: ['lively','group','casual'], best: ['groups','margaritas','casual dinner'], first: ['Taquería','La Cantina','Casa','Maíz','Agave','El Mero'], second: ['Mexicana','del Sur','Cantina','Mero',''] },
+  { cuisine: 'Asian fusion',   weight: 8,  price: [2,3], vibes: ['casual','date','lively'], best: ['sharing','date night','casual dinner'], first: ['Wok','Bao','Lucky','Bambú','Zen','Mango'], second: ['Asian','Fusion','Noodle Bar','Street Food',''] },
+  { cuisine: 'paella',         weight: 10, price: [2,4], vibes: ['family','outdoor','view','group'], best: ['Sunday lunch','families','tourists'], first: ['Casa','Arrocería','Barraca','La','El Palmar'], second: ['Valenciana','del Mar','de l\'Albufera','Carmela',''] },
+  { cuisine: 'seafood',        weight: 8,  price: [2,4], vibes: ['date','view','family'], best: ['fresh fish','date night','sea view'], first: ['Marisquería','La Lonja','El Puerto','Cala Mar','La Pescadería'], second: ['del Puerto','Central','de la Mar',''] },
+  { cuisine: 'Mediterranean',  weight: 8,  price: [2,3], vibes: ['date','cozy','outdoor'], best: ['date night','long lunch','sharing'], first: ['Oliva','Sal','Terra','Mare','Mediterrània'], second: ['Mediterránea','Kitchen','& Co','Taula',''] },
+  { cuisine: 'vegan',          weight: 6,  price: [2,3], vibes: ['casual','cozy','outdoor'], best: ['plant-based','healthy lunch','brunch'], first: ['Raíz','Verde','Planta','Bloom','Bruma'], second: ['Vegana','Plant Kitchen','& Roots','Green',''] },
+  { cuisine: 'steak',          weight: 6,  price: [3,4], vibes: ['date','group','cozy'], best: ['meat lovers','date night','celebrations'], first: ['La Brasa','El Asador','Fuego','Carbón','El Fogón'], second: ['Steakhouse','Parrilla','Grill',''] },
+  { cuisine: 'Indian',         weight: 5,  price: [1,3], vibes: ['casual','family','group'], best: ['spice lovers','groups','casual dinner'], first: ['Taj','Mumbai','Bombay','Masala','Spice'], second: ['Tandoori','Curry House','Kitchen',''] },
+  { cuisine: 'pasta',          weight: 9,  price: [2,3], vibes: ['date','cozy','casual'], best: ['date night','comfort food','casual dinner'], first: ['Mamma','Nonna','Bella','Da Vero','Trattoria'], second: ['Pasta','Trattoria','Cucina','& Co',''] },
 ]
 
 const COVER_SEEDS = ['lime-bright','lime-dark','lime-deep','lime-warm','lime-muted']
@@ -143,15 +146,39 @@ function slugify(s) {
     .replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+// Light Valencia flavour suffixes. Only appended to standalone (no-second)
+// names so we never produce "... del Mercat del Mercat".
+const FLAVOUR = ['VLC', 'València', 'Russafa', 'Ruzafa', 'del Mercat', 'Centre']
+
+// Words too generic to stand alone as a restaurant name. If a name would
+// reduce to just one of these, we always append a second word or a tag.
+const WEAK_ALONE = new Set([
+  'Casa', 'Bar', 'La', 'El Racó', 'Smash', 'Forno', 'Wok', 'Bao', 'Zen',
+  'Sal', 'Terra', 'Mare', 'Verde', 'Raíz', 'Vital', 'Bloom', 'Masala',
+  'Spice', 'Fuego', 'Carbón', 'Mango', 'Lucky', 'Bambú', 'Sunny', 'Honey',
+  'Citrus', 'Daily', 'Lento', 'Grano', 'Origen', 'Bruna', 'Mamma', 'Nonna',
+  'Bella', 'Sakura', 'Umi', 'Nori', 'Kaito', 'Hana', 'Kenko', 'Taj',
+  'Mumbai', 'Bombay', 'Oliva', 'Cafè',
+  // generic restaurant-type words that read thin on their own
+  'Doble', 'Cantina', 'Cervecería', 'Mesón', 'Vermutería', 'Restaurante',
+  'Marisquería', 'Taquería', 'Arrocería', 'Trattoria', 'Tasca', 'Bodega',
+])
+
 function makeName(cat) {
-  for (let tries = 0; tries < 40; tries++) {
-    const p = pick(cat.prefix), n = pick(cat.noun)
-    let name = chance(0.5) ? `${p} ${n}` : `${n} ${p}`
-    // light touch of Valencia flavour
-    if (chance(0.18)) name += ' ' + pick(['VLC','València','Russafa','del Mercat','24'])
+  for (let tries = 0; tries < 60; tries++) {
+    const first = pick(cat.first)
+    let second = pick(cat.second)
+    // Never let a weak word stand alone: force a second word (or a tag).
+    if (!second && WEAK_ALONE.has(first)) {
+      const opts = cat.second.filter(Boolean)
+      second = opts.length && chance(0.7) ? pick(opts) : pick(FLAVOUR)
+    }
+    // Avoid redundant pairs like "Cafè Café" / "Forno Forno".
+    if (second && first.toLowerCase() === second.toLowerCase()) continue
+    let name = second ? `${first} ${second}` : first
     if (!usedNames.has(name)) { usedNames.add(name); return name }
   }
-  const fallback = `${pick(cat.prefix)} ${pick(cat.noun)} ${usedNames.size}`
+  const fallback = `${pick(cat.first)} ${pick(FLAVOUR)} ${usedNames.size}`
   usedNames.add(fallback); return fallback
 }
 
