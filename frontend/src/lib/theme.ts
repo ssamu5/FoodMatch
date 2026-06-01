@@ -22,7 +22,9 @@ function resolveTheme(mode: ThemeMode): Theme {
   return mode
 }
 
-/** Read the user's stored preference. Falls back to 'system'. */
+/** Read the user's stored preference. Falls back to 'light' (matches the
+ *  foodmatch.es website; the app does not follow the phone's dark mode
+ *  unless the user explicitly picks 'system' or 'dark'). */
 function readMode(): ThemeMode {
   try {
     const v = localStorage.getItem(STORAGE_KEY)
@@ -35,7 +37,7 @@ function readMode(): ThemeMode {
     const attr = document.documentElement.getAttribute('data-mode')
     if (attr === 'light' || attr === 'dark' || attr === 'system') return attr
   }
-  return 'system'
+  return 'light'
 }
 
 function applyTheme(theme: Theme, mode: ThemeMode) {

@@ -25,15 +25,18 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
 
     <!-- Pre-paint theme bootstrap. Runs synchronously before React mounts
-         so the page never flashes the wrong theme. Reads user's stored
-         preference, falls back to OS preference. -->
+         so the page never flashes the wrong theme. Defaults to LIGHT to
+         match the foodmatch.es website; only honours dark if the user
+         explicitly picked it. -->
     <script>
       (function () {
         try {
           var stored = localStorage.getItem('fm.theme');
+          // Default mode is 'light' (matches the website). 'system' and
+          // 'dark' only apply when the user explicitly chose them.
           var mode = stored === 'light' || stored === 'dark' || stored === 'system'
             ? stored
-            : 'system';
+            : 'light';
           var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
           var theme = mode === 'system' ? (prefersDark ? 'dark' : 'light') : mode;
           if (theme === 'dark') document.documentElement.classList.add('dark');
