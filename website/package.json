@@ -1,0 +1,11 @@
+{
+  "name": "foodmatch-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "FoodMatch public website + SEO restaurant pages (static, bilingual).",
+  "scripts": {
+    "build": "node build.mjs",
+    "preview": "npm run build && npx --yes http-server dist -p 8899 -c-1"
+  }
+}
