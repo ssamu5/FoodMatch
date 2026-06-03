@@ -9,7 +9,12 @@ import type { FoodIntent, SearchEvent } from '../types/search'
 import type { RestaurantLead, UserLead } from '../types/profile'
 import { parseFoodIntent } from './foodIntent'
 import { rankRestaurants } from './ranking'
+import { SeedSource, runSearchPipeline } from './searchPipeline'
 import { addRecentSearch, addRestaurantLead, addUserLead } from './storage'
+
+// One source for the whole app today. Swap SeedSource for a SQL-backed
+// source when the DB lands; nothing below changes.
+const restaurantSource = new SeedSource(SEED_RESTAURANTS)
 
 function nowIso(): string {
   return new Date().toISOString()
@@ -49,13 +54,11 @@ export const api = {
     event: SearchEvent
   } {
     const intent = parseFoodIntent(query)
-    const rankedResults = rankRestaurants(intent, SEED_RESTAURANTS, {
-      hardFilterOpenNow: opts.hardFilterOpenNow ?? intent.mustBeOpenNow,
+    const pipeline = runSearchPipeline(intent, restaurantSource, {
       minScore: 10,
     })
-    const results = rankedResults
-      .map((rr) => SEED_RESTAURANTS.find((r) => r.id === rr.restaurantId))
-      .filter((x): x is Restaurant => Boolean(x))
+    const rankedResults = pipeline.ranked
+    const results = pipeline.results
 
     const event: SearchEvent = {
       id: id(),
@@ -75,14 +78,8 @@ export const api = {
     results: Restaurant[]
     rankedResults: ReturnType<typeof rankRestaurants>
   } {
-    const rankedResults = rankRestaurants(intent, SEED_RESTAURANTS, {
-      hardFilterOpenNow: opts.hardFilterOpenNow ?? intent.mustBeOpenNow,
-      minScore: 10,
-    })
-    const results = rankedResults
-      .map((rr) => SEED_RESTAURANTS.find((r) => r.id === rr.restaurantId))
-      .filter((x): x is Restaurant => Boolean(x))
-    return { results, rankedResults }
+    const pipeline = runSearchPipeline(intent, restaurantSource, { minScore: 10 })
+    return { results: pipeline.results, rankedResults: pipeline.ranked }
   },
 
   // ---------- Leads ----------
