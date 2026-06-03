@@ -32,6 +32,7 @@ export interface PipelineDiagnostics {
   shortlisted: number
   ranked: number
   ms: number
+  widened: boolean
 }
 
 export interface PipelineResult {
@@ -46,7 +47,10 @@ function norm(s: string): string {
 
 function matchesFilter(r: Restaurant, f: HardFilter): boolean {
   if (f.openNow && !isOpenAt(r)) return false
-  if (f.avoidCuisines && f.avoidCuisines.includes(r.cuisine)) return false
+  if (f.avoidCuisines) {
+    const sec = r.secondaryCuisines ?? []
+    if (f.avoidCuisines.includes(r.cuisine) || sec.some((c) => f.avoidCuisines!.includes(c))) return false
+  }
   if (f.area && r.area !== f.area) return false
   if (f.maxSpendEur != null && r.averageSpend > f.maxSpendEur * 1.2) return false
   if (f.cuisines && f.cuisines.length) {
@@ -88,7 +92,7 @@ function cheapScore(r: Restaurant, intent: FoodIntent): number {
   if (intent.cuisines.includes(r.cuisine)) n += 2
   if (intent.area && r.area === intent.area) n += 1
   if (intent.maxSpendEur != null && r.averageSpend <= intent.maxSpendEur) n += 1
-  n += r.rating // tie-break toward better-rated
+  n += r.rating // rating (0-5) as a tie-break; deliberately below the hard-signal weights
   return n
 }
 
@@ -106,13 +110,14 @@ export function runSearchPipeline(
 
   // 1. filter (coarse / SQL-WHERE seam)
   let candidates = source.find(hardFilterFromIntent(intent))
+  const filtered = candidates.length // true post-filter count, before any widening
 
   // widen: if the filter was too aggressive, fall back to all rows so we
   // never return an empty page on a reasonable query.
-  if (candidates.length < MIN_CANDIDATES) {
+  const widened = candidates.length < MIN_CANDIDATES
+  if (widened) {
     candidates = source.all()
   }
-  const filtered = candidates.length
 
   // 2. shortlist (cap)
   const shortlist =
@@ -122,18 +127,18 @@ export function runSearchPipeline(
   const shortlisted = shortlist.length
 
   // 3. rank (expensive; only sees the shortlist)
-  const ranked = rankRestaurants(intent, shortlist, {
+  const rankedResults = rankRestaurants(intent, shortlist, {
     hardFilterOpenNow: intent.mustBeOpenNow,
     minScore,
   })
 
   // 4. explain (resolve to restaurants; explanations built by callers/cards)
   const byId = new Map(shortlist.map((r) => [r.id, r]))
-  const results = ranked.map((rr) => byId.get(rr.restaurantId)).filter((x): x is Restaurant => Boolean(x))
+  const results = rankedResults.map((rr) => byId.get(rr.restaurantId)).filter((x): x is Restaurant => Boolean(x))
 
   return {
     results,
-    ranked,
-    diagnostics: { total, filtered, shortlisted, ranked: results.length, ms: Date.now() - start },
+    ranked: rankedResults,
+    diagnostics: { total, filtered, shortlisted, ranked: results.length, ms: Date.now() - start, widened },
   }
 }

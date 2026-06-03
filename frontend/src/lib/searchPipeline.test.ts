@@ -6,13 +6,14 @@ import { SeedSource, runSearchPipeline } from './searchPipeline'
 const source = new SeedSource(SEED_RESTAURANTS)
 
 describe('search pipeline', () => {
-  it('reports per-stage diagnostics with total >= filtered >= shortlisted >= ranked', () => {
-    const intent = parseFoodIntent('paella near Marina')
+  it('reports per-stage diagnostics, never expanding total', () => {
+    const intent = parseFoodIntent('tapas')
     const { diagnostics } = runSearchPipeline(intent, source)
     expect(diagnostics.total).toBe(SEED_RESTAURANTS.length)
-    expect(diagnostics.total).toBeGreaterThanOrEqual(diagnostics.filtered)
-    expect(diagnostics.filtered).toBeGreaterThanOrEqual(diagnostics.shortlisted)
-    expect(diagnostics.shortlisted).toBeGreaterThanOrEqual(diagnostics.ranked)
+    expect(diagnostics.filtered).toBeLessThanOrEqual(diagnostics.total)
+    expect(diagnostics.shortlisted).toBeLessThanOrEqual(diagnostics.total)
+    expect(diagnostics.ranked).toBeLessThanOrEqual(diagnostics.shortlisted)
+    expect(diagnostics.widened).toBe(false)
   })
 
   it('surfaces dish-serving restaurants for a dish query', () => {
@@ -33,8 +34,21 @@ describe('search pipeline', () => {
   })
 
   it('widens rather than returning empty when the hard filter is too narrow', () => {
-    const intent = parseFoodIntent('caviar')
-    const { results } = runSearchPipeline(intent, source)
+    // 'sushi Ruzafa under 15' matches 0 rows exactly (no sushi in Ruzafa under 15 EUR),
+    // so the pipeline widens to the full set rather than returning an empty page.
+    const intent = parseFoodIntent('sushi Ruzafa under 15')
+    const { results, diagnostics } = runSearchPipeline(intent, source)
     expect(results.length).toBeGreaterThan(0)
+    expect(diagnostics.widened).toBe(true)
+  })
+
+  it('bounds the shortlist regardless of how many candidates the source returns', () => {
+    const many = Array.from({ length: 500 }, (_, i) => ({ ...SEED_RESTAURANTS[i % SEED_RESTAURANTS.length], id: `mock-${i}` }))
+    const bigSource = new SeedSource(many)
+    const intent = parseFoodIntent('')
+    const { diagnostics } = runSearchPipeline(intent, bigSource, { shortlistCap: 25 })
+    expect(diagnostics.total).toBe(500)
+    expect(diagnostics.shortlisted).toBe(25)
+    expect(diagnostics.ranked).toBeLessThanOrEqual(25)
   })
 })
