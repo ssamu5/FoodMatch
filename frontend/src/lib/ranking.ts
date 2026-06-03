@@ -73,6 +73,7 @@ function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?
     ...(r.menu?.map((d) => d.name) ?? []),
     ...(r.menuHighlights ?? []),
     ...r.tags,
+    r.cuisine,
   ]
     .join(' ')
     .toLowerCase()

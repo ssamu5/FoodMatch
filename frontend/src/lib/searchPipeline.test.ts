@@ -33,6 +33,18 @@ describe('search pipeline', () => {
     expect(diagnostics.shortlisted).toBeLessThanOrEqual(20)
   })
 
+  it('scores a dish whose name maps to a cuisine even if menu items omit the word', () => {
+    // 'nigiri' -> intent.dishes = ['sushi']; a sushi restaurant's menu lists
+    // "Nigiri salmón" etc., none containing the literal "sushi". The dish
+    // bonus must still apply (haystack includes r.cuisine).
+    const intent = parseFoodIntent('nigiri')
+    expect(intent.dishes).toContain('sushi')
+    const { results, ranked } = runSearchPipeline(intent, source)
+    expect(results.length).toBeGreaterThan(0)
+    const top = ranked[0]
+    expect(top.score.reasons.join(' ')).toMatch(/serves sushi/)
+  })
+
   it('widens rather than returning empty when the hard filter is too narrow', () => {
     // 'sushi Ruzafa under 15' matches 0 rows exactly (no sushi in Ruzafa under 15 EUR),
     // so the pipeline widens to the full set rather than returning an empty page.
