@@ -59,6 +59,12 @@ export interface OpeningInfo {
   notes?: string
 }
 
+export interface Dish {
+  name: string
+  priceEur?: number
+  tags?: string[]
+}
+
 export interface Restaurant {
   id: string
   slug: string
@@ -90,6 +96,7 @@ export interface Restaurant {
   whatsapp?: string      // verified WhatsApp number (E.164-ish). Absent in seed/demo data.
 
   menuHighlights?: string[] // 2-4 signature dishes. Falls back to a cuisine preset when absent.
+  menu?: Dish[]             // structured menu; the field a restaurant edits after claiming. Sample data until verified.
 
   opening?: OpeningInfo
 
