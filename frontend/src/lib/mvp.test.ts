@@ -26,6 +26,12 @@ describe('FoodMatch MVP craving flow', () => {
     expect(intent.budgetLevel).toBe(2)
   })
 
+  it('parses bare dish names into intent.dishes', () => {
+    expect(parseFoodIntent('croquetas').dishes).toContain('croquetas')
+    expect(parseFoodIntent('ramen near El Carmen').dishes).toContain('ramen')
+    expect(parseFoodIntent('quiet dinner').dishes).toEqual([])
+  })
+
   it('ranks a Ruzafa burger query toward a Ruzafa burger spot', () => {
     const intent = parseFoodIntent('juicy burger in Ruzafa under 20')
     const [top] = rankRestaurants(intent, SEED_RESTAURANTS)
