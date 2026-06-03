@@ -76,8 +76,9 @@ const HIGHLIGHTS_BY_CUISINE: Record<Cuisine, string[]> = {
   bar: ['Caña + tapa', 'Bravas', 'Bocadillo de calamares'],
 }
 
-/** 2-4 menu highlights for a restaurant. Explicit data wins; cuisine preset is the fallback. */
+/** 2-4 menu highlights for a restaurant. Structured menu wins; explicit highlights next; cuisine preset is the fallback. */
 export function menuHighlightsFor(r: Restaurant): string[] {
+  if (r.menu && r.menu.length > 0) return r.menu.slice(0, 4).map((d) => d.name)
   if (r.menuHighlights && r.menuHighlights.length > 0) return r.menuHighlights
   return HIGHLIGHTS_BY_CUISINE[r.cuisine] ?? []
 }

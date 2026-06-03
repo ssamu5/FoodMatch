@@ -189,23 +189,36 @@ export default function RestaurantDetail() {
         </div>
       </section>
 
-      {highlights.length > 0 && (
+      {r.menu && r.menu.length > 0 ? (
         <section className="mt-4 rounded-2xl glass p-4">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Menu highlights</h2>
-            {!r.menuHighlights && (
-              <span className="text-[10px] text-tinta/40">sample</span>
-            )}
+            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Menu</h2>
+            {!r.isPartner && <span className="text-[10px] text-tinta/40">sample</span>}
           </div>
-          <ul className="mt-2 space-y-1.5">
-            {highlights.map((dish) => (
-              <li key={dish} className="flex items-center gap-2 text-[14px] text-tinta">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-tomate" aria-hidden="true" />
-                {dish}
+          <ul className="mt-2 divide-y divide-tinta/8">
+            {r.menu.slice(0, 8).map((d) => (
+              <li key={d.name} className="flex items-baseline justify-between gap-3 py-2">
+                <span className="text-[14px] text-tinta">{d.name}</span>
+                {d.priceEur != null && (
+                  <span className="shrink-0 font-mono text-[13px] text-tinta/60">€{d.priceEur}</span>
+                )}
               </li>
             ))}
           </ul>
         </section>
+      ) : (
+        highlights.length > 0 && (
+          <section className="mt-4 rounded-2xl glass p-4">
+            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Menu highlights</h2>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {highlights.map((h) => (
+                <span key={h} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
+                  {h}
+                </span>
+              ))}
+            </div>
+          </section>
+        )
       )}
 
       <section className="mt-4 grid grid-cols-2 gap-2">
