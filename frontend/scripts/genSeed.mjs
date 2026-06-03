@@ -89,6 +89,31 @@ const TAGS_BY = {
   pasta: ['fresh pasta','tiramisu','Italian','trattoria','vino'],
 }
 
+// Per-cuisine dish pools for generated sample menus. Each menu draws 6-10
+// dishes from its cuisine pool (+ a couple of shared sides/drinks). Demo
+// data, labelled "sample" in the UI; the field a restaurant edits later.
+const DISHES_BY_CUISINE = {
+  burgers: ['Smash cheeseburger', 'Doble bacon', 'Hamburguesa clásica', 'Pollo crispy', 'Burger vegetal', 'Patatas bravas', 'Aros de cebolla', 'Patatas fritas'],
+  pizza: ['Margherita', 'Diavola', 'Cuatro quesos', 'Prosciutto', 'Burrata', 'Calzone', 'Focaccia', 'Tiramisú'],
+  pasta: ['Cacio e pepe', 'Carbonara', 'Tagliatelle al ragú', 'Lasaña', 'Ñoquis', 'Pesto', 'Tiramisú', 'Burrata'],
+  'Spanish tapas': ['Patatas bravas', 'Croquetas caseras', 'Gambas al ajillo', 'Tortilla', 'Pulpo a la gallega', 'Jamón ibérico', 'Pan con tomate', 'Ensaladilla'],
+  paella: ['Paella valenciana', 'Arroz del senyoret', 'Arroz negro', 'Arroz a banda', 'Fideuà', 'Allioli', 'Sangría'],
+  sushi: ['Nigiri salmón', 'Maki California', 'Sashimi', 'Uramaki tempura', 'Gyoza', 'Edamame', 'Sopa de miso', 'Mochi'],
+  'Asian fusion': ['Ramen', 'Bao de cerdo', 'Pad thai', 'Curry rojo', 'Dumplings', 'Arroz frito', 'Rollitos'],
+  Indian: ['Pollo tikka masala', 'Naan de ajo', 'Biryani', 'Samosa', 'Dal', 'Korma', 'Raita'],
+  Mexican: ['Tacos al pastor', 'Guacamole', 'Quesadillas', 'Nachos', 'Burrito', 'Enchiladas', 'Margarita'],
+  steak: ['Entrecot', 'Solomillo', 'Chuletón', 'Costillas a la brasa', 'Verduras a la parrilla', 'Patatas asadas'],
+  seafood: ['Pulpo a la brasa', 'Mejillones', 'Gambas', 'Calamares', 'Pescado del día', 'Almejas marinera', 'Ostras'],
+  Mediterranean: ['Hummus', 'Pulpo a la brasa', 'Ensalada griega', 'Falafel', 'Mezze', 'Cordero', 'Baklava'],
+  'healthy bowls': ['Poke bowl', 'Bowl de quinoa', 'Açaí bowl', 'Ensalada César', 'Wrap vegetal', 'Smoothie verde', 'Tostada de aguacate'],
+  vegan: ['Hamburguesa vegana', 'Buddha bowl', 'Curry de garbanzos', 'Tofu salteado', 'Tarta de zanahoria', 'Smoothie'],
+  vegetarian: ['Paella de verduras', 'Halloumi a la plancha', 'Risotto de setas', 'Ensalada de quinoa', 'Berenjena asada'],
+  brunch: ['Huevos benedictinos', 'Tostada de aguacate', 'Tortitas', 'Bowl de açaí', 'Zumo natural', 'Café con leche', 'Croissant'],
+  coffee: ['Flat white', 'Cold brew', 'Cappuccino', 'Tostada con tomate', 'Croissant', 'Tarta de zanahoria', 'Cookie'],
+  bar: ['Caña', 'Vermut', 'Patatas bravas', 'Croquetas', 'Bocadillo de calamares', 'Gilda', 'Tabla de quesos'],
+  'menú del día': ['Menú del día (3 platos)', 'Plato del día', 'Ensalada de la casa', 'Sopa casera', 'Postre casero', 'Pan y bebida'],
+}
+
 const DESCS = {
   burgers: 'Smash burgers, hand-cut fries and craft beer. Counter service, busy at weekends.',
   pizza: 'Wood-fired pizzas with a thin, blistered crust. Good for sharing and families.',
@@ -210,6 +235,14 @@ for (let i = 0; i < TARGET; i++) {
 
   const sec = (SECONDARY[cuisine] && chance(0.4)) ? [pick(SECONDARY[cuisine])] : null
 
+  // 6-10 sample dishes from the cuisine pool, deterministic, with prices
+  // scaled to the restaurant's price band.
+  const dishPool = DISHES_BY_CUISINE[cuisine] || ['Plato de la casa', 'Especial del chef']
+  const dishCount = Math.min(dishPool.length, int(6, 10))
+  const dishNames = pickN(dishPool, dishCount)
+  const dishBase = { 1: 6, 2: 9, 3: 14, 4: 22 }[priceLevel]
+  const menu = dishNames.map((dn) => ({ name: dn, priceEur: dishBase + int(0, 8) }))
+
   restaurants.push({
     id: `r-${String(i + 1).padStart(3, '0')}`,
     slug, name,
@@ -230,6 +263,7 @@ for (let i = 0; i < TARGET; i++) {
     veganFriendly: vegan,
     glutenFreeOptions: gf,
     isPartner: chance(0.12),
+    menu,
   })
 }
 
@@ -289,6 +323,7 @@ for (const r of restaurants) {
   out += `    opening: ${opening},\n`
   out += `    vegetarianFriendly: ${r.vegetarianFriendly}, veganFriendly: ${r.veganFriendly}, glutenFreeOptions: ${r.glutenFreeOptions},\n`
   out += `    isPartner: ${r.isPartner},\n`
+  out += `    menu: [${r.menu.map((d) => `{ name: ${tsStr(d.name)}, priceEur: ${d.priceEur} }`).join(', ')}],\n`
   out += '  },\n'
 }
 out += ']\n'
