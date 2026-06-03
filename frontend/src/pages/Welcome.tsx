@@ -10,7 +10,7 @@ import type { Account } from '../types/profile'
 // and saves/greetings personalise. Real accounts + sync come later.
 export default function Welcome() {
   const navigate = useNavigate()
-  const [step, setStep] = useState<'intro' | 'signup'>('intro')
+  const [step, setStep] = useState<'role' | 'intro' | 'signup'>('role')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
 
@@ -22,6 +22,17 @@ export default function Welcome() {
   function skip() {
     track('account_signed_out', { reason: 'skipped_welcome' })
     finish()
+  }
+
+  function chooseDiner() {
+    track('onboarding_step', { field: 'role', answered: true })
+    setStep('intro')
+  }
+
+  function chooseRestaurant() {
+    track('onboarding_step', { field: 'role', answered: true })
+    markWelcomeSeen()
+    navigate('/restaurants', { replace: true })
   }
 
   function createAccount() {
@@ -60,11 +71,48 @@ export default function Welcome() {
             food<span className="italic text-tomate">match</span>.
           </h1>
           <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-tinta/75">
-            Tu asistente para encontrar dónde comer en Valencia. Dile a Foody qué te apetece y te lleva a la mesa que encaja.
+            {step === 'role'
+              ? 'Descubre dónde comer en Valencia, y ayuda a los restaurantes locales a que los encuentren.'
+              : 'Tu asistente para encontrar dónde comer en Valencia. Dile a Foody qué te apetece y te lleva a la mesa que encaja.'}
           </p>
         </div>
 
-        {step === 'intro' ? (
+        {step === 'role' ? (
+          <div className="mt-9 animate-fade-up">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-tinta/45">
+              ¿Cómo usas FoodMatch?
+            </p>
+            <div className="mt-3 space-y-3">
+              <button
+                onClick={chooseDiner}
+                className="flex w-full items-center gap-4 rounded-3xl border border-tinta/10 bg-surface p-4 text-left shadow-soft transition hover:shadow-softMd active:scale-[0.99]"
+              >
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-tomate/12 text-tomate">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true"><path d="M6 3v6a2 2 0 0 0 2 2v10M6 3v6M9 3v6M18 3c-1.5 0-2.5 2-2.5 5s1 4 2.5 4v9" /></svg>
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-[18px] font-bold text-tinta">Quiero comer fuera</span>
+                  <span className="block text-[13px] text-tinta/60">Descubre tu próximo sitio en Valencia.</span>
+                </span>
+                <span aria-hidden="true" className="text-[18px] text-tinta/40">→</span>
+              </button>
+
+              <button
+                onClick={chooseRestaurant}
+                className="flex w-full items-center gap-4 rounded-3xl border border-tinta/10 bg-surface p-4 text-left shadow-soft transition hover:shadow-softMd active:scale-[0.99]"
+              >
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-azulejo/12 text-azulejo">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true"><path d="M3 9 4.5 4h15L21 9M4 9v10h16V9M4 9h16M9 19v-5h6v5" /></svg>
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-[18px] font-bold text-tinta">Tengo un restaurante</span>
+                  <span className="block text-[13px] text-tinta/60">Que te encuentren los clientes correctos.</span>
+                </span>
+                <span aria-hidden="true" className="text-[18px] text-tinta/40">→</span>
+              </button>
+            </div>
+          </div>
+        ) : step === 'intro' ? (
           <div className="mt-10 animate-fade-up">
             <ul className="space-y-3.5">
               {[
@@ -88,6 +136,9 @@ export default function Welcome() {
               </button>
               <button onClick={skip} className="mt-2 h-11 w-full text-[13px] text-tinta/55 hover:text-tinta">
                 Entrar sin perfil
+              </button>
+              <button onClick={() => setStep('role')} className="mt-1 h-9 w-full text-[12px] text-tinta/40 hover:text-tinta">
+                &larr; Atrás
               </button>
             </div>
           </div>
