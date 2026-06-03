@@ -64,6 +64,25 @@ function isOpenAt(r: Restaurant, date = new Date()): boolean {
 
 // ---------- Score components ----------
 
+// Dish match. A restaurant scores when its structured menu (or, fallback,
+// menuHighlights) contains a requested dish term. Neutral credit when no
+// dish was requested, so existing craving queries are unaffected.
+function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?: string } {
+  if (intent.dishes.length === 0) return { points: 6 } // neutral
+  const haystack = [
+    ...(r.menu?.map((d) => d.name) ?? []),
+    ...(r.menuHighlights ?? []),
+    ...r.tags,
+  ]
+    .join(' ')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+  const hit = intent.dishes.find((d) => haystack.includes(d))
+  if (hit) return { points: 12, reason: `serves ${hit}` }
+  return { points: 0 }
+}
+
 function scoreCuisine(intent: FoodIntent, r: Restaurant): { points: number; reason?: string; warning?: string } {
   if (intent.avoidCuisines.includes(r.cuisine)) {
     return { points: -15, warning: `You said no ${r.cuisine}` }
@@ -72,10 +91,10 @@ function scoreCuisine(intent: FoodIntent, r: Restaurant): { points: number; reas
     return { points: 12 } // partial neutral credit when user didn't specify cuisine
   }
   if (intent.cuisines.includes(r.cuisine)) {
-    return { points: 30, reason: `${r.cuisine} match` }
+    return { points: 24, reason: `${r.cuisine} match` }
   }
   if (r.secondaryCuisines && r.secondaryCuisines.some((s) => intent.cuisines.includes(s))) {
-    return { points: 18, reason: `also serves ${intent.cuisines.find((c) => r.secondaryCuisines?.includes(c))}` }
+    return { points: 14, reason: `also serves ${intent.cuisines.find((c) => r.secondaryCuisines?.includes(c))}` }
   }
   return { points: 0 }
 }
@@ -87,7 +106,7 @@ function scoreArea(intent: FoodIntent, r: Restaurant): { points: number; reason?
     return { points: 10 }
   }
   if (intent.area && r.area === intent.area) {
-    return { points: 20, reason: `in ${r.area}` }
+    return { points: 18, reason: `in ${r.area}` }
   }
   if (intent.area) {
     // Different area to the one requested
@@ -104,7 +123,7 @@ function scoreBudget(intent: FoodIntent, r: Restaurant): { points: number; reaso
   if (intent.maxSpendEur !== null) {
     if (r.averageSpend <= intent.maxSpendEur) {
       const slack = intent.maxSpendEur - r.averageSpend
-      const points = 20 - Math.min(8, slack * 0.4) // strong fit, slight ding if way under
+      const points = 18 - Math.min(8, slack * 0.4) // strong fit, slight ding if way under
       return { points: Math.round(points), reason: `~€${r.averageSpend} fits €${intent.maxSpendEur} budget` }
     }
     // Over budget
@@ -114,7 +133,7 @@ function scoreBudget(intent: FoodIntent, r: Restaurant): { points: number; reaso
     return { points: -5, warning: `over your €${intent.maxSpendEur} budget` }
   }
   if (targetLevel) {
-    if (r.priceLevel === targetLevel) return { points: 20, reason: `price level matches` }
+    if (r.priceLevel === targetLevel) return { points: 18, reason: `price level matches` }
     if (Math.abs(r.priceLevel - targetLevel) === 1) return { points: 10 }
     return { points: 0 }
   }
@@ -138,7 +157,7 @@ function scoreVibeAndOccasion(intent: FoodIntent, r: Restaurant): { points: numb
     }
   }
   if (wanted.length === 0) pts = 9 // neutral when no vibe signal
-  pts = Math.min(pts, 15)
+  pts = Math.min(pts, 13)
   return matched.length > 0
     ? { points: pts, reason: `${matched.slice(0, 2).join(', ')} vibe` }
     : { points: pts }
@@ -172,6 +191,7 @@ export function scoreRestaurant(intent: FoodIntent, r: Restaurant): MatchScore {
   let total = 0
 
   const parts = [
+    scoreDish(intent, r),
     scoreCuisine(intent, r),
     scoreArea(intent, r),
     scoreBudget(intent, r),
