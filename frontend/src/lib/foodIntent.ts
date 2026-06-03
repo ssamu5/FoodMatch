@@ -84,6 +84,44 @@ const DIETARY_KEYWORDS: Array<{ canonical: 'vegetarian' | 'vegan' | 'gluten-free
   { canonical: 'gluten-free', keywords: ['gluten free', 'gluten-free', 'sin gluten', 'celiac', 'celiaco'] },
 ]
 
+// Dish keywords -> canonical display term. Accent-insensitive (matched
+// against the normalized query). Derived from the generated menu vocabulary
+// plus common ES/EN aliases. Used so a bare dish name ("croquetas", "ramen")
+// resolves even when it is not a cuisine.
+const DISH_KEYWORDS: Array<{ canonical: string; keywords: string[] }> = [
+  { canonical: 'paella', keywords: ['paella', 'arroz', 'arros'] },
+  { canonical: 'croquetas', keywords: ['croquetas', 'croqueta'] },
+  { canonical: 'bravas', keywords: ['bravas', 'patatas bravas'] },
+  { canonical: 'tortilla', keywords: ['tortilla'] },
+  { canonical: 'pulpo', keywords: ['pulpo', 'octopus'] },
+  { canonical: 'ramen', keywords: ['ramen'] },
+  { canonical: 'sushi', keywords: ['nigiri', 'maki', 'sashimi', 'uramaki'] },
+  { canonical: 'gyoza', keywords: ['gyoza', 'dumplings', 'dumpling'] },
+  { canonical: 'tacos', keywords: ['tacos', 'taco'] },
+  { canonical: 'guacamole', keywords: ['guacamole', 'guac'] },
+  { canonical: 'burger', keywords: ['burger', 'hamburguesa', 'smash'] },
+  { canonical: 'pizza', keywords: ['pizza', 'margherita', 'diavola', 'calzone'] },
+  { canonical: 'pasta', keywords: ['pasta', 'carbonara', 'lasaña', 'lasana', 'noquis', 'ñoquis'] },
+  { canonical: 'poke', keywords: ['poke', 'poke bowl'] },
+  { canonical: 'curry', keywords: ['curry', 'tikka', 'masala', 'biryani'] },
+  { canonical: 'naan', keywords: ['naan'] },
+  { canonical: 'hummus', keywords: ['hummus'] },
+  { canonical: 'falafel', keywords: ['falafel'] },
+  { canonical: 'entrecot', keywords: ['entrecot', 'solomillo', 'chuleton', 'chuletón'] },
+  { canonical: 'brunch', keywords: ['benedictinos', 'tortitas', 'pancakes', 'aguacate', 'avocado'] },
+  { canonical: 'vermut', keywords: ['vermut', 'vermouth'] },
+  { canonical: 'gambas', keywords: ['gambas', 'prawns'] },
+  { canonical: 'fideua', keywords: ['fideua', 'fideuà'] },
+]
+
+function extractDishes(q: string): string[] {
+  const found = new Set<string>()
+  for (const { canonical, keywords } of DISH_KEYWORDS) {
+    if (keywords.some((k) => contains(q, k))) found.add(canonical)
+  }
+  return Array.from(found)
+}
+
 const OPEN_NOW_KEYWORDS = ['open now', 'right now', 'tonight', 'esta noche', 'ahora']
 const NEAR_ME_KEYWORDS = ['near me', 'close', 'cerca', 'cerca de mi', 'closest', 'nearby']
 
@@ -243,10 +281,12 @@ export function parseFoodIntent(query: string, city = 'Valencia'): FoodIntent {
   const mustBeOpenNow = extractMustBeOpenNow(q)
   const distancePreference = extractDistance(q, area)
   const { budgetLevel, maxSpendEur } = extractBudget(q)
+  const dishes = extractDishes(q)
 
   return {
     rawQuery: query,
     cuisines: finalCuisines,
+    dishes,
     avoidCuisines,
     budgetLevel,
     maxSpendEur,
@@ -282,6 +322,7 @@ export function intentFromProfile(p: TasteProfile, city = 'Valencia'): FoodInten
   return {
     rawQuery: '',
     cuisines: p.favoriteCuisines,
+    dishes: [],
     avoidCuisines: [],
     budgetLevel: p.budgetComfort,
     maxSpendEur: null,

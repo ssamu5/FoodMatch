@@ -7,6 +7,7 @@ export type DistancePref = 'near_me' | 'area' | 'anywhere'
 export interface FoodIntent {
   rawQuery: string
   cuisines: Cuisine[]
+  dishes: string[]         // specific dish terms the user asked for, e.g. ['paella']
   avoidCuisines: Cuisine[]
   budgetLevel: 1 | 2 | 3 | 4 | null
   maxSpendEur: number | null
