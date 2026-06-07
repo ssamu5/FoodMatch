@@ -22,8 +22,8 @@ export interface HardFilter {
 }
 
 export interface RestaurantSource {
-  all(): Restaurant[]
-  find(filter: HardFilter): Restaurant[]
+  all(): Promise<Restaurant[]>
+  find(filter: HardFilter): Promise<Restaurant[]>
 }
 
 export interface PipelineDiagnostics {
@@ -67,10 +67,10 @@ function matchesFilter(r: Restaurant, f: HardFilter): boolean {
 // In-memory source backed by the seed array. SQL-backed source replaces this.
 export class SeedSource implements RestaurantSource {
   constructor(private rows: Restaurant[]) {}
-  all(): Restaurant[] {
+  async all(): Promise<Restaurant[]> {
     return this.rows
   }
-  find(filter: HardFilter): Restaurant[] {
+  async find(filter: HardFilter): Promise<Restaurant[]> {
     return this.rows.filter((r) => matchesFilter(r, filter))
   }
 }
@@ -98,25 +98,26 @@ function cheapScore(r: Restaurant, intent: FoodIntent): number {
 
 const MIN_CANDIDATES = 8
 
-export function runSearchPipeline(
+export async function runSearchPipeline(
   intent: FoodIntent,
   source: RestaurantSource,
   opts: { shortlistCap?: number; minScore?: number } = {},
-): PipelineResult {
+): Promise<PipelineResult> {
   const start = Date.now()
-  const total = source.all().length
+  const allRows = await source.all()
+  const total = allRows.length
   const cap = opts.shortlistCap ?? 150
   const minScore = opts.minScore ?? 10
 
   // 1. filter (coarse / SQL-WHERE seam)
-  let candidates = source.find(hardFilterFromIntent(intent))
+  let candidates = await source.find(hardFilterFromIntent(intent))
   const filtered = candidates.length // true post-filter count, before any widening
 
   // widen: if the filter was too aggressive, fall back to all rows so we
   // never return an empty page on a reasonable query.
   const widened = candidates.length < MIN_CANDIDATES
   if (widened) {
-    candidates = source.all()
+    candidates = allRows
   }
 
   // 2. shortlist (cap)
