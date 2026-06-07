@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Restaurant, Cuisine, Area, Dish } from '../types/restaurant'
+import { openingFromHoursKind } from './openingHours'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const env = (import.meta as any).env as Record<string, string | undefined>
@@ -74,6 +75,9 @@ export function rowToRestaurant(row: RestaurantRow): Restaurant {
     phone: row.phone ?? undefined,
     whatsapp: row.whatsapp ?? undefined,
     menu,
+    // DB rows store only a coarse hours_kind; rebuild the weekly schedule so the
+    // open-now filter and ranking signal work on live data, not just seed data.
+    opening: openingFromHoursKind(row.hours_kind),
     vegetarianFriendly: row.vegetarian_friendly,
     veganFriendly: row.vegan_friendly,
     glutenFreeOptions: row.gluten_free_options,
