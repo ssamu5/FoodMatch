@@ -11,6 +11,7 @@ import { buildWhatsAppUrl, hasVerifiedWhatsApp, lastCraving, menuHighlightsFor }
 import { listingTierLabel, PUBLIC_LISTING_NOTE, VERIFIED_LISTING_NOTE } from '../lib/listings'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap, openExternal, shareNative } from '../lib/native'
+import type { Restaurant } from '../types/restaurant'
 
 const LAST_QUERY_KEY = 'foodmatch.lastIntentQuery'
 
@@ -23,10 +24,27 @@ const FEEDBACK = ['Good match', 'Too expensive', 'Too far', 'Not my vibe'] as co
 export default function RestaurantDetail() {
   const { slug = '' } = useParams()
   const navigate = useNavigate()
-  const r = api.getRestaurantBySlug(slug)
 
+  const [r, setR] = useState<Restaurant | undefined>(undefined)
+  // This page always fetches on mount, so start in the loading state. The
+  // loading guard below keeps the NotFound state from flashing before the
+  // restaurant resolves.
+  const [loading, setLoading] = useState(true)
   const [saved, setSaved] = useState(false)
   const [feedbackSent, setFeedbackSent] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    api.getRestaurantBySlug(slug).then((found) => {
+      if (cancelled) return
+      setR(found)
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [slug])
 
   useEffect(() => {
     if (r) setSaved(isSaved(r.id))
@@ -48,6 +66,17 @@ export default function RestaurantDetail() {
     const score = scoreRestaurant(intent, r)
     return { explanation: buildMatchExplanation(intent, r, score), score }
   }, [r])
+
+  if (loading) {
+    return (
+      <AppShell>
+        <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
+          <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
+          Loading restaurant...
+        </section>
+      </AppShell>
+    )
+  }
 
   if (!r) {
     return (

@@ -20,9 +20,16 @@ export default function Saved() {
   const [recent, setRecent] = useState<SearchEvent[]>([])
 
   useEffect(() => {
+    let cancelled = false
     const ids = getSavedIds()
-    setSaved(api.getRestaurantsByIds(ids))
+    api.getRestaurantsByIds(ids).then((rows) => {
+      if (cancelled) return
+      setSaved(rows)
+    })
     setRecent(getRecentSearches())
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   function removeSaved(id: string) {

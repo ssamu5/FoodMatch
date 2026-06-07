@@ -4,6 +4,7 @@ import { clearEvents, exportBundle, summarizeEvents } from '../lib/analytics'
 import { getRestaurantLeads, getUserLeads } from '../lib/storage'
 import { api } from '../lib/api'
 import { openExternal } from '../lib/native'
+import type { Restaurant } from '../types/restaurant'
 
 const ADMIN_CODE = 'foodmatch-2026' // MVP-only soft lock. Replace with real auth before any sensitive data lands.
 const KEY = 'foodmatch.adminUnlocked'
@@ -19,10 +20,22 @@ export default function Admin() {
   const [code, setCode] = useState('')
   const [, setTick] = useState(0)
   const [copied, setCopied] = useState(false)
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
 
   useEffect(() => {
     const id = window.setInterval(() => setTick((t) => t + 1), 5000)
     return () => window.clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    api.listRestaurants().then((rows) => {
+      if (cancelled) return
+      setRestaurants(rows)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   if (!unlocked) {
@@ -60,7 +73,6 @@ export default function Admin() {
   }
 
   const summary = summarizeEvents()
-  const restaurants = api.listRestaurants()
   const topClicks = Object.entries(summary.restaurantClicks)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
