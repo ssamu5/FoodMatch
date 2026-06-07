@@ -7,11 +7,10 @@ import EmptyState from '../components/EmptyState'
 import FilterDrawer, { type SortKey } from '../components/FilterDrawer'
 import { api } from '../lib/api'
 import { intentFromProfile, parseFoodIntent, profileHasSignal } from '../lib/foodIntent'
-import { rankRestaurants } from '../lib/ranking'
 import { getTasteProfile } from '../lib/storage'
-import { SEED_RESTAURANTS } from '../data/seedRestaurants'
 import { track } from '../lib/analytics'
-import type { FoodIntent } from '../types/search'
+import type { Restaurant } from '../types/restaurant'
+import type { FoodIntent, RankedResult } from '../types/search'
 
 export default function Results() {
   const [params, setParams] = useSearchParams()
@@ -31,15 +30,31 @@ export default function Results() {
   const [sort, setSort] = useState<SortKey>('best')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
+  const [results, setResults] = useState<Restaurant[]>([])
+  const [rankedResults, setRankedResults] = useState<RankedResult[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    api.searchByIntent(intent).then((r) => {
+      if (cancelled) return
+      setResults(r.results)
+      setRankedResults(r.rankedResults)
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [intent, query])
+
   const ranked = useMemo(() => {
-    const r = query
-      ? rankRestaurants(intent, SEED_RESTAURANTS, { hardFilterOpenNow: intent.mustBeOpenNow, minScore: 0 })
-      : rankRestaurants(intent, SEED_RESTAURANTS, { hardFilterOpenNow: false, minScore: 0 })
+    const byId = new Map(results.map((x) => [x.id, x]))
     // Sorting
-    const items = r
+    const items = rankedResults
       .map((rr) => ({
         rr,
-        restaurant: SEED_RESTAURANTS.find((x) => x.id === rr.restaurantId)!,
+        restaurant: byId.get(rr.restaurantId)!,
       }))
       .filter((x) => Boolean(x.restaurant))
 
@@ -60,10 +75,9 @@ export default function Results() {
     }
     // 'best' uses score (default rr order)
     return items
-  }, [intent, query, sort])
+  }, [results, rankedResults, intent, sort])
 
   useEffect(() => {
-    void api // ensure import retained
     if (query) {
       setParams({ q: query }, { replace: true })
       // Carry the query so RestaurantDetail can explain the match.
@@ -125,7 +139,14 @@ export default function Results() {
         )}
       </section>
 
-      {ranked.length === 0 && (
+      {loading && (
+        <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
+          <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
+          Finding restaurants...
+        </section>
+      )}
+
+      {!loading && ranked.length === 0 && (
         <section className="mt-6">
           <EmptyState
             title="No matches with those filters"
@@ -135,17 +156,19 @@ export default function Results() {
         </section>
       )}
 
-      <section className="mt-5 space-y-2">
-        {ranked.map(({ restaurant, rr }, idx) => (
-          <RestaurantCard
-            key={restaurant.id}
-            restaurant={restaurant}
-            score={rr.score}
-            rank={idx + 1}
-            onOpen={() => track('restaurant_opened', { restaurantId: restaurant.id, source: 'results' })}
-          />
-        ))}
-      </section>
+      {!loading && (
+        <section className="mt-5 space-y-2">
+          {ranked.map(({ restaurant, rr }, idx) => (
+            <RestaurantCard
+              key={restaurant.id}
+              restaurant={restaurant}
+              score={rr.score}
+              rank={idx + 1}
+              onOpen={() => track('restaurant_opened', { restaurantId: restaurant.id, source: 'results' })}
+            />
+          ))}
+        </section>
+      )}
 
       <FilterDrawer
         open={filtersOpen}

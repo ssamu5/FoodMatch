@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import AppShell from '../components/AppShell'
 import PromptComposer from '../components/PromptComposer'
@@ -7,10 +7,10 @@ import RestaurantCard from '../components/RestaurantCard'
 import EmptyState from '../components/EmptyState'
 import { api } from '../lib/api'
 import { applyRefinement, parseFoodIntent } from '../lib/foodIntent'
-import { buildMatchExplanation, rankRestaurants } from '../lib/ranking'
-import { SEED_RESTAURANTS } from '../data/seedRestaurants'
+import { buildMatchExplanation } from '../lib/ranking'
 import { track } from '../lib/analytics'
-import type { FoodIntent } from '../types/search'
+import type { Restaurant } from '../types/restaurant'
+import type { FoodIntent, RankedResult } from '../types/search'
 
 const REFINEMENTS = ['cheaper', 'closer', 'romantic', 'open now', 'vegetarian']
 
@@ -35,14 +35,32 @@ export default function Ask() {
     }
   }, [query, setParams])
 
-  const { results, rankedResults } = useMemo(() => {
-    if (!query) return { results: [], rankedResults: [] }
-    const r = api.searchByIntent(intent)
-    return r
+  const [results, setResults] = useState<Restaurant[]>([])
+  const [rankedResults, setRankedResults] = useState<RankedResult[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!query) {
+      setResults([])
+      setRankedResults([])
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    api.searchByIntent(intent).then((r) => {
+      if (cancelled) return
+      setResults(r.results)
+      setRankedResults(r.rankedResults)
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [intent, query])
 
   useEffect(() => {
-    if (!query) return
+    if (!query || loading) return
     if (results.length === 0) {
       track('no_results', { query, intent: { cuisines: intent.cuisines, area: intent.area } })
     } else {
@@ -57,7 +75,7 @@ export default function Ask() {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query])
+  }, [query, loading])
 
   const top = results[0]
   const topScore = rankedResults[0]?.score
@@ -97,7 +115,14 @@ export default function Ask() {
         </section>
       )}
 
-      {query && (
+      {query && loading && (
+        <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
+          <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
+          Finding your matches...
+        </section>
+      )}
+
+      {query && !loading && (
         <section className="mt-6 space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-[12px] uppercase tracking-[0.18em] text-tinta/50">
@@ -151,7 +176,3 @@ export default function Ask() {
     </AppShell>
   )
 }
-
-// Suppress unused import warning in dev (SEED_RESTAURANTS is intentionally re-exported via api in production but
-// we keep the symbol available in case Ask page wants direct fallback later).
-void SEED_RESTAURANTS
