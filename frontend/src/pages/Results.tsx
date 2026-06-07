@@ -32,7 +32,10 @@ export default function Results() {
 
   const [results, setResults] = useState<Restaurant[]>([])
   const [rankedResults, setRankedResults] = useState<RankedResult[]>([])
-  const [loading, setLoading] = useState(false)
+  // Results always fetches on mount, so start in the loading state. This keeps
+  // the loading indicator visible immediately and prevents the result_viewed
+  // analytics effect below from firing once at count 0 before data arrives.
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -90,9 +93,10 @@ export default function Results() {
   }, [query, setParams])
 
   useEffect(() => {
+    if (loading) return
     track('result_viewed', { query, resultCount: ranked.length })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, ranked.length])
+  }, [query, ranked.length, loading])
 
   function handleSubmit(q: string) {
     setQuery(q)
