@@ -1,5 +1,6 @@
 -- FoodMatch schema, increment 1. Idempotent (safe to re-run).
--- Apply with: npm run db:schema  (uses the service role key)
+-- Apply by pasting this whole file into the Supabase SQL editor
+-- (Dashboard > SQL Editor > New query > Run).
 
 create table if not exists public.restaurants (
   id            text primary key,
