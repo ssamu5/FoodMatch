@@ -1,6 +1,7 @@
 // MVP API layer.
-// For now everything is mocked from seed data and localStorage.
-// All access goes through this file so the swap to Supabase / backend later
+// Read methods are async and route through Supabase when env is configured,
+// falling back to seed data on missing-env or any error so the app never breaks.
+// All access goes through this file so the swap to a real backend
 // is a one-file change in the implementation, not the call sites.
 
 import { SEED_RESTAURANTS } from '../data/seedRestaurants'
@@ -11,10 +12,12 @@ import { parseFoodIntent } from './foodIntent'
 import { rankRestaurants } from './ranking'
 import { SeedSource, runSearchPipeline } from './searchPipeline'
 import { addRecentSearch, addRestaurantLead, addUserLead } from './storage'
+import { supabase, supabaseEnabled } from './supabase'
+import { SupabaseSource } from './supabaseSource'
 
-// One source for the whole app today. Swap SeedSource for a SQL-backed
-// source when the DB lands; nothing below changes.
-const restaurantSource = new SeedSource(SEED_RESTAURANTS)
+const seedSource = new SeedSource(SEED_RESTAURANTS)
+const liveSource = supabaseEnabled && supabase ? new SupabaseSource(supabase) : null
+const restaurantSource = liveSource ?? seedSource
 
 function nowIso(): string {
   return new Date().toISOString()
@@ -28,38 +31,59 @@ function id(): string {
 export const api = {
   // ---------- Restaurants ----------
 
-  listRestaurants(): Restaurant[] {
+  async listRestaurants(): Promise<Restaurant[]> {
+    if (liveSource) {
+      try {
+        return await liveSource.all()
+      } catch (e) {
+        console.warn('[api] supabase listRestaurants failed, using seed', e)
+      }
+    }
     return SEED_RESTAURANTS
   },
 
-  getRestaurantBySlug(slug: string): Restaurant | undefined {
+  async getRestaurantBySlug(slug: string): Promise<Restaurant | undefined> {
+    if (liveSource && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('restaurants')
+          .select('*, dishes(name, price_eur, tags, sort)')
+          .eq('slug', slug)
+          .maybeSingle()
+        if (error) throw error
+        if (data) {
+          const { rowToRestaurant } = await import('./supabase')
+          return rowToRestaurant(data as Parameters<typeof rowToRestaurant>[0])
+        }
+        return undefined
+      } catch (e) {
+        console.warn('[api] supabase getRestaurantBySlug failed, using seed', e)
+      }
+    }
     return SEED_RESTAURANTS.find((r) => r.slug === slug)
   },
 
-  getRestaurantById(id: string): Restaurant | undefined {
-    return SEED_RESTAURANTS.find((r) => r.id === id)
+  async getRestaurantById(id: string): Promise<Restaurant | undefined> {
+    const all = await this.listRestaurants()
+    return all.find((r) => r.id === id)
   },
 
-  getRestaurantsByIds(ids: string[]): Restaurant[] {
+  async getRestaurantsByIds(ids: string[]): Promise<Restaurant[]> {
     const set = new Set(ids)
-    return SEED_RESTAURANTS.filter((r) => set.has(r.id))
+    const all = await this.listRestaurants()
+    return all.filter((r) => set.has(r.id))
   },
 
   // ---------- Search ----------
 
-  search(query: string, opts: { hardFilterOpenNow?: boolean } = {}): {
+  async search(query: string, _opts: { hardFilterOpenNow?: boolean } = {}): Promise<{
     intent: FoodIntent
     results: Restaurant[]
     rankedResults: ReturnType<typeof rankRestaurants>
     event: SearchEvent
-  } {
+  }> {
     const intent = parseFoodIntent(query)
-    const pipeline = runSearchPipeline(intent, restaurantSource, {
-      minScore: 10,
-    })
-    const rankedResults = pipeline.ranked
-    const results = pipeline.results
-
+    const { results, rankedResults } = await this.searchByIntent(intent)
     const event: SearchEvent = {
       id: id(),
       query,
@@ -70,16 +94,21 @@ export const api = {
       resultCount: results.length,
     }
     addRecentSearch(event)
-
     return { intent, results, rankedResults, event }
   },
 
-  searchByIntent(intent: FoodIntent, opts: { hardFilterOpenNow?: boolean } = {}): {
+  async searchByIntent(intent: FoodIntent, _opts: { hardFilterOpenNow?: boolean } = {}): Promise<{
     results: Restaurant[]
     rankedResults: ReturnType<typeof rankRestaurants>
-  } {
-    const pipeline = runSearchPipeline(intent, restaurantSource, { minScore: 10 })
-    return { results: pipeline.results, rankedResults: pipeline.ranked }
+  }> {
+    try {
+      const p = await runSearchPipeline(intent, restaurantSource, { minScore: 10 })
+      return { results: p.results, rankedResults: p.ranked }
+    } catch (e) {
+      console.warn('[api] supabase search failed, using seed', e)
+      const p = await runSearchPipeline(intent, seedSource, { minScore: 10 })
+      return { results: p.results, rankedResults: p.ranked }
+    }
   },
 
   // ---------- Leads ----------
@@ -93,6 +122,23 @@ export const api = {
   submitRestaurantLead(lead: Omit<RestaurantLead, 'createdAt'>): RestaurantLead {
     const stored: RestaurantLead = { ...lead, createdAt: nowIso() }
     addRestaurantLead(stored)
+    if (supabaseEnabled && supabase) {
+      const anyLead = lead as Record<string, unknown>
+      supabase.from('restaurant_claims').insert({
+        restaurant_slug: (anyLead.restaurantSlug as string) ?? null,
+        restaurant_name: lead.restaurantName,
+        owner_name: lead.ownerName,
+        email: lead.email,
+        phone: lead.phone ?? null,
+        area: lead.area ?? null,
+        cuisine: lead.cuisine ?? null,
+        price_band: lead.priceBand ?? null,
+        menu_link: lead.menuLink ?? null,
+        has_photos: lead.hasPhotos ?? null,
+        message: lead.message ?? null,
+        source: lead.source ?? 'form',
+      }).then(({ error }) => { if (error) console.warn('[api] claim insert failed', error) })
+    }
     return stored
   },
 }
