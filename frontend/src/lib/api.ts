@@ -12,7 +12,7 @@ import { parseFoodIntent } from './foodIntent'
 import { rankRestaurants } from './ranking'
 import { SeedSource, runSearchPipeline } from './searchPipeline'
 import { addRecentSearch, addRestaurantLead, addUserLead } from './storage'
-import { supabase, supabaseEnabled } from './supabase'
+import { supabase, supabaseEnabled, rowToRestaurant } from './supabase'
 import { SupabaseSource } from './supabaseSource'
 
 const seedSource = new SeedSource(SEED_RESTAURANTS)
@@ -52,7 +52,6 @@ export const api = {
           .maybeSingle()
         if (error) throw error
         if (data) {
-          const { rowToRestaurant } = await import('./supabase')
           return rowToRestaurant(data as Parameters<typeof rowToRestaurant>[0])
         }
         return undefined
@@ -124,20 +123,29 @@ export const api = {
     addRestaurantLead(stored)
     if (supabaseEnabled && supabase) {
       const anyLead = lead as Record<string, unknown>
-      supabase.from('restaurant_claims').insert({
-        restaurant_slug: (anyLead.restaurantSlug as string) ?? null,
-        restaurant_name: lead.restaurantName,
-        owner_name: lead.ownerName,
-        email: lead.email,
-        phone: lead.phone ?? null,
-        area: lead.area ?? null,
-        cuisine: lead.cuisine ?? null,
-        price_band: lead.priceBand ?? null,
-        menu_link: lead.menuLink ?? null,
-        has_photos: lead.hasPhotos ?? null,
-        message: lead.message ?? null,
-        source: lead.source ?? 'form',
-      }).then(({ error }) => { if (error) console.warn('[api] claim insert failed', error) })
+      const client = supabase
+      // Fire-and-forget: never block or throw out of submitRestaurantLead.
+      void (async () => {
+        try {
+          const { error } = await client.from('restaurant_claims').insert({
+            restaurant_slug: (anyLead.restaurantSlug as string) ?? null,
+            restaurant_name: lead.restaurantName,
+            owner_name: lead.ownerName,
+            email: lead.email,
+            phone: lead.phone ?? null,
+            area: lead.area ?? null,
+            cuisine: lead.cuisine ?? null,
+            price_band: lead.priceBand ?? null,
+            menu_link: lead.menuLink ?? null,
+            has_photos: lead.hasPhotos ?? null,
+            message: lead.message ?? null,
+            source: lead.source ?? 'form',
+          })
+          if (error) console.warn('[api] claim insert failed', error)
+        } catch (e) {
+          console.warn('[api] claim insert threw', e)
+        }
+      })()
     }
     return stored
   },
