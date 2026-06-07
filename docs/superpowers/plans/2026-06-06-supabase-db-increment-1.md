@@ -188,7 +188,7 @@ the user provides the DB password.**
 ```bash
 node -e "import('@supabase/supabase-js').then(async ({createClient})=>{const fs=require('fs');const t=fs.readFileSync('.env','utf8');const e=Object.fromEntries([...t.matchAll(/^([A-Z0-9_]+)=(.*)$/gm)].map(m=>[m[1],m[2]]));const s=createClient(e.VITE_SUPABASE_URL,e.VITE_SUPABASE_ANON_KEY);const {error}=await s.from('restaurants').select('id',{head:true,count:'exact'});console.log(error?('NOT READY: '+error.message):'tables exist, RLS read OK')})"
 ```
-Expected: `tables exist, RLS read OK` (zero rows is fine — table just needs to exist and be readable).
+Expected: `tables exist, RLS read OK` (zero rows is fine: table just needs to exist and be readable).
 
 **Path B (optional automation, needs DB password): `pg` script.**
 
@@ -236,7 +236,7 @@ console.log('Schema applied.')
 - [ ] **Step B3:** `npm run db:schema` → expect `Schema applied.` Then run the
   Step A2 verification. If the direct host refuses (IPv6-only on some
   projects), fall back to Path A. Do NOT guess alternate hosts more than once
-  — fall back to Path A and move on.
+ : fall back to Path A and move on.
 
 - [ ] **Step 3 (both paths): Commit**
 
@@ -255,7 +255,7 @@ git commit -m "feat(db): schema apply path" --allow-empty
 - [ ] **Step 1: Write the migration**
 
 Reuse the website's seed parser at `../../website/src/data.mjs`
-(`loadRestaurants()` returns plain objects with `slug`, `menu` etc. — VERIFY
+(`loadRestaurants()` returns plain objects with `slug`, `menu` etc.: VERIFY
 it exposes `menu`; if not, parse `src/data/seedRestaurants.ts` for the menu
 field). Create `scripts/migrateToSupabase.mjs`:
 
@@ -480,7 +480,7 @@ NOTE on `opening`: the seed objects carry an `opening` schedule used by
 undefined makes `isOpenAt` return "unknown" → treated as open (the open-now
 filter simply won't exclude DB rows). This is acceptable and documented; a
 later increment can reconstruct `OpeningInfo` from `hours_kind`. The mapper
-must compile against the real `Restaurant`/`Dish` types — if a required
+must compile against the real `Restaurant`/`Dish` types: if a required
 field is missing, add it from the row (do not cast away required fields).
 
 - [ ] **Step 2: Verify it compiles**
@@ -718,7 +718,7 @@ export class SupabaseSource implements RestaurantSource {
 NOTE: dish-term filtering is intentionally NOT pushed to SQL here (dish text
 lives in the child table; a server-side join filter is more complex). The
 pipeline's widen + client ranking still surface dish matches because
-`scoreDish` runs on the candidates. If `find` over-returns, that's fine —
+`scoreDish` runs on the candidates. If `find` over-returns, that's fine :
 the shortlist cap + ranker handle it. Keep `find` correct, not exhaustive.
 
 - [ ] **Step 4: Run tests**
@@ -834,7 +834,7 @@ Convert these methods to async, each trying Supabase then falling back to seed o
   },
 ```
 
-(Keep `rankedResults`/`ranked` naming consistent with `PipelineResult.ranked`. `search` now returns `rankedResults: pipeline.rankedResults` — adjust: `searchByIntent` returns `rankedResults`, so in `search` use the returned `rankedResults`.)
+(Keep `rankedResults`/`ranked` naming consistent with `PipelineResult.ranked`. `search` now returns `rankedResults: pipeline.rankedResults`: adjust: `searchByIntent` returns `rankedResults`, so in `search` use the returned `rankedResults`.)
 
 - [ ] **Step 5: Persist claims to the DB (best-effort)**
 
@@ -862,7 +862,7 @@ In `submitRestaurantLead`, after the existing local `addRestaurantLead(stored)` 
 - [ ] **Step 6: Verify lint**
 
 Run: `npm run lint`
-Expected: PASS. The async signature changes will surface compile errors at the page call sites — those are fixed in Tasks 9-11. If lint blocks here on the pages, that's expected; proceed (pages get fixed next). If lint blocks IN api.ts itself, fix it.
+Expected: PASS. The async signature changes will surface compile errors at the page call sites: those are fixed in Tasks 9-11. If lint blocks here on the pages, that's expected; proceed (pages get fixed next). If lint blocks IN api.ts itself, fix it.
 
 - [ ] **Step 7: Commit**
 
@@ -877,7 +877,7 @@ git commit -m "feat(db): api reads via Supabase with seed fallback; persist clai
 
 **Files:** Modify `src/pages/Ask.tsx`, `src/pages/Results.tsx`
 
-- [ ] **Step 1: Ask.tsx — replace the useMemo search with an async effect**
+- [ ] **Step 1: Ask.tsx: replace the useMemo search with an async effect**
 
 In `src/pages/Ask.tsx`, replace:
 
@@ -912,7 +912,7 @@ with state + effect:
 
 Add imports at the top: `import type { Restaurant } from '../types/restaurant'` and `import type { RankedResult } from '../types/search'` (merge with the existing search-type import). Remove the now-unused `useMemo`, `rankRestaurants`, `SEED_RESTAURANTS`, and the `void SEED_RESTAURANTS` line if present.
 
-- [ ] **Step 2: Ask.tsx — optional loading indicator**
+- [ ] **Step 2: Ask.tsx: optional loading indicator**
 
 Where results render, show a simple loading state when `loading && query`. Find the results section and add, just before it:
 
@@ -922,7 +922,7 @@ Where results render, show a simple loading state when `loading && query`. Find 
       )}
 ```
 
-- [ ] **Step 3: Results.tsx — route through api.searchByIntent**
+- [ ] **Step 3: Results.tsx: route through api.searchByIntent**
 
 In `src/pages/Results.tsx`, read the current logic (it builds `ranked` via `rankRestaurants(intent, SEED_RESTAURANTS, ...)` inside a `useMemo`). Replace the direct-rank `useMemo` with an async effect that calls `api.searchByIntent(intent)` and stores `results`. Remove `rankRestaurants` + `SEED_RESTAURANTS` imports. Concretely, replace the `useMemo` that produces `ranked` with:
 
@@ -943,7 +943,7 @@ In `src/pages/Results.tsx`, read the current logic (it builds `ranked` via `rank
   }, [intent])
 ```
 
-Then update the render to map `items` (each has `.restaurant` and `.rr`) instead of the old `ranked` structure, and show `loading ? 'Cargando…'` when appropriate. Read the existing render to wire the field names exactly (the old code used `ranked.map(({ restaurant, rr }) => ...)` per the grep — if so, just rename `ranked` → `items`). Add imports: `import { api } from '../lib/api'`, `import type { Restaurant } from '../types/restaurant'`, `import type { RankedResult } from '../types/search'`.
+Then update the render to map `items` (each has `.restaurant` and `.rr`) instead of the old `ranked` structure, and show `loading ? 'Cargando…'` when appropriate. Read the existing render to wire the field names exactly (the old code used `ranked.map(({ restaurant, rr }) => ...)` per the grep: if so, just rename `ranked` → `items`). Add imports: `import { api } from '../lib/api'`, `import type { Restaurant } from '../types/restaurant'`, `import type { RankedResult } from '../types/search'`.
 
 NOTE: Results.tsx had sort/filter logic applied after ranking. Preserve it: apply the existing sort to `items` (by `restaurant.averageSpend`, `rating`, etc.) the same way it did before. Read the file and keep that behaviour; only the data SOURCE changes (api pipeline instead of direct rank).
 
@@ -967,7 +967,7 @@ git commit -m "feat(db): Ask + Results read via async search pipeline"
 
 **Files:** Modify `src/pages/RestaurantDetail.tsx`, `src/pages/Saved.tsx`, `src/pages/Admin.tsx`
 
-- [ ] **Step 1: RestaurantDetail.tsx — async getRestaurantBySlug**
+- [ ] **Step 1: RestaurantDetail.tsx: async getRestaurantBySlug**
 
 Currently `const r = api.getRestaurantBySlug(slug)` is synchronous and used throughout the component. Replace with state + effect at the top of the component:
 
@@ -1003,7 +1003,7 @@ Add `import type { Restaurant } from '../types/restaurant'` if not present. The 
 
 The `personalised` useMemo and other code referencing `r` already handle `if (!r) return null` internally; keep them. Verify nothing else calls `api.getRestaurantBySlug` synchronously.
 
-- [ ] **Step 2: Saved.tsx — async getRestaurantsByIds**
+- [ ] **Step 2: Saved.tsx: async getRestaurantsByIds**
 
 Currently `setSaved(api.getRestaurantsByIds(ids))` inside an effect. Make it await the promise:
 
@@ -1013,9 +1013,9 @@ Currently `setSaved(api.getRestaurantsByIds(ids))` inside an effect. Make it awa
     setRecent(getRecentSearches())
 ```
 
-(Read the surrounding effect to place this correctly; `getSavedIds`/`getRecentSearches` stay synchronous — only the api call becomes a promise.)
+(Read the surrounding effect to place this correctly; `getSavedIds`/`getRecentSearches` stay synchronous: only the api call becomes a promise.)
 
-- [ ] **Step 3: Admin.tsx — async listRestaurants**
+- [ ] **Step 3: Admin.tsx: async listRestaurants**
 
 Currently `const restaurants = api.listRestaurants()` at component top. Convert to state + effect:
 
@@ -1035,7 +1035,7 @@ Expected: PASS.
 Run: `npm run build`
 Expected: PASS.
 Run: `npm test`
-Expected: PASS (all suites; mvp.test.ts may need awaits — see Task 11).
+Expected: PASS (all suites; mvp.test.ts may need awaits: see Task 11).
 
 - [ ] **Step 5: Commit**
 

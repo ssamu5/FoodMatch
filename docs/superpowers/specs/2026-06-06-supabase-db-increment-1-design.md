@@ -130,7 +130,7 @@ write them. Admin writes happen via the service key (migration/dashboard).
 4. **`src/lib/supabaseSource.ts`** (new): `SupabaseSource implements
    RestaurantSource`. `all()` selects restaurants + dishes; `find(filter)`
    issues the coarse query (`.eq('area',...)`, `.lte('average_spend',...)`,
-   `.in('cuisine',...)`, dish/cuisine `or` for dish terms) — the real SQL
+   `.in('cuisine',...)`, dish/cuisine `or` for dish terms): the real SQL
    WHERE. Maps rows to `Restaurant` (incl. nested `menu`). On any error,
    logs and signals fallback.
 5. **`src/lib/api.ts`:** pick the source: `supabaseEnabled ?
@@ -159,7 +159,7 @@ write them. Admin writes happen via the service key (migration/dashboard).
 ## Schema application
 
 Apply schema + RLS via the Supabase MCP `apply_migration` against project
-`tiofurkrxqsnliwppkgc` (the MCP is authorized to the OLD account though —
+`tiofurkrxqsnliwppkgc` (the MCP is authorized to the OLD account though :
 if it cannot reach this project, fall back to running the SQL through a
 `scripts/applySchema.mjs` using the service key, or paste into the SQL
 editor). Spec assumes the SQL is the source of truth either way; store it
