@@ -98,12 +98,23 @@ describe('FoodMatch MVP lead generation', () => {
 
 describe('FoodMatch MVP local state', () => {
   it('keeps saves usable in-session when localStorage is blocked', () => {
-    const getSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new DOMException('blocked', 'SecurityError')
-    })
-    const setSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new DOMException('blocked', 'SecurityError')
-    })
+    // Simulate a browser where localStorage exists but every access throws
+    // (Safari private mode, blocked storage). storage.ts must fall back to its
+    // in-memory store so saves stay usable for the session. We stub the global
+    // rather than spying on Storage.prototype so this runs in the node test
+    // environment (which has no DOM Storage) without pulling in jsdom.
+    const blocked = {
+      getItem: () => {
+        throw new Error('storage blocked')
+      },
+      setItem: () => {
+        throw new Error('storage blocked')
+      },
+      removeItem: () => {
+        throw new Error('storage blocked')
+      },
+    }
+    vi.stubGlobal('localStorage', blocked)
 
     try {
       const id = aBurgerSpot.id
@@ -115,8 +126,7 @@ describe('FoodMatch MVP local state', () => {
       unsaveRestaurant(id)
       expect(getSavedIds()).not.toContain(id)
     } finally {
-      getSpy.mockRestore()
-      setSpy.mockRestore()
+      vi.unstubAllGlobals()
     }
   })
 })
