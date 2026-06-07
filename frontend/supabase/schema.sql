@@ -73,5 +73,15 @@ create policy "public read restaurants" on public.restaurants for select using (
 drop policy if exists "public read dishes" on public.dishes;
 create policy "public read dishes" on public.dishes for select using (true);
 
+-- Anyone (signed out or signed in) may submit a restaurant claim. Be explicit
+-- about the roles and the table grant so the insert path cannot silently break
+-- if Supabase default grants differ. Read/update/delete stay closed (no policy),
+-- so the table is insert-only for the public.
 drop policy if exists "anon insert claims" on public.restaurant_claims;
-create policy "anon insert claims" on public.restaurant_claims for insert with check (true);
+create policy "anon insert claims"
+  on public.restaurant_claims
+  for insert
+  to anon, authenticated
+  with check (true);
+
+grant insert on public.restaurant_claims to anon, authenticated;
