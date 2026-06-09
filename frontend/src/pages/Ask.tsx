@@ -13,8 +13,6 @@ import { useT } from '../lib/i18n'
 import type { Restaurant } from '../types/restaurant'
 import type { FoodIntent, RankedResult } from '../types/search'
 
-const REFINEMENTS = ['cheaper', 'closer', 'romantic', 'open now', 'vegetarian']
-
 export default function Ask() {
   const [params, setParams] = useSearchParams()
   const initialQuery = params.get('q') || ''

@@ -13,6 +13,7 @@ export const es: Dictionary = {
     opensSoon: 'Abre pronto',
     viewDetails: 'Ver detalles',
     forRestaurants: 'Para restaurantes',
+    and: 'y',
   },
   nav: {
     discover: 'Descubre',

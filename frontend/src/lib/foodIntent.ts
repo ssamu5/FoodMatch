@@ -337,15 +337,6 @@ export function intentFromProfile(p: TasteProfile, city = 'Valencia'): FoodInten
   }
 }
 
-// ---------- Starter chip presets ----------
-
-export const STARTER_CHIPS: Array<{ label: string; query: string }> = [
-  { label: 'Dinner under €20', query: 'Dinner under €20' },
-  { label: 'Date night sushi', query: 'Date night sushi' },
-  { label: 'Healthy lunch near me', query: 'Healthy lunch near me' },
-  { label: 'Group dinner tonight', query: 'Group dinner tonight' },
-]
-
 // ---------- Refinement helper ----------
 
 // Mutates intent by applying one of the quick refinement chips on the Ask page.

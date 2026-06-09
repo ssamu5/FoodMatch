@@ -209,7 +209,7 @@ export default function RestaurantDetail() {
       <section className="mt-4 rounded-2xl glass p-4">
         <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.whyPicks')}</h2>
         <p className="mt-2 text-[14px] leading-relaxed text-tinta">
-          {r.bestFor.length > 0 ? t('detail.bestForShort', { tags: r.bestFor.slice(0, 2).join(' and ') }) : ''}
+          {r.bestFor.length > 0 ? t('detail.bestForShort', { tags: r.bestFor.slice(0, 2).join(` ${t('common.and')} `) }) : ''}
           {t('detail.typicalSpend', { spend: String(r.averageSpend), vibe: r.vibe.slice(0, 3).join(', ') })}
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
