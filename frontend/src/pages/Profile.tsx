@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import AppShell from '../components/AppShell'
+import LanguageToggle from '../components/LanguageToggle'
+import { useT } from '../lib/i18n'
 import { clearAccount, getAccount, getTasteProfile, saveAccount, saveTasteProfile } from '../lib/storage'
 import { api } from '../lib/api'
 import { track } from '../lib/analytics'
@@ -20,6 +22,7 @@ const AREAS: Area[] = ['Ruzafa', 'El Carmen', 'Canovas', 'Benimaclet', 'City cen
 const VIBES: Vibe[] = ['romantic', 'casual', 'lively', 'quiet', 'family', 'work', 'outdoor', 'cozy']
 
 export default function Profile() {
+  const { t } = useT()
   const [profile, setProfile] = useState<TasteProfile>(() => getTasteProfile())
   const [emailDraft, setEmailDraft] = useState(profile.email || '')
   const [savedAt, setSavedAt] = useState<string | null>(null)
@@ -79,9 +82,9 @@ export default function Profile() {
   return (
     <AppShell>
       <section className="pt-2">
-        <h1 className="font-display text-[28px] font-bold leading-tight text-tinta">You</h1>
+        <h1 className="font-display text-[28px] font-bold leading-tight text-tinta">{t('profile.heading')}</h1>
         <p className="mt-1 text-[13px] text-tinta/70">
-          Your FoodMatch profile for the Valencia pilot.
+          {t('profile.subtitle')}
         </p>
       </section>
 
@@ -94,35 +97,35 @@ export default function Profile() {
               </span>
               <div className="min-w-0">
                 <p className="truncate font-display text-[19px] font-bold leading-tight text-tinta">
-                  Hola, {account.displayName}
+                  {t('profile.greeting', { name: account.displayName })}
                 </p>
                 <p className="truncate text-[12px] text-tinta/60">
-                  {account.email ?? 'Signed in on this device'}
+                  {account.email ?? t('profile.signedInOnDevice')}
                 </p>
               </div>
             </div>
             <button onClick={signOut} className="btn-ghost mt-4 h-10 w-full text-[13px]">
-              Sign out
+              {t('profile.signOut')}
             </button>
           </>
         ) : (
           <>
-            <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">Create your profile</h2>
+            <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">{t('profile.createProfileHeading')}</h2>
             <p className="mt-1 text-[13px] leading-relaxed text-tinta/70">
-              Keep your saved spots and get craving-aware picks. No password yet, it stays on this device for the pilot.
+              {t('profile.createProfileBody')}
             </p>
             <div className="mt-3 space-y-2">
               <input
                 value={nameDraft}
                 onChange={(e) => setNameDraft(e.target.value)}
-                placeholder="Your name"
+                placeholder={t('profile.namePlaceholder')}
                 className="liquid-input w-full rounded-2xl px-3 py-2.5 text-[14px]"
               />
               <input
                 type="email"
                 value={acctEmailDraft}
                 onChange={(e) => setAcctEmailDraft(e.target.value)}
-                placeholder="Email (optional)"
+                placeholder={t('profile.emailPlaceholder')}
                 className="liquid-input w-full rounded-2xl px-3 py-2.5 text-[14px]"
               />
               <button
@@ -130,25 +133,25 @@ export default function Profile() {
                 disabled={!nameDraft.trim()}
                 className="btn-lime h-11 w-full text-[13px]"
               >
-                Continue
+                {t('profile.continue')}
               </button>
             </div>
             <p className="mt-2 text-[11px] text-tinta/50">
-              Demo sign-in for the pilot. Real accounts and sync come later.
+              {t('profile.demoNote')}
             </p>
           </>
         )}
       </section>
 
       <section className="mt-7">
-        <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">Your taste</h2>
+        <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">{t('profile.tasteHeading')}</h2>
         <p className="mt-1 text-[13px] text-tinta/70">
-          Tell FoodMatch what you usually love. We use it as a soft signal on every search.
+          {t('profile.tasteSubtitle')}
         </p>
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Favorite cuisines</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.sectionCuisines')}</h2>
         <div className="flex flex-wrap gap-1.5">
           {CUISINES.map((c) => (
             <button
@@ -168,7 +171,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Budget comfort</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.sectionBudget')}</h2>
         <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
@@ -179,7 +182,7 @@ export default function Profile() {
               persist(next)
             }}
           >
-            No preference
+            {t('profile.noPreference')}
           </button>
           {[1, 2, 3, 4].map((l) => (
             <button
@@ -199,7 +202,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Preferred areas</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.sectionAreas')}</h2>
         <div className="flex flex-wrap gap-1.5">
           {AREAS.map((a) => (
             <button
@@ -219,7 +222,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Dietary</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.sectionDietary')}</h2>
         <div className="flex flex-wrap gap-1.5">
           {(['vegetarian', 'vegan', 'gluten-free'] as const).map((d) => (
             <button
@@ -239,7 +242,7 @@ export default function Profile() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Vibe</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.sectionVibe')}</h2>
         <div className="flex flex-wrap gap-1.5">
           {VIBES.map((v) => (
             <button
@@ -258,24 +261,31 @@ export default function Profile() {
         </div>
       </section>
 
+      <section className="mt-5">
+        <div className="flex items-center justify-between rounded-2xl glass px-4 py-3">
+          <span className="text-[13px] text-tinta">{t('language.label')}</span>
+          <LanguageToggle />
+        </div>
+      </section>
+
       <section className="mt-6 rounded-2xl glass p-4">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Weekly Valencia picks</h2>
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.weeklyPicksHeading')}</h2>
         <p className="mt-1 text-[13px] text-tinta/70">
-          Optional. Email me one short list of best spots per week. Unsubscribe anytime.
+          {t('profile.weeklyPicksBody')}
         </p>
         <div className="mt-3 flex gap-2">
           <input
             type="email"
             value={emailDraft}
             onChange={(e) => setEmailDraft(e.target.value)}
-            placeholder="you@email.com"
+            placeholder={t('profile.emailPlaceholderPicks')}
             className="liquid-input flex-1 rounded-full px-4 py-2 text-[14px] focus:outline-none"
           />
           <button onClick={submitEmail} className="btn-lime h-10 px-4 text-[13px]" disabled={!emailDraft.trim()}>
-            Subscribe
+            {t('profile.subscribe')}
           </button>
         </div>
-        {savedAt && <p className="mt-2 text-[11px] text-tinta/70">Saved at {savedAt}.</p>}
+        {savedAt && <p className="mt-2 text-[11px] text-tinta/70">{t('profile.savedAt', { time: savedAt })}</p>}
       </section>
     </AppShell>
   )
