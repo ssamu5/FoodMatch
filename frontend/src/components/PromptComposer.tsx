@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useT } from '../lib/i18n'
 
 interface PromptComposerProps {
   initialValue?: string
@@ -14,8 +15,8 @@ interface PromptComposerProps {
 
 export default function PromptComposer({
   initialValue = '',
-  placeholder = 'What do you feel like eating?',
-  cta = 'Find my match',
+  placeholder,
+  cta,
   starterChips,
   refinementChips,
   onSubmit,
@@ -23,6 +24,9 @@ export default function PromptComposer({
   autoFocus,
   compact,
 }: PromptComposerProps) {
+  const { t } = useT()
+  const resolvedPlaceholder = placeholder ?? t('search.defaultPlaceholder')
+  const resolvedCta = cta ?? t('search.cta')
   const [value, setValue] = useState(initialValue)
 
   function handleSubmit(e: FormEvent) {
@@ -50,13 +54,13 @@ export default function PromptComposer({
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKey}
           rows={compact ? 1 : 2}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className="min-w-0 flex-1 resize-none bg-transparent py-1.5 text-[16px] leading-snug text-tinta placeholder:text-tinta/45 focus:outline-none"
         />
         <button
           type="submit"
           disabled={!value.trim()}
-          aria-label={cta}
+          aria-label={resolvedCta}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-tomate text-cream transition enabled:hover:bg-tomateDeep enabled:active:scale-95 disabled:opacity-30"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">

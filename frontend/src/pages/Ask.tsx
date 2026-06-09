@@ -9,6 +9,7 @@ import { api } from '../lib/api'
 import { applyRefinement, parseFoodIntent } from '../lib/foodIntent'
 import { buildMatchExplanation } from '../lib/ranking'
 import { track } from '../lib/analytics'
+import { useT } from '../lib/i18n'
 import type { Restaurant } from '../types/restaurant'
 import type { FoodIntent, RankedResult } from '../types/search'
 
@@ -18,6 +19,7 @@ export default function Ask() {
   const [params, setParams] = useSearchParams()
   const initialQuery = params.get('q') || ''
   const navigate = useNavigate()
+  const { t, tn } = useT()
 
   const [query, setQuery] = useState(initialQuery)
   const [intent, setIntent] = useState<FoodIntent>(() => parseFoodIntent(initialQuery))
@@ -86,9 +88,27 @@ export default function Ask() {
     setIntent(parseFoodIntent(q))
   }
 
+  // Map from translated label back to the English logic key used by applyRefinement.
+  const refinementLabelToKey: Record<string, string> = {
+    [t('ask.refineCheaper')]: 'cheaper',
+    [t('ask.refineCloser')]: 'closer',
+    [t('ask.refineRomantic')]: 'romantic',
+    [t('ask.refineOpenNow')]: 'open now',
+    [t('ask.refineVegetarian')]: 'vegetarian',
+  }
+
+  const refinementLabels = [
+    t('ask.refineCheaper'),
+    t('ask.refineCloser'),
+    t('ask.refineRomantic'),
+    t('ask.refineOpenNow'),
+    t('ask.refineVegetarian'),
+  ]
+
   function handleRefine(label: string) {
-    setIntent((i) => applyRefinement(i, label))
-    track('filter_applied', { source: 'refinement_chip', label })
+    const key = refinementLabelToKey[label] ?? label
+    setIntent((i) => applyRefinement(i, key))
+    track('filter_applied', { source: 'refinement_chip', label: key })
   }
 
   return (
@@ -96,9 +116,9 @@ export default function Ask() {
       <section className="pt-2">
         <PromptComposer
           initialValue={query}
-          placeholder="Tell FoodMatch what you're craving..."
+          placeholder={t('ask.placeholder')}
           starterChips={!query ? undefined : undefined}
-          refinementChips={query ? REFINEMENTS : undefined}
+          refinementChips={query ? refinementLabels : undefined}
           onSubmit={handleSubmit}
           onRefine={handleRefine}
           autoFocus={!query}
@@ -109,8 +129,8 @@ export default function Ask() {
       {!query && (
         <section className="mt-8 space-y-3">
           <EmptyState
-            title="FoodMatch is ready."
-            hint='Tell me what you crave in Valencia. Try "vegan brunch in Russafa under €15", "date night quiet paella by the sea", or "tapas open now near me".'
+            title={t('ask.emptyTitle')}
+            hint={t('ask.emptyHint')}
           />
         </section>
       )}
@@ -118,7 +138,7 @@ export default function Ask() {
       {query && loading && (
         <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
           <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
-          Finding your matches...
+          {t('ask.loading')}
         </section>
       )}
 
@@ -126,13 +146,13 @@ export default function Ask() {
         <section className="mt-6 space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-[12px] uppercase tracking-[0.18em] text-tinta/50">
-              FoodMatch found {results.length} match{results.length === 1 ? '' : 'es'}
+              {tn('results.found', results.length)}
             </h2>
             <button
               onClick={() => navigate(`/results?q=${encodeURIComponent(query)}`)}
               className="text-[12px] text-tinta/70 hover:text-tinta"
             >
-              See all &rarr;
+              {t('ask.seeAll')} &rarr;
             </button>
           </div>
 
@@ -146,15 +166,15 @@ export default function Ask() {
 
           {!top && (
             <EmptyState
-              title="No matches"
-              hint="Try loosening cuisine, area, or budget. The starter chips on the home page are good starting points."
-              action={{ label: 'Back to home', onClick: () => navigate('/') }}
+              title={t('ask.noMatchTitle')}
+              hint={t('ask.noMatchHint')}
+              action={{ label: t('ask.backHome'), onClick: () => navigate('/') }}
             />
           )}
 
           {shortlist.length > 0 && (
             <div>
-              <h3 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-tinta/50">Shortlist</h3>
+              <h3 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-tinta/50">{t('ask.shortlist')}</h3>
               <div className="space-y-2">
                 {shortlist.map((r, idx) => {
                   const s = rankedResults.find((rr) => rr.restaurantId === r.id)?.score

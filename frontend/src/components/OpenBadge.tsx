@@ -1,5 +1,6 @@
 import type { Restaurant } from '../types/restaurant'
 import { getOpenStatus } from '../lib/ranking'
+import { useT } from '../lib/i18n'
 
 interface OpenBadgeProps {
   restaurant: Restaurant
@@ -14,6 +15,7 @@ interface OpenBadgeProps {
  */
 export default function OpenBadge({ restaurant, onImage, className }: OpenBadgeProps) {
   const status = getOpenStatus(restaurant)
+  const { t } = useT()
   if (status.state === 'unknown') return null
 
   let dot: string
@@ -23,16 +25,16 @@ export default function OpenBadge({ restaurant, onImage, className }: OpenBadgeP
   if (status.state === 'open') {
     if (status.closesSoon) {
       dot = 'bg-mostaza'
-      text = 'Closes soon'
+      text = t('common.closesSoon')
       tone = onImage ? 'text-cream' : 'text-tinta'
     } else {
       dot = 'bg-fresco'
-      text = 'Open now'
+      text = t('common.open')
       tone = onImage ? 'text-cream' : 'text-tinta'
     }
   } else {
     dot = onImage ? 'bg-cream/50' : 'bg-tinta/30'
-    text = status.opensSoon ? 'Opens soon' : 'Closed'
+    text = status.opensSoon ? t('common.opensSoon') : t('common.closed')
     tone = onImage ? 'text-cream/85' : 'text-tinta/55'
   }
 

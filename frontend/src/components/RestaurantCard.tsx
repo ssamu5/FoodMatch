@@ -7,6 +7,7 @@ import RestaurantCover from './RestaurantCover'
 import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap } from '../lib/native'
+import { useT } from '../lib/i18n'
 
 interface RestaurantCardProps {
   restaurant: Restaurant
@@ -25,6 +26,7 @@ function priceMark(level: 1 | 2 | 3 | 4): string {
 export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemove }: RestaurantCardProps) {
   const link = `/restaurant/${restaurant.slug}`
   const [saved, setSaved] = useState(() => isSaved(restaurant.id))
+  const { t } = useT()
 
   function toggleSave() {
     if (saved) {
@@ -63,7 +65,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
           {onRemove ? (
             <button
               type="button"
-              aria-label="Remove from saved"
+              aria-label={t('search.removeFromSaved')}
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -76,7 +78,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
           ) : (
             <button
               type="button"
-              aria-label={saved ? 'Remove from saved' : 'Save'}
+              aria-label={saved ? t('search.removeFromSaved') : t('common.save')}
               aria-pressed={saved}
               onClick={(e) => {
                 e.preventDefault()

@@ -9,6 +9,7 @@ import { api } from '../lib/api'
 import { intentFromProfile, parseFoodIntent, profileHasSignal } from '../lib/foodIntent'
 import { getTasteProfile } from '../lib/storage'
 import { track } from '../lib/analytics'
+import { useT } from '../lib/i18n'
 import type { Restaurant } from '../types/restaurant'
 import type { FoodIntent, RankedResult } from '../types/search'
 
@@ -16,6 +17,7 @@ export default function Results() {
   const [params, setParams] = useSearchParams()
   const initialQuery = params.get('q') || ''
   const navigate = useNavigate()
+  const { t } = useT()
 
   // When the user browses without a query, personalise from saved taste.
   const profile = getTasteProfile()
@@ -104,7 +106,7 @@ export default function Results() {
   }
 
   const summary = useMemo(() => {
-    if (!query) return usingPreferences ? 'Based on your taste' : 'Browsing all Valencia restaurants'
+    if (!query) return usingPreferences ? t('results.basedOnTaste') : t('results.browsingAll')
     const parts: string[] = []
     if (intent.cuisines.length) parts.push(intent.cuisines.join(', '))
     if (intent.area) parts.push(`in ${intent.area}`)
@@ -112,14 +114,16 @@ export default function Results() {
     if (intent.mustBeOpenNow) parts.push('open now')
     if (intent.dietary.length) parts.push(intent.dietary.join('+'))
     return parts.join(' · ') || query
-  }, [intent, query, usingPreferences])
+  // t is stable across renders (memoized in useT), so including it is safe.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intent, query, usingPreferences, t])
 
   return (
     <AppShell>
       <section className="space-y-3">
         <PromptComposer
           initialValue={query}
-          placeholder="Tell FoodMatch what you're craving..."
+          placeholder={t('ask.placeholder')}
           onSubmit={handleSubmit}
           compact
         />
@@ -132,13 +136,13 @@ export default function Results() {
             className="ml-2 inline-flex items-center gap-1.5 text-tinta/70 hover:text-tinta"
           >
             <FilterIcon className="h-3.5 w-3.5" />
-            Filters
+            {t('results.filters')}
           </button>
         </div>
 
         {!query && (
           <p className="px-1 text-[11px] leading-relaxed text-tinta/55">
-            Listings are built from public Valencia restaurant information. Restaurants can claim and enhance theirs.
+            {t('results.listingsNote')}
           </p>
         )}
       </section>
@@ -146,16 +150,16 @@ export default function Results() {
       {loading && (
         <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
           <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
-          Finding restaurants...
+          {t('results.loading')}
         </section>
       )}
 
       {!loading && ranked.length === 0 && (
         <section className="mt-6">
           <EmptyState
-            title="No matches with those filters"
-            hint="Loosen one of the constraints. Cuisine and area are the strongest filters."
-            action={{ label: 'Back to home', onClick: () => navigate('/') }}
+            title={t('results.noMatchTitle')}
+            hint={t('results.noMatchHint')}
+            action={{ label: t('results.backHome'), onClick: () => navigate('/') }}
           />
         </section>
       )}

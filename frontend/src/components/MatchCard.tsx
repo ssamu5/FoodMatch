@@ -3,6 +3,7 @@ import type { Restaurant } from '../types/restaurant'
 import type { MatchScore } from '../types/search'
 import OpenBadge from './OpenBadge'
 import RestaurantCover from './RestaurantCover'
+import { useT } from '../lib/i18n'
 
 interface MatchCardProps {
   restaurant: Restaurant
@@ -15,6 +16,7 @@ function priceMark(level: 1 | 2 | 3 | 4): string {
 }
 
 export default function MatchCard({ restaurant, score, explanation }: MatchCardProps) {
+  const { t } = useT()
   return (
     <Link
       to={`/restaurant/${restaurant.slug}`}
@@ -25,7 +27,7 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ink/30 to-ink/90" />
         <div className="absolute left-4 right-4 top-4 flex items-center justify-between">
           <span className="rounded-full bg-cream px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-tomate">
-            Best pick
+            {t('results.bestPick')}
           </span>
           <span className="rounded-full bg-tomate px-3 py-1 text-[12px] font-semibold text-cream">
             {score.score}/100
@@ -78,8 +80,8 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
         )}
 
         <div className="mt-4 flex items-center justify-between text-[12px] text-tinta/70">
-          <span>{restaurant.bestFor[0] ? `Best for: ${restaurant.bestFor[0]}` : restaurant.tags.slice(0, 2).join(' · ')}</span>
-          <span className="font-medium text-tinta group-hover:text-tomate">View details →</span>
+          <span>{restaurant.bestFor[0] ? t('results.bestFor', { tag: restaurant.bestFor[0] }) : restaurant.tags.slice(0, 2).join(' · ')}</span>
+          <span className="font-medium text-tinta group-hover:text-tomate">{t('common.viewDetails')} &rarr;</span>
         </div>
       </div>
     </Link>

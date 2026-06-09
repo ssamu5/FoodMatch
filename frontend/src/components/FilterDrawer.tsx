@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FoodIntent } from '../types/search'
 import type { Area, Cuisine, Vibe } from '../types/restaurant'
+import { useT } from '../lib/i18n'
 
 type SortKey = 'best' | 'closest' | 'cheapest' | 'rating'
 
@@ -55,16 +56,17 @@ const VIBE_OPTIONS: Vibe[] = [
   'cozy',
 ]
 
-const SORTS: { key: SortKey; label: string }[] = [
-  { key: 'best', label: 'Best match' },
-  { key: 'closest', label: 'Closest' },
-  { key: 'cheapest', label: 'Cheapest' },
-  { key: 'rating', label: 'Rating' },
-]
-
 export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }: FilterDrawerProps) {
   const [draft, setDraft] = useState<FoodIntent>(intent)
   const [sort, setSort] = useState<SortKey>(sortKey)
+  const { t } = useT()
+
+  const SORTS: { key: SortKey; label: string }[] = [
+    { key: 'best', label: t('filters.sortBest') },
+    { key: 'closest', label: t('filters.sortClosest') },
+    { key: 'cheapest', label: t('filters.sortCheapest') },
+    { key: 'rating', label: t('filters.sortRating') },
+  ]
 
   useEffect(() => {
     if (open) {
@@ -104,10 +106,10 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end" role="dialog" aria-label="Filters">
+    <div className="fixed inset-0 z-50 flex items-end" role="dialog" aria-label={t('filters.ariaLabel')}>
       <button
         type="button"
-        aria-label="Close filters"
+        aria-label={t('filters.ariaClose')}
         className="absolute inset-0 bg-ink/70 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -116,13 +118,13 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-tinta/20" />
 
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-[18px] font-semibold text-tinta">Filters &amp; sort</h2>
-          <button onClick={onClose} className="text-[12px] text-tinta/70 hover:text-tinta">Close</button>
+          <h2 className="font-display text-[18px] font-semibold text-tinta">{t('filters.title')}</h2>
+          <button onClick={onClose} className="text-[12px] text-tinta/70 hover:text-tinta">{t('filters.close')}</button>
         </div>
 
         <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Sort</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('filters.sectionSort')}</h3>
             <div className="flex flex-wrap gap-1.5">
               {SORTS.map((s) => (
                 <button
@@ -138,7 +140,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Cuisine</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('filters.sectionCuisine')}</h3>
             <div className="flex flex-wrap gap-1.5">
               {CUISINE_OPTIONS.map((c) => (
                 <button
@@ -154,14 +156,14 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Area</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('filters.sectionArea')}</h3>
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
                 className={['chip', draft.area === null ? 'active' : ''].join(' ')}
                 onClick={() => setArea(null)}
               >
-                Anywhere
+                {t('filters.anywhere')}
               </button>
               {AREA_OPTIONS.map((a) => (
                 <button
@@ -177,14 +179,14 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Budget</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('filters.sectionBudget')}</h3>
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
                 className={['chip', draft.budgetLevel === null ? 'active' : ''].join(' ')}
                 onClick={() => setBudget(null)}
               >
-                Any
+                {t('filters.any')}
               </button>
               {[1, 2, 3, 4].map((l) => (
                 <button
@@ -200,7 +202,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Vibe</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('filters.sectionVibe')}</h3>
             <div className="flex flex-wrap gap-1.5">
               {VIBE_OPTIONS.map((v) => (
                 <button
@@ -216,7 +218,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Dietary</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('filters.sectionDietary')}</h3>
             <div className="flex flex-wrap gap-1.5">
               {(['vegetarian', 'vegan', 'gluten-free'] as const).map((d) => (
                 <button
@@ -232,14 +234,14 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
           </section>
 
           <section>
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Availability</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('filters.sectionAvailability')}</h3>
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
                 className={['chip', draft.mustBeOpenNow ? 'active' : ''].join(' ')}
                 onClick={toggleOpenNow}
               >
-                Open now
+                {t('filters.openNow')}
               </button>
             </div>
           </section>
@@ -263,7 +265,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
               setSort('best')
             }}
           >
-            Reset
+            {t('filters.reset')}
           </button>
           <button
             type="button"
@@ -273,7 +275,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
               onClose()
             }}
           >
-            Apply
+            {t('filters.apply')}
           </button>
         </div>
       </div>
