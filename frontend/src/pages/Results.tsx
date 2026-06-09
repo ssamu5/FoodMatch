@@ -109,9 +109,9 @@ export default function Results() {
     if (!query) return usingPreferences ? t('results.basedOnTaste') : t('results.browsingAll')
     const parts: string[] = []
     if (intent.cuisines.length) parts.push(intent.cuisines.join(', '))
-    if (intent.area) parts.push(`in ${intent.area}`)
-    if (intent.maxSpendEur) parts.push(`under €${intent.maxSpendEur}`)
-    if (intent.mustBeOpenNow) parts.push('open now')
+    if (intent.area) parts.push(t('results.summaryIn', { area: intent.area }))
+    if (intent.maxSpendEur) parts.push(t('results.summaryUnder', { spend: intent.maxSpendEur }))
+    if (intent.mustBeOpenNow) parts.push(t('results.summaryOpenNow'))
     if (intent.dietary.length) parts.push(intent.dietary.join('+'))
     return parts.join(' · ') || query
   // t is stable across renders (memoized in useT), so including it is safe.

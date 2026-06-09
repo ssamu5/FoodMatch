@@ -23,7 +23,7 @@ describe('translate', () => {
   })
 
   it('interpolates {vars}', () => {
-    expect(translate('en', 'greeting', { name: 'Sam' })).toBe('Hi Sam')
+    expect(translate('en', 'profile.greeting', { name: 'Sam' })).toBe('Hi, Sam')
   })
 
   it('falls back to the raw key for missing keys', () => {
@@ -33,7 +33,7 @@ describe('translate', () => {
 
 describe('translatePlural', () => {
   it('selects one vs other and injects {count}', () => {
-    expect(translatePlural('en', 'plural', 1)).toBe('1 item')
-    expect(translatePlural('en', 'plural', 3)).toBe('3 items')
+    expect(translatePlural('en', 'results.found', 1)).toBe('FoodMatch found 1 match')
+    expect(translatePlural('en', 'results.found', 3)).toBe('FoodMatch found 3 matches')
   })
 })

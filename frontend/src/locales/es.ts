@@ -30,8 +30,6 @@ export const es: Dictionary = {
     switchToLight: 'Cambiar a modo claro',
     switchToSystem: 'Cambiar a modo del sistema',
   },
-  greeting: 'Hola {name}',
-  plural: { one: '{count} elemento', other: '{count} elementos' },
   welcome: {
     headingPrefix: 'Bienvenido a',
     roleSubtitle: 'Descubre dónde comer en Valencia, y ayuda a los restaurantes locales a que los encuentren.',
@@ -100,6 +98,9 @@ export const es: Dictionary = {
     shortlist: 'Lista corta',
     bestFor: 'Ideal para: {tag}',
     whyFits: 'Por qué encaja con tu búsqueda',
+    summaryIn: 'en {area}',
+    summaryUnder: 'menos de €{spend}',
+    summaryOpenNow: 'abierto ahora',
   },
   search: {
     removeFromSaved: 'Eliminar de guardados',

@@ -15,11 +15,3 @@ export function listingTier(r: Restaurant): ListingTier {
 export function listingTierLabel(r: Restaurant): string {
   return r.isPartner ? 'Verified partner' : 'Public listing'
 }
-
-// Shown on public (unclaimed) restaurant detail pages.
-export const PUBLIC_LISTING_NOTE =
-  'This profile is built from publicly available information so diners can discover the place. If you run it, you can claim the listing to verify details, add photos and menu, and see demand insights.'
-
-// Shown on verified partner detail pages.
-export const VERIFIED_LISTING_NOTE =
-  'Details on this listing are managed by the restaurant as a FoodMatch partner.'

@@ -30,8 +30,6 @@ export const en: Dictionary = {
     switchToLight: 'Switch to light mode',
     switchToSystem: 'Switch to system mode',
   },
-  greeting: 'Hi {name}',
-  plural: { one: '{count} item', other: '{count} items' },
   welcome: {
     headingPrefix: 'Welcome to',
     roleSubtitle: 'Discover where to eat in Valencia, and help local restaurants get found.',
@@ -100,6 +98,9 @@ export const en: Dictionary = {
     shortlist: 'Shortlist',
     bestFor: 'Best for: {tag}',
     whyFits: 'Why this fits your search',
+    summaryIn: 'in {area}',
+    summaryUnder: 'under €{spend}',
+    summaryOpenNow: 'open now',
   },
   search: {
     removeFromSaved: 'Remove from saved',
