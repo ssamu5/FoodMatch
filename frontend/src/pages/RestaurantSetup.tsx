@@ -4,6 +4,7 @@ import AppShell from '../components/AppShell'
 import { api } from '../lib/api'
 import { track } from '../lib/analytics'
 import { openExternal } from '../lib/native'
+import { useT } from '../lib/i18n'
 
 const FOODMATCH_EMAIL = 'hola@foodmatch.es'
 
@@ -24,85 +25,127 @@ type FieldKey =
   | 'menuLink'
   | 'hasPhotos'
 
+interface StepOption {
+  // The value committed to state and sent to the API (always the original Spanish string).
+  value: string
+  // The i18n key used to look up the translated display label.
+  labelKey: string
+}
+
 interface Step {
   key: FieldKey
-  // Foody's message (Spanish).
-  ask: (data: Partial<Record<FieldKey, string>>) => string
-  placeholder?: string
-  // Tap options. If present, the user can tap instead of typing.
-  options?: string[]
+  // i18n key for Foody's message.
+  askKey: string
+  // Whether ask() needs dynamic data interpolation ({name} etc.).
+  askVars?: (data: Partial<Record<FieldKey, string>>) => Record<string, string>
+  placeholderKey?: string
+  options?: StepOption[]
   optional?: boolean
-  // free-text allowed alongside options
   allowFreeText?: boolean
   kind?: 'text' | 'email' | 'tel' | 'url'
 }
 
-const AREAS = ['Ruzafa', 'El Carmen', 'Cánovas', 'Benimaclet', 'Centro', 'Marina / playa', 'Otra zona']
-const CUISINES = [
-  'Tapas', 'Arroces / paella', 'Menú del día', 'Hamburguesas', 'Pizza',
-  'Sushi', 'Brunch', 'Cafetería', 'Bar', 'Saludable', 'Mexicana', 'Otra',
+// Option lists: value is always the original Spanish string (committed to state
+// and API); labelKey resolves the translated display label.
+const AREA_OPTIONS: StepOption[] = [
+  { value: 'Ruzafa', labelKey: 'setup.optionAreaRuzafa' },
+  { value: 'El Carmen', labelKey: 'setup.optionAreaCarmen' },
+  { value: 'Cánovas', labelKey: 'setup.optionAreaCanovas' },
+  { value: 'Benimaclet', labelKey: 'setup.optionAreaBenimaclet' },
+  { value: 'Centro', labelKey: 'setup.optionAreaCentro' },
+  { value: 'Marina / playa', labelKey: 'setup.optionAreaMarina' },
+  { value: 'Otra zona', labelKey: 'setup.optionAreaOther' },
 ]
-const PRICE_BANDS = ['€ (hasta 15)', '€€ (15-30)', '€€€ (30-50)', '€€€€ (50+)']
+
+const CUISINE_OPTIONS: StepOption[] = [
+  { value: 'Tapas', labelKey: 'setup.optionCuisineTapas' },
+  { value: 'Arroces / paella', labelKey: 'setup.optionCuisineArroces' },
+  { value: 'Menú del día', labelKey: 'setup.optionCuisineMenu' },
+  { value: 'Hamburguesas', labelKey: 'setup.optionCuisineHamburguesas' },
+  { value: 'Pizza', labelKey: 'setup.optionCuisinePizza' },
+  { value: 'Sushi', labelKey: 'setup.optionCuisineSushi' },
+  { value: 'Brunch', labelKey: 'setup.optionCuisineBrunch' },
+  { value: 'Cafetería', labelKey: 'setup.optionCuisineCafeteria' },
+  { value: 'Bar', labelKey: 'setup.optionCuisineBar' },
+  { value: 'Saludable', labelKey: 'setup.optionCuisineSaludable' },
+  { value: 'Mexicana', labelKey: 'setup.optionCuisineMexicana' },
+  { value: 'Otra', labelKey: 'setup.optionCuisineOther' },
+]
+
+const PRICE_BAND_OPTIONS: StepOption[] = [
+  { value: '€ (hasta 15)', labelKey: 'setup.optionPrice1' },
+  { value: '€€ (15-30)', labelKey: 'setup.optionPrice2' },
+  { value: '€€€ (30-50)', labelKey: 'setup.optionPrice3' },
+  { value: '€€€€ (50+)', labelKey: 'setup.optionPrice4' },
+]
+
+const PHOTOS_OPTIONS: StepOption[] = [
+  { value: 'Sí, usad nuestras fotos', labelKey: 'setup.optionPhotosYes' },
+  { value: 'Prefiero enviarlas yo', labelKey: 'setup.optionPhotosMe' },
+  { value: 'Todavía no tengo', labelKey: 'setup.optionPhotosNo' },
+]
 
 const STEPS: Step[] = [
   {
     key: 'restaurantName',
-    ask: () => '¡Hola! Soy Foody. Te ayudo a poner tu restaurante en FoodMatch en un minuto, sin complicaciones. ¿Cómo se llama tu restaurante?',
-    placeholder: 'Casa Carmela',
+    askKey: 'setup.step1Ask',
+    placeholderKey: 'setup.placeholderRestaurantName',
   },
   {
     key: 'area',
-    ask: (d) => `Genial, ${d.restaurantName || ''}. ¿En qué zona de Valencia estáis?`,
-    options: AREAS,
+    askKey: 'setup.step2Ask',
+    askVars: (d) => ({ name: d.restaurantName || '' }),
+    options: AREA_OPTIONS,
     allowFreeText: true,
-    placeholder: 'Tu barrio',
+    placeholderKey: 'setup.placeholderArea',
   },
   {
     key: 'cuisine',
-    ask: () => '¿Qué tipo de comida hacéis? Toca la que mejor encaje.',
-    options: CUISINES,
+    askKey: 'setup.step3Ask',
+    options: CUISINE_OPTIONS,
     allowFreeText: true,
-    placeholder: 'Tu especialidad',
+    placeholderKey: 'setup.placeholderCuisine',
   },
   {
     key: 'priceBand',
-    ask: () => '¿Cuánto se suele gastar una persona? Una idea aproximada vale.',
-    options: PRICE_BANDS,
+    askKey: 'setup.step4Ask',
+    options: PRICE_BAND_OPTIONS,
   },
   {
     key: 'ownerName',
-    ask: () => 'Perfecto. ¿Y tú cómo te llamas? Para saber con quién hablamos.',
-    placeholder: 'Tu nombre',
+    askKey: 'setup.step5Ask',
+    placeholderKey: 'setup.placeholderOwnerName',
   },
   {
     key: 'phone',
-    ask: (d) => `Encantado, ${d.ownerName || ''}. ¿Un teléfono o WhatsApp de contacto?`,
-    placeholder: '+34 600 123 456',
+    askKey: 'setup.step6Ask',
+    askVars: (d) => ({ name: d.ownerName || '' }),
+    placeholderKey: 'setup.placeholderPhone',
     kind: 'tel',
   },
   {
     key: 'email',
-    ask: () => '¿Y un email? Te escribimos para terminar de montar la ficha.',
-    placeholder: 'hola@turestaurante.com',
+    askKey: 'setup.step7Ask',
+    placeholderKey: 'setup.placeholderEmail',
     kind: 'email',
   },
   {
     key: 'instagramOrWebsite',
-    ask: () => '¿Tenéis Instagram o web? Así cogemos vuestras fotos y no tenéis que subir nada.',
-    placeholder: '@turestaurante',
+    askKey: 'setup.step8Ask',
+    placeholderKey: 'setup.placeholderInstagram',
     optional: true,
   },
   {
     key: 'menuLink',
-    ask: () => '¿La carta está en algún sitio online (web, PDF, foto en Instagram)? Pega el enlace si lo tienes.',
-    placeholder: 'Enlace a la carta (opcional)',
+    askKey: 'setup.step9Ask',
+    placeholderKey: 'setup.placeholderMenuLink',
     optional: true,
     kind: 'url',
   },
   {
     key: 'hasPhotos',
-    ask: () => 'Última cosa: ¿queréis que usemos vuestras fotos de Instagram para la ficha?',
-    options: ['Sí, usad nuestras fotos', 'Prefiero enviarlas yo', 'Todavía no tengo'],
+    askKey: 'setup.step10Ask',
+    options: PHOTOS_OPTIONS,
   },
 ]
 
@@ -113,11 +156,15 @@ interface ChatLine {
 
 export default function RestaurantSetup() {
   const navigate = useNavigate()
+  const { t } = useT()
+
   const [stepIdx, setStepIdx] = useState(0)
   const [data, setData] = useState<Partial<Record<FieldKey, string>>>({})
   const [input, setInput] = useState('')
   const [done, setDone] = useState(false)
-  const [lines, setLines] = useState<ChatLine[]>([{ from: 'foody', text: STEPS[0].ask({}) }])
+  const [lines, setLines] = useState<ChatLine[]>([
+    { from: 'foody', text: t('setup.step1Ask') },
+  ])
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -131,11 +178,16 @@ export default function RestaurantSetup() {
   const step = STEPS[stepIdx]
   const progress = Math.round((stepIdx / STEPS.length) * 100)
 
+  function resolveAsk(s: Step, currentData: Partial<Record<FieldKey, string>>): string {
+    const vars = s.askVars ? s.askVars(currentData) : undefined
+    return vars ? t(s.askKey, vars) : t(s.askKey)
+  }
+
   function commit(rawValue: string) {
     const value = rawValue.trim()
     if (!value && !step.optional) return
 
-    const display = value || 'Lo dejamos para luego'
+    const display = value || t('setup.skipLater')
     const nextData = { ...data, [step.key]: value }
     setData(nextData)
     setLines((l) => [...l, { from: 'user', text: display }])
@@ -150,7 +202,7 @@ export default function RestaurantSetup() {
     // Foody asks the next question (tiny delay reads as "typing").
     setStepIdx(nextIdx)
     window.setTimeout(() => {
-      setLines((l) => [...l, { from: 'foody', text: STEPS[nextIdx].ask(nextData) }])
+      setLines((l) => [...l, { from: 'foody', text: resolveAsk(STEPS[nextIdx], nextData) }])
     }, 280)
   }
 
@@ -178,7 +230,13 @@ export default function RestaurantSetup() {
     })
     setLines((l) => [
       ...l,
-      { from: 'foody', text: `¡Listo, ${finalData.ownerName || ''}! Ya tengo lo básico de ${finalData.restaurantName || 'tu restaurante'}. Nosotros montamos la ficha y te escribimos en 48h para repasarla. No tienes que subir nada.` },
+      {
+        from: 'foody',
+        text: t('setup.finishMessage', {
+          ownerName: finalData.ownerName || '',
+          restaurantName: finalData.restaurantName || 'tu restaurante',
+        }),
+      },
     ])
     setDone(true)
   }
@@ -199,16 +257,17 @@ export default function RestaurantSetup() {
   const reviewRows = useMemo(
     () =>
       [
-        ['Restaurante', data.restaurantName],
-        ['Zona', data.area],
-        ['Comida', data.cuisine],
-        ['Precio medio', data.priceBand],
-        ['Contacto', [data.ownerName, data.phone].filter(Boolean).join(' · ')],
-        ['Email', data.email],
-        ['Instagram / web', data.instagramOrWebsite],
-        ['Carta', data.menuLink],
+        [t('setup.reviewLabelRestaurant'), data.restaurantName],
+        [t('setup.reviewLabelArea'), data.area],
+        [t('setup.reviewLabelCuisine'), data.cuisine],
+        [t('setup.reviewLabelPrice'), data.priceBand],
+        [t('setup.reviewLabelContact'), [data.ownerName, data.phone].filter(Boolean).join(' · ')],
+        [t('setup.reviewLabelEmail'), data.email],
+        [t('setup.reviewLabelInstagram'), data.instagramOrWebsite],
+        [t('setup.reviewLabelMenu'), data.menuLink],
       ].filter(([, v]) => Boolean(v)) as Array<[string, string]>,
-    [data],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data, t],
   )
 
   return (
@@ -217,11 +276,11 @@ export default function RestaurantSetup() {
       <section className="pt-2">
         <div className="flex items-center justify-between">
           <Link to="/restaurants" className="text-[13px] text-tinta/60 hover:text-tinta">
-            &larr; Atrás
+            &larr; {t('setup.back')}
           </Link>
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-tomate">
             <span className="h-1.5 w-1.5 rounded-full bg-tomate animate-pulse-soft" />
-            Foody te ayuda
+            {t('setup.foodyLabel')}
           </span>
         </div>
         {/* progress bar */}
@@ -262,8 +321,8 @@ export default function RestaurantSetup() {
           {step.options && (
             <div className="mb-2 flex flex-wrap gap-1.5">
               {step.options.map((opt) => (
-                <button key={opt} type="button" className="chip" onClick={() => commit(opt)}>
-                  {opt}
+                <button key={opt.value} type="button" className="chip" onClick={() => commit(opt.value)}>
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
@@ -280,7 +339,7 @@ export default function RestaurantSetup() {
                 autoFocus
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={step.placeholder || 'Escribe aquí...'}
+                placeholder={step.placeholderKey ? t(step.placeholderKey) : t('setup.placeholderFreeText')}
                 type={step.kind === 'email' ? 'email' : step.kind === 'tel' ? 'tel' : step.kind === 'url' ? 'url' : 'text'}
                 inputMode={step.kind === 'tel' ? 'tel' : step.kind === 'email' ? 'email' : 'text'}
                 className="liquid-input flex-1 rounded-2xl px-3.5 py-3 text-[15px]"
@@ -290,7 +349,7 @@ export default function RestaurantSetup() {
                 disabled={!input.trim() && !step.optional}
                 className="btn-lime h-12 shrink-0 px-4 text-[14px]"
               >
-                {step.optional && !input.trim() ? 'Saltar' : 'Enviar'}
+                {step.optional && !input.trim() ? t('setup.skipButton') : t('setup.sendButton')}
               </button>
             </form>
           )}
@@ -300,17 +359,17 @@ export default function RestaurantSetup() {
               onClick={() => commit('')}
               className="mt-2 text-center text-[12px] text-tinta/50 hover:text-tinta"
             >
-              Saltar este paso
+              {t('setup.skipStep')}
             </button>
           )}
           <p className="mt-2 text-center text-[11px] text-tinta/45">
-            Paso {Math.min(stepIdx + 1, STEPS.length)} de {STEPS.length} · sin compromiso
+            {t('setup.progress', { step: Math.min(stepIdx + 1, STEPS.length), total: STEPS.length })}
           </p>
         </section>
       ) : (
         <section className="mt-4 space-y-3">
           <div className="rounded-3xl stamp-card p-5">
-            <h2 className="font-display text-[20px] font-bold text-tinta">Resumen de tu ficha</h2>
+            <h2 className="font-display text-[20px] font-bold text-tinta">{t('setup.doneHeading')}</h2>
             <div className="mt-3 space-y-1.5 text-[13px]">
               {reviewRows.map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-3 border-b border-tinta/10 pb-1.5 last:border-0">
@@ -321,13 +380,13 @@ export default function RestaurantSetup() {
             </div>
           </div>
           <button onClick={sendWhatsAppRecap} className="btn-lime h-12 w-full text-[14px]">
-            Enviar resumen por WhatsApp
+            {t('setup.doneWhatsApp')}
           </button>
           <button onClick={() => navigate('/restaurants')} className="btn-ghost h-12 w-full text-[14px]">
-            Volver
+            {t('setup.doneBack')}
           </button>
           <p className="text-center text-[11px] text-tinta/45">
-            ¿Algo mal? Escríbenos a{' '}
+            {t('setup.doneContact')}
             <a href={`mailto:${FOODMATCH_EMAIL}`} className="underline underline-offset-2 hover:text-tinta">
               {FOODMATCH_EMAIL}
             </a>
