@@ -1,19 +1,21 @@
 import { useTheme, type ThemeMode } from '../lib/theme'
 import { track } from '../lib/analytics'
+import { useT } from '../lib/i18n'
 
 interface ThemeToggleProps {
   className?: string
 }
 
-// Cycle order and the human label for "what tapping does next".
+// Cycle order and the translation key for "what tapping does next".
 const NEXT: Record<ThemeMode, { next: ThemeMode; label: string }> = {
-  light: { next: 'dark', label: 'Switch to dark mode' },
-  dark: { next: 'system', label: 'Switch to system mode' },
-  system: { next: 'light', label: 'Switch to light mode' },
+  light: { next: 'dark', label: 'theme.switchToDark' },
+  dark: { next: 'system', label: 'theme.switchToSystem' },
+  system: { next: 'light', label: 'theme.switchToLight' },
 }
 
 export default function ThemeToggle({ className }: ThemeToggleProps) {
   const { mode, cycle } = useTheme()
+  const { t } = useT()
   const { next, label } = NEXT[mode]
 
   return (
@@ -27,8 +29,8 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
           /* analytics is best-effort */
         }
       }}
-      aria-label={label}
-      title={label}
+      aria-label={t(label)}
+      title={t(label)}
       className={[
         'inline-flex h-9 w-9 items-center justify-center rounded-full',
         'border border-tinta/15 bg-paper/60 text-tinta',

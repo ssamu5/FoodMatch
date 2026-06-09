@@ -1,13 +1,15 @@
 import { NavLink } from 'react-router-dom'
+import { useT } from '../lib/i18n'
 
 const links = [
-  { to: '/', label: 'Discover', icon: SearchIcon },
-  { to: '/ask', label: 'Ask', icon: SparkIcon },
-  { to: '/saved', label: 'Saved', icon: BookmarkIcon },
-  { to: '/profile', label: 'You', icon: UserIcon },
+  { to: '/', labelKey: 'nav.discover', icon: SearchIcon },
+  { to: '/ask', labelKey: 'nav.ask', icon: SparkIcon },
+  { to: '/saved', labelKey: 'nav.saved', icon: BookmarkIcon },
+  { to: '/profile', labelKey: 'nav.you', icon: UserIcon },
 ] as const
 
 export default function BottomNav() {
+  const { t } = useT()
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 border-t border-tinta/8 bg-surface/90 backdrop-blur-xl safe-bottom"
@@ -31,7 +33,7 @@ export default function BottomNav() {
                 }
               >
                 <Icon className="h-5 w-5" />
-                <span>{l.label}</span>
+                <span>{t(l.labelKey)}</span>
               </NavLink>
             </li>
           )

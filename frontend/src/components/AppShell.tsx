@@ -2,6 +2,8 @@ import { type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import BottomNav from './BottomNav'
 import ThemeToggle from './ThemeToggle'
+import LanguageToggle from './LanguageToggle'
+import { useT } from '../lib/i18n'
 
 interface AppShellProps {
   children: ReactNode
@@ -18,6 +20,7 @@ export default function AppShell({
 }: AppShellProps) {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
+  const { t } = useT()
 
   return (
     <div className="relative min-h-full">
@@ -35,9 +38,10 @@ export default function AppShell({
             {headerSlot}
             {!isHome && (
               <Link to="/restaurants" className="hidden text-xs text-tinta/70 hover:text-tinta sm:inline-block">
-                For restaurants
+                {t('common.forRestaurants')}
               </Link>
             )}
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>

@@ -25,6 +25,11 @@ export const es: Dictionary = {
     switchToEnglish: 'Cambiar a inglés',
     switchToSpanish: 'Cambiar a español',
   },
+  theme: {
+    switchToDark: 'Cambiar a modo oscuro',
+    switchToLight: 'Cambiar a modo claro',
+    switchToSystem: 'Cambiar a modo del sistema',
+  },
   greeting: 'Hola {name}',
   plural: { one: '{count} elemento', other: '{count} elementos' },
 }

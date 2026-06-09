@@ -11,6 +11,7 @@ import RestaurantSetup from './pages/RestaurantSetup'
 import Admin from './pages/Admin'
 import Welcome from './pages/Welcome'
 import { hasSeenWelcome } from './lib/storage'
+import { LanguageProvider } from './lib/i18n'
 
 // First-run gate: on a fresh device (no account, welcome not seen), send the
 // user to /welcome. After they sign in or skip, normal routing resumes.
@@ -24,6 +25,7 @@ function FirstRunGate({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
+    <LanguageProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/welcome" element={<Welcome />} />
@@ -48,5 +50,6 @@ export default function App() {
         />
       </Routes>
     </BrowserRouter>
+    </LanguageProvider>
   )
 }
