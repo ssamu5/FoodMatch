@@ -4,12 +4,14 @@ import { clearEvents, exportBundle, summarizeEvents } from '../lib/analytics'
 import { getRestaurantLeads, getUserLeads } from '../lib/storage'
 import { api } from '../lib/api'
 import { openExternal } from '../lib/native'
+import { useT } from '../lib/i18n'
 import type { Restaurant } from '../types/restaurant'
 
 const ADMIN_CODE = 'foodmatch-2026' // MVP-only soft lock. Replace with real auth before any sensitive data lands.
 const KEY = 'foodmatch.adminUnlocked'
 
 export default function Admin() {
+  const { t } = useT()
   const [unlocked, setUnlocked] = useState<boolean>(() => {
     try {
       return localStorage.getItem(KEY) === '1'
@@ -42,16 +44,16 @@ export default function Admin() {
     return (
       <AppShell hideNav>
         <section className="pt-10">
-          <h1 className="font-display text-[28px] font-bold text-tinta">Admin</h1>
+          <h1 className="font-display text-[28px] font-bold text-tinta">{t('admin.heading')}</h1>
           <p className="mt-2 text-[13px] text-tinta/70">
-            MVP-only soft lock. Type the code to view internal stats.
+            {t('admin.lockSubtitle')}
           </p>
           <div className="mt-5 flex gap-2">
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
               type="password"
-              placeholder="code"
+              placeholder={t('admin.codePlaceholder')}
               className="liquid-input flex-1 rounded-full px-4 py-2 text-[14px]"
             />
             <button
@@ -64,7 +66,7 @@ export default function Admin() {
                 }
               }}
             >
-              Unlock
+              {t('admin.unlockButton')}
             </button>
           </div>
         </section>
@@ -107,66 +109,66 @@ export default function Admin() {
     <AppShell hideNav>
       <section className="pt-2">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-[28px] font-bold text-tinta">Admin</h1>
+          <h1 className="font-display text-[28px] font-bold text-tinta">{t('admin.heading')}</h1>
           <div className="flex items-center gap-3">
             <button
               type="button"
               className="text-[12px] font-medium text-fresco hover:underline"
               onClick={copyJson}
             >
-              {copied ? 'Copied' : 'Export JSON'}
+              {copied ? t('admin.copied') : t('admin.exportJson')}
             </button>
             <button
               type="button"
               className="text-[12px] text-tinta/70 hover:text-tomate"
               onClick={() => {
-                if (confirm('Clear all analytics events on this device?')) {
+                if (confirm(t('admin.clearConfirm'))) {
                   clearEvents()
                   setTick((t) => t + 1)
                 }
               }}
             >
-              Clear events
+              {t('admin.clearEvents')}
             </button>
           </div>
         </div>
         <p className="mt-1 text-[12px] text-tinta/70">
-          MVP stats from local event buffer. Replace with Supabase queries once the backend lands.
+          {t('admin.statsNote')}
         </p>
       </section>
 
       <section className="mt-5 grid grid-cols-2 gap-2">
-        <Metric label="Total events" value={summary.total} />
-        <Metric label="Today" value={summary.today} />
-        <Metric label="Searches" value={summary.searches} />
-        <Metric label="Searches today" value={summary.searchesToday} />
+        <Metric label={t('admin.metricTotalEvents')} value={summary.total} />
+        <Metric label={t('admin.metricToday')} value={summary.today} />
+        <Metric label={t('admin.metricSearches')} value={summary.searches} />
+        <Metric label={t('admin.metricSearchesToday')} value={summary.searchesToday} />
       </section>
 
       <section className="mt-2 grid grid-cols-4 gap-2">
-        <Metric label="Opens" value={summary.opens} />
-        <Metric label="Saves" value={summary.saves} />
-        <Metric label="WA leads" value={summary.whatsappLeads} />
-        <Metric label="Shares" value={summary.shares} />
+        <Metric label={t('admin.metricOpens')} value={summary.opens} />
+        <Metric label={t('admin.metricSaves')} value={summary.saves} />
+        <Metric label={t('admin.metricWaLeads')} value={summary.whatsappLeads} />
+        <Metric label={t('admin.metricShares')} value={summary.shares} />
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Top cuisines (searched)</h2>
-        <KvList rows={topRows(summary.cuisineCounts)} />
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionTopCuisines')}</h2>
+        <KvList rows={topRows(summary.cuisineCounts)} emptyLabel={t('admin.emptyData')} />
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Top areas (searched)</h2>
-        <KvList rows={topRows(summary.areaCounts)} />
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionTopAreas')}</h2>
+        <KvList rows={topRows(summary.areaCounts)} emptyLabel={t('admin.emptyData')} />
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Most opened restaurants</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionMostOpened')}</h2>
         <div className="rounded-2xl glass p-3">
-          {topClicks.length === 0 && <p className="text-[13px] text-tinta/70">No restaurant opens yet.</p>}
+          {topClicks.length === 0 && <p className="text-[13px] text-tinta/70">{t('admin.emptyOpens')}</p>}
           {topClicks.map(({ count, restaurant }, i) => (
             <div key={(restaurant?.id || 'x') + i} className="flex items-baseline justify-between border-b border-tinta/12 py-1.5 last:border-0">
               <span className="text-[13px] text-tinta">
-                {restaurant ? restaurant.name : 'Unknown'}{' '}
+                {restaurant ? restaurant.name : t('admin.unknownRestaurant')}{' '}
                 {restaurant && <span className="text-tinta/70">· {restaurant.area}</span>}
               </span>
               <span className="font-mono text-[12px] text-tomate">{count}</span>
@@ -176,13 +178,13 @@ export default function Admin() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">WhatsApp leads by restaurant</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionWaLeads')}</h2>
         <div className="rounded-2xl glass p-3">
-          {topLeads.length === 0 && <p className="text-[13px] text-tinta/70">No WhatsApp leads yet.</p>}
+          {topLeads.length === 0 && <p className="text-[13px] text-tinta/70">{t('admin.emptyWaLeads')}</p>}
           {topLeads.map(({ count, restaurant }, i) => (
             <div key={(restaurant?.id || 'x') + i} className="flex items-baseline justify-between border-b border-tinta/12 py-1.5 last:border-0">
               <span className="text-[13px] text-tinta">
-                {restaurant ? restaurant.name : 'Unknown'}{' '}
+                {restaurant ? restaurant.name : t('admin.unknownRestaurant')}{' '}
                 {restaurant && <span className="text-tinta/70">· {restaurant.area}</span>}
               </span>
               <span className="font-mono text-[12px] text-fresco">{count}</span>
@@ -192,10 +194,10 @@ export default function Admin() {
       </section>
 
       <section className="mt-5">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">No-result searches</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionNoResults')}</h2>
         <div className="rounded-2xl glass p-3 text-[13px] text-tinta">
           {summary.noResultQueries.length === 0 ? (
-            <p className="text-tinta/70">None.</p>
+            <p className="text-tinta/70">{t('admin.emptyNoResults')}</p>
           ) : (
             summary.noResultQueries.map((q, i) => (
               <div key={q + i} className="border-b border-tinta/12 py-1.5 last:border-0">
@@ -207,14 +209,14 @@ export default function Admin() {
       </section>
 
       <section className="mt-5 grid grid-cols-2 gap-2">
-        <Metric label="User leads" value={userLeads.length} />
-        <Metric label="Restaurant leads" value={restaurantLeads.length} />
+        <Metric label={t('admin.metricUserLeads')} value={userLeads.length} />
+        <Metric label={t('admin.metricRestaurantLeads')} value={restaurantLeads.length} />
       </section>
 
       <section className="mt-3">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Recent restaurant leads</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionRecentLeads')}</h2>
         <div className="rounded-2xl glass p-3">
-          {restaurantLeads.length === 0 && <p className="text-[13px] text-tinta/70">No partner applications yet.</p>}
+          {restaurantLeads.length === 0 && <p className="text-[13px] text-tinta/70">{t('admin.emptyPartnerLeads')}</p>}
           {restaurantLeads.slice(0, 6).map((lead) => (
             <div key={lead.createdAt + lead.email} className="border-b border-tinta/12 py-1.5 text-[12px] last:border-0">
               <p className="text-tinta">{lead.restaurantName} · {lead.ownerName}</p>
@@ -236,10 +238,10 @@ function Metric({ label, value }: { label: string; value: number }) {
   )
 }
 
-function KvList({ rows }: { rows: { key: string; value: number }[] }) {
+function KvList({ rows, emptyLabel }: { rows: { key: string; value: number }[]; emptyLabel: string }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl glass p-3 text-[13px] text-tinta/70">No data yet.</div>
+      <div className="rounded-2xl glass p-3 text-[13px] text-tinta/70">{emptyLabel}</div>
     )
   }
   return (
