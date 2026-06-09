@@ -165,3 +165,15 @@ export function addRestaurantLead(lead: RestaurantLead): RestaurantLead[] {
   safeSet(KEY_RESTAURANT_LEADS, updated)
   return updated
 }
+
+// ---------- Language ----------
+
+const KEY_LANG = 'foodmatch.lang'
+
+export function getLanguage(): 'es' | 'en' {
+  return safeGet<'es' | 'en'>(KEY_LANG, 'es') === 'en' ? 'en' : 'es'
+}
+
+export function setLanguage(lang: 'es' | 'en'): void {
+  safeSet(KEY_LANG, lang)
+}
