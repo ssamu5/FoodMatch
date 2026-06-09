@@ -8,9 +8,9 @@ import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
 import { parseFoodIntent } from '../lib/foodIntent'
 import { buildMatchExplanation, scoreRestaurant } from '../lib/ranking'
 import { buildWhatsAppUrl, hasVerifiedWhatsApp, lastCraving, menuHighlightsFor } from '../lib/leads'
-import { listingTierLabel, PUBLIC_LISTING_NOTE, VERIFIED_LISTING_NOTE } from '../lib/listings'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap, openExternal, shareNative } from '../lib/native'
+import { useT } from '../lib/i18n'
 import type { Restaurant } from '../types/restaurant'
 
 const LAST_QUERY_KEY = 'foodmatch.lastIntentQuery'
@@ -19,11 +19,14 @@ function priceMark(level: 1 | 2 | 3 | 4): string {
   return '€'.repeat(level)
 }
 
-const FEEDBACK = ['Good match', 'Too expensive', 'Too far', 'Not my vibe'] as const
+// Keys used as analytics payload values; labels are translated via t() below.
+const FEEDBACK_KEYS = ['Good match', 'Too expensive', 'Too far', 'Not my vibe'] as const
+type FeedbackKey = typeof FEEDBACK_KEYS[number]
 
 export default function RestaurantDetail() {
   const { slug = '' } = useParams()
   const navigate = useNavigate()
+  const { t } = useT()
 
   const [r, setR] = useState<Restaurant | undefined>(undefined)
   // This page always fetches on mount, so start in the loading state. The
@@ -31,7 +34,7 @@ export default function RestaurantDetail() {
   // restaurant resolves.
   const [loading, setLoading] = useState(true)
   const [saved, setSaved] = useState(false)
-  const [feedbackSent, setFeedbackSent] = useState<string | null>(null)
+  const [feedbackSent, setFeedbackSent] = useState<FeedbackKey | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -72,7 +75,7 @@ export default function RestaurantDetail() {
       <AppShell>
         <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
           <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
-          Loading restaurant...
+          {t('detail.loading')}
         </section>
       </AppShell>
     )
@@ -83,9 +86,9 @@ export default function RestaurantDetail() {
       <AppShell>
         <div className="pt-8">
           <EmptyState
-            title="Restaurant not found"
-            hint="It may have been removed or the link is invalid."
-            action={{ label: 'Back to home', onClick: () => navigate('/') }}
+            title={t('detail.notFoundTitle')}
+            hint={t('detail.notFoundHint')}
+            action={{ label: t('detail.notFoundBack'), onClick: () => navigate('/') }}
           />
         </div>
       </AppShell>
@@ -128,9 +131,9 @@ export default function RestaurantDetail() {
     openExternal(buildWhatsAppUrl(r, lastCraving()))
   }
 
-  function sendFeedback(label: string) {
-    setFeedbackSent(label)
-    track('feedback_submitted', { restaurantId: r!.id, label })
+  function sendFeedback(key: FeedbackKey) {
+    setFeedbackSent(key)
+    track('feedback_submitted', { restaurantId: r!.id, label: key })
   }
 
   const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(`${r.name} ${r.address} ${r.city}`)}`
@@ -149,7 +152,7 @@ export default function RestaurantDetail() {
             r.isPartner ? 'bg-tomate text-cream' : 'bg-ink/55 text-cream backdrop-blur-sm',
           ].join(' ')}
         >
-          {listingTierLabel(r)}
+          {r.isPartner ? t('detail.listingTierVerified') : t('detail.listingTierPublic')}
         </span>
       </div>
 
@@ -169,18 +172,18 @@ export default function RestaurantDetail() {
           style={{ background: '#25D366' }}
         >
           <WhatsAppIcon className="h-5 w-5" />
-          Reservar o pedir por WhatsApp
+          {t('detail.whatsappButton')}
         </button>
         <p className="mt-1.5 text-center text-[11px] text-tinta/50">
           {hasVerifiedWhatsApp(r)
-            ? 'Opens WhatsApp with your craving ready to send.'
-            : 'Opens WhatsApp with a prefilled message. Demo numbers are not connected yet.'}
+            ? t('detail.whatsappVerified')
+            : t('detail.whatsappDemo')}
         </p>
       </section>
 
       {personalised && (
         <section className="mt-4 rounded-2xl glass p-4">
-          <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Why this fits your search</h2>
+          <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.whyFits')}</h2>
           <p className="mt-2 text-[14px] leading-relaxed text-tinta">{personalised.explanation}</p>
           {personalised.score.reasons.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -204,10 +207,10 @@ export default function RestaurantDetail() {
       )}
 
       <section className="mt-4 rounded-2xl glass p-4">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Why FoodMatch picks it</h2>
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.whyPicks')}</h2>
         <p className="mt-2 text-[14px] leading-relaxed text-tinta">
-          {r.bestFor.length > 0 ? `Best for ${r.bestFor.slice(0, 2).join(' and ')}. ` : ''}
-          Typical spend ~€{r.averageSpend}. Vibe: {r.vibe.slice(0, 3).join(', ')}.
+          {r.bestFor.length > 0 ? t('detail.bestForShort', { tags: r.bestFor.slice(0, 2).join(' and ') }) : ''}
+          {t('detail.typicalSpend', { spend: String(r.averageSpend), vibe: r.vibe.slice(0, 3).join(', ') })}
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {r.bestFor.slice(0, 4).map((b) => (
@@ -221,8 +224,8 @@ export default function RestaurantDetail() {
       {r.menu && r.menu.length > 0 ? (
         <section className="mt-4 rounded-2xl glass p-4">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Menu</h2>
-            {!r.isPartner && <span className="text-[10px] text-tinta/40">sample</span>}
+            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.menu')}</h2>
+            {!r.isPartner && <span className="text-[10px] text-tinta/40">{t('detail.menuSample')}</span>}
           </div>
           <ul className="mt-2 divide-y divide-tinta/8">
             {r.menu.slice(0, 8).map((d) => (
@@ -238,7 +241,7 @@ export default function RestaurantDetail() {
       ) : (
         highlights.length > 0 && (
           <section className="mt-4 rounded-2xl glass p-4">
-            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Menu highlights</h2>
+            <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.menuHighlights')}</h2>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {highlights.map((h) => (
                 <span key={h} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
@@ -258,7 +261,7 @@ export default function RestaurantDetail() {
           onClick={() => track('outbound_map_clicked', { restaurantId: r.id })}
           className="btn-ghost h-12"
         >
-          <PinIcon className="h-4 w-4" /> Open Maps
+          <PinIcon className="h-4 w-4" /> {t('detail.openMaps')}
         </a>
         {telUrl && (
           <a
@@ -266,7 +269,7 @@ export default function RestaurantDetail() {
             onClick={() => track('outbound_call_clicked', { restaurantId: r.id })}
             className="btn-ghost h-12"
           >
-            <PhoneIcon className="h-4 w-4" /> Call
+            <PhoneIcon className="h-4 w-4" /> {t('detail.call')}
           </a>
         )}
         {igUrl && (
@@ -277,7 +280,7 @@ export default function RestaurantDetail() {
             onClick={() => track('outbound_instagram_clicked', { restaurantId: r.id })}
             className="btn-ghost h-12"
           >
-            <InstaIcon className="h-4 w-4" /> Instagram
+            <InstaIcon className="h-4 w-4" /> {t('detail.instagram')}
           </a>
         )}
         {r.website && (
@@ -288,41 +291,41 @@ export default function RestaurantDetail() {
             onClick={() => track('outbound_website_clicked', { restaurantId: r.id })}
             className="btn-ghost h-12"
           >
-            <GlobeIcon className="h-4 w-4" /> Website
+            <GlobeIcon className="h-4 w-4" /> {t('detail.website')}
           </a>
         )}
         <button onClick={toggleSave} className={['h-12', saved ? 'btn-lime' : 'btn-ghost'].join(' ')}>
           <BookmarkIcon className="h-4 w-4" />
-          {saved ? 'Saved' : 'Save'}
+          {saved ? t('common.saved') : t('common.save')}
         </button>
         <button onClick={share} className="btn-ghost h-12">
-          <ShareIcon className="h-4 w-4" /> Share
+          <ShareIcon className="h-4 w-4" /> {t('detail.share')}
         </button>
       </section>
 
       <section className="mt-5 space-y-2">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Practical info</h2>
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.practicalInfo')}</h2>
         <div className="rounded-2xl glass p-4 text-[13px] text-tinta">
           <div className="flex justify-between gap-3 border-b border-tinta/12 py-2">
-            <span className="text-tinta/70">Address</span>
+            <span className="text-tinta/70">{t('detail.address')}</span>
             <span className="text-right">{r.address}</span>
           </div>
           <div className="flex justify-between gap-3 border-b border-tinta/12 py-2">
-            <span className="text-tinta/70">Price level</span>
+            <span className="text-tinta/70">{t('detail.priceLevel')}</span>
             <span>{priceMark(r.priceLevel)} · ~€{r.averageSpend}</span>
           </div>
           <div className="flex justify-between gap-3 border-b border-tinta/12 py-2">
-            <span className="text-tinta/70">Dietary</span>
+            <span className="text-tinta/70">{t('detail.dietary')}</span>
             <span className="text-right">
-              {r.vegetarianFriendly ? 'veg ' : ''}
-              {r.veganFriendly ? '· vegan ' : ''}
-              {r.glutenFreeOptions ? '· gluten-free' : ''}
-              {!r.vegetarianFriendly && !r.veganFriendly && !r.glutenFreeOptions ? 'standard menu' : ''}
+              {r.vegetarianFriendly ? t('detail.dietaryVeg') : ''}
+              {r.veganFriendly ? t('detail.dietaryVegan') : ''}
+              {r.glutenFreeOptions ? t('detail.dietaryGluten') : ''}
+              {!r.vegetarianFriendly && !r.veganFriendly && !r.glutenFreeOptions ? t('detail.dietaryStandard') : ''}
             </span>
           </div>
           {r.opening?.notes && (
             <div className="flex justify-between gap-3 py-2">
-              <span className="text-tinta/70">Note</span>
+              <span className="text-tinta/70">{t('detail.openingNote')}</span>
               <span className="text-right">{r.opening.notes}</span>
             </div>
           )}
@@ -331,18 +334,18 @@ export default function RestaurantDetail() {
 
       <section className="mt-5 rounded-2xl glass p-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">How this listing works</h2>
+          <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.howListing')}</h2>
           <span
             className={[
               'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
               r.isPartner ? 'bg-tomate/15 text-tomate' : 'bg-tinta/10 text-tinta/70',
             ].join(' ')}
           >
-            {listingTierLabel(r)}
+            {r.isPartner ? t('detail.listingTierVerified') : t('detail.listingTierPublic')}
           </span>
         </div>
         <p className="mt-2 text-[13px] leading-relaxed text-tinta/70">
-          {r.isPartner ? VERIFIED_LISTING_NOTE : PUBLIC_LISTING_NOTE}
+          {r.isPartner ? t('detail.listingNoteVerified') : t('detail.listingNotePublic')}
         </p>
         {!r.isPartner && (
           <>
@@ -351,42 +354,45 @@ export default function RestaurantDetail() {
               onClick={() => track('listing_claim_clicked', { restaurantId: r.id })}
               className="btn-ghost mt-3 h-11 w-full text-[13px]"
             >
-              Claim or update this listing →
+              {t('detail.claimListing')} →
             </Link>
             <p className="mt-2 text-[11px] leading-relaxed text-tinta/50">
-              See wrong info? Email {''}
+              {t('detail.wrongInfoPre')}
               <a href="mailto:hola@foodmatch.es?subject=FoodMatch%20listing%20correction" className="underline underline-offset-2 hover:text-tinta">
                 hola@foodmatch.es
-              </a>{' '}
-              to correct or remove this listing.
+              </a>
+              {t('detail.wrongInfoPost')}
             </p>
           </>
         )}
       </section>
 
       <section className="mt-5">
-        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">Feedback</h2>
+        <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.feedbackSection')}</h2>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {FEEDBACK.map((f) => (
+          {FEEDBACK_KEYS.map((key) => (
             <button
-              key={f}
+              key={key}
               type="button"
-              className={['chip', feedbackSent === f ? 'active' : ''].join(' ')}
-              onClick={() => sendFeedback(f)}
+              className={['chip', feedbackSent === key ? 'active' : ''].join(' ')}
+              onClick={() => sendFeedback(key)}
               disabled={Boolean(feedbackSent)}
             >
-              {f}
+              {key === 'Good match' ? t('detail.feedbackGood')
+                : key === 'Too expensive' ? t('detail.feedbackExpensive')
+                : key === 'Too far' ? t('detail.feedbackFar')
+                : t('detail.feedbackVibe')}
             </button>
           ))}
         </div>
         {feedbackSent && (
-          <p className="mt-2 text-[12px] text-tinta/70">Thanks. Logged: {feedbackSent}.</p>
+          <p className="mt-2 text-[12px] text-tinta/70">{t('detail.feedbackLogged', { label: feedbackSent })}</p>
         )}
       </section>
 
       <div className="mt-6">
         <Link to="/ask" className="text-[13px] text-tinta/70 hover:text-tinta">
-          &larr; Back to results
+          &larr; {t('detail.backToResults')}
         </Link>
       </div>
     </AppShell>
