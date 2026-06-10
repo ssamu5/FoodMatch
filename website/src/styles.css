@@ -188,6 +188,24 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 700; letter-spacing: -0.02e
   position: absolute; top: 10px; left: 14px; font-family: var(--serif); font-weight: 700;
   font-size: 2.4rem; color: rgba(255,255,255,0.92); text-shadow: 0 2px 16px rgba(0,0,0,0.25);
 }
+/* photo tiles */
+.tile-img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tile::after {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to top, rgba(20,12,8,0.58), rgba(20,12,8,0.06) 46%, rgba(20,12,8,0) 72%);
+}
+.tile .tile-label, .tile .tile-mono { position: relative; z-index: 2; }
+.tile { transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s ease; }
+.tile:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+.tile:hover .tile-img { transform: scale(1.06); }
+@media (prefers-reduced-motion: reduce) {
+  .tile, .tile-img { transition: none; }
+  .tile:hover { transform: none; }
+  .tile:hover .tile-img { transform: none; }
+}
 
 /* ---------- split CTA cards (user vs restaurant) ---------- */
 .split-card {

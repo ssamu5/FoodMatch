@@ -2,7 +2,7 @@
 // Outputs fully-rendered HTML to website/dist/ (deploy that directory).
 // Run: node build.mjs   (from website/)
 
-import { mkdirSync, writeFileSync, copyFileSync, rmSync, readFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, copyFileSync, cpSync, rmSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { LANGS, localePath, t } from './src/i18n.mjs'
@@ -81,6 +81,7 @@ async function build() {
 
   // --- assets ---
   copyFileSync(resolve(__dirname, 'src/styles.css'), resolve(OUT, 'styles.css'))
+  cpSync(resolve(__dirname, 'img'), resolve(OUT, 'img'), { recursive: true })
   writeFileSync(resolve(OUT, 'favicon.svg'), FAVICON)
   writeFileSync(resolve(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`)
   writeFileSync(resolve(OUT, 'sitemap.xml'), sitemap(urls))

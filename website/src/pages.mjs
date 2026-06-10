@@ -5,18 +5,22 @@ import { cuisineLabel, areaLabel, OPENING_HOURS } from './data.mjs'
 
 const SITE = 'https://foodmatch.es'
 
-// Small inline collage of cuisine tiles for the hero (no external images).
+// Hero collage: four AI-generated cuisine photos (warm, food-first).
+const HERO_TILES = [
+  { img: 'tapas', cuisine: 'Spanish tapas' },
+  { img: 'burger', cuisine: 'burgers' },
+  { img: 'paella', cuisine: 'paella' },
+  { img: 'mexican', cuisine: 'Mexican' },
+]
 function heroCollage(restaurants, lang) {
-  const picks = restaurants.slice(0, 4)
-  return `<div class="collage" aria-hidden="true">
-    ${picks
-      .map(
-        (r) => `<div class="tile" style="${coverStyle(r.cuisine)}">
-        <span class="tile-mono">${esc(monogram(r.name))}</span>
-        <span class="tile-label">${esc(cuisineLabel(r.cuisine, lang))}</span>
-      </div>`,
-      )
-      .join('')}
+  return `<div class="collage">
+    ${HERO_TILES.map((tile) => {
+      const label = cuisineLabel(tile.cuisine, lang)
+      return `<div class="tile">
+        <img class="tile-img" src="/img/hero-${tile.img}.jpg" alt="${esc(label)}" width="860" height="860" loading="lazy" decoding="async" />
+        <span class="tile-label">${esc(label)}</span>
+      </div>`
+    }).join('')}
   </div>`
 }
 
