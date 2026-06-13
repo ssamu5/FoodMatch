@@ -11,6 +11,7 @@ import { page } from './src/components.mjs'
 import {
   homePage, dinerPage, restaurantPage, explorePage, detailPage, claimPage, restaurantJsonLd,
 } from './src/pages.mjs'
+import { LEGAL } from './src/legal.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(__dirname, 'dist')
@@ -49,6 +50,13 @@ async function build() {
     for (const [path, title, desc, body] of landings) {
       emit(localePath(lang, path), page({ lang, path, title: title[lang], description: (desc[lang] || desc.es || desc), body }))
       record(lang, path)
+      count++
+    }
+
+    // --- legal pages ---
+    for (const L of LEGAL) {
+      emit(localePath(lang, L.path), page({ lang, path: L.path, title: L.title[lang], description: L.desc[lang], body: L.render(lang) }))
+      record(lang, L.path)
       count++
     }
 

@@ -133,9 +133,15 @@ export function footer(lang) {
       </div>
     </div>
     <hr style="border:0;border-top:1px solid rgba(248,241,229,0.14);margin:2.2rem 0 1.4rem" />
-    <div style="display:flex;flex-wrap:wrap;gap:0.5rem 1.5rem;justify-content:space-between;font-size:0.82rem;color:rgba(248,241,229,0.6)">
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem 1.4rem;font-size:0.82rem;color:rgba(248,241,229,0.6)">
+      <a href="${L('/aviso-legal')}">${lang === 'es' ? 'Aviso legal' : 'Legal notice'}</a>
+      <a href="${L('/privacidad')}">${lang === 'es' ? 'Privacidad' : 'Privacy'}</a>
+      <a href="${L('/cookies')}">Cookies</a>
+      <a href="${L('/terminos')}">${lang === 'es' ? 'Términos' : 'Terms'}</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem 1.5rem;justify-content:space-between;font-size:0.82rem;color:rgba(248,241,229,0.6);margin-top:0.9rem">
       <span>© 2026 FoodMatch · ${t.footer.rights[lang]}</span>
-      <span>hola@foodmatch.es</span>
+      <span><a href="mailto:foodmatchinfo@gmail.com">foodmatchinfo@gmail.com</a> · <a href="https://instagram.com/foodmatch_es" target="_blank" rel="noopener">@foodmatch_es</a></span>
     </div>
     <p style="font-size:0.75rem;color:rgba(248,241,229,0.45);margin-top:1rem;max-width:60ch">${t.footer.pilotNote[lang]}</p>
   </div>
