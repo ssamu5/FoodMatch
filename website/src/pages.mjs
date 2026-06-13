@@ -282,8 +282,9 @@ export function detailPage(lang, r, nearby) {
   const c = t.detail
   const hours = OPENING_HOURS[r.hours]
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${r.name} ${r.address} ${r.city}`)}`
-  const tel = r.phone ? `tel:${r.phone.replace(/\s+/g, '')}` : null
-  const ig = r.instagram ? `https://instagram.com/${r.instagram.replace(/^@/, '')}` : null
+  // Phone and Instagram are intentionally NOT published here: the seed data is
+  // placeholder (invented numbers/handles), so showing them would expose real
+  // strangers. Re-enable per restaurant only for verified/claimed listings.
   const diet = [r.vegetarianFriendly && c.veg[lang], r.veganFriendly && c.vegan[lang], r.glutenFreeOptions && c.gf[lang]].filter(Boolean)
   return `
 <article>
@@ -299,8 +300,6 @@ export function detailPage(lang, r, nearby) {
     <div class="wrap" style="max-width:760px">
       <div style="display:flex;flex-wrap:wrap;gap:0.7rem">
         <a class="btn btn-primary" href="${mapsUrl}" target="_blank" rel="noopener">${c.openMaps[lang]}</a>
-        ${tel ? `<a class="btn btn-ghost" href="${tel}">${c.call[lang]}</a>` : ''}
-        ${ig ? `<a class="btn btn-ghost" href="${ig}" target="_blank" rel="noopener">${c.instagram[lang]}</a>` : ''}
       </div>
 
       <h2 class="serif" style="font-size:1.3rem;margin-top:2.2rem">${c.about[lang]}</h2>
@@ -395,8 +394,7 @@ export function restaurantJsonLd(lang, r) {
       reviewCount: r.reviewCount,
     },
   }
-  if (r.phone) data.telephone = r.phone
-  if (r.instagram) data.sameAs = [`https://instagram.com/${r.instagram.replace(/^@/, '')}`]
+  // Omit telephone/sameAs: seed contact data is placeholder, not real.
   return `<script type="application/ld+json">${JSON.stringify(data)}</script>`
 }
 
