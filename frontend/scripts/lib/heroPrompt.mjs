@@ -1,6 +1,6 @@
 // Pure prompt builder for restaurant hero images. Maps a restaurant's cuisine
 // (its "theme") to a food-forward photography prompt. Keys MUST match the literal
-// seed/DB cuisine strings, including accents (for example 'menu del dia').
+// seed/DB cuisine strings, including accents (for example 'menú del día').
 
 const STYLE_SUFFIX =
   'Professional food photography, 45-degree angle, warm natural window light, ' +
@@ -32,8 +32,8 @@ const CUISINE_SUBJECT = {
 
 const DEFAULT_SUBJECT = 'an appetising signature dish, beautifully plated'
 
-export function heroPrompt(cuisine, { vibe = [], name = '' } = {}) {
-  void name // reserved for future per-restaurant nuance; kept in the signature
+// Callers may also pass `name`; it is accepted but not yet used (future nuance).
+export function heroPrompt(cuisine, { vibe = [] } = {}) {
   const subject = CUISINE_SUBJECT[cuisine] || DEFAULT_SUBJECT
   const vibeWords = Array.isArray(vibe) ? vibe.filter(Boolean).slice(0, 2).join(', ') : ''
   const ambiance = vibeWords ? ` The mood is ${vibeWords}.` : ''

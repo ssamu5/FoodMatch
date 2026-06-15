@@ -11,4 +11,7 @@ describe('parseArgs', () => {
   it('combines a slug with flags', () => {
     expect(parseArgs(['la-prueba', '--force'])).toEqual({ slug: 'la-prueba', missing: false, force: true, dryRun: false })
   })
+  it('ignores unknown flags', () => {
+    expect(parseArgs(['--verbose'])).toEqual({ slug: null, missing: false, force: false, dryRun: false })
+  })
 })

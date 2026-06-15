@@ -15,7 +15,8 @@ export async function downloadAsJpeg(imageUrl, { fetchImpl = fetch, width = 1200
   }
   try {
     return await tryFetch(weservUrl(imageUrl, { width, quality }))
-  } catch {
+  } catch (e) {
+    console.warn(`download: weserv proxy failed (${e.message}); falling back to direct`)
     return await tryFetch(imageUrl)
   }
 }

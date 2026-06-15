@@ -12,7 +12,8 @@ export const KIE_MODEL = 'gpt-image-2-text-to-image'
 export function extractImageUrl(resultJson) {
   if (!resultJson) return null
   const text = typeof resultJson === 'string' ? resultJson : JSON.stringify(resultJson)
-  const m = text.match(/https:\/\/[^"\\\s]+\.(?:png|jpe?g)/i)
+  // Capture an optional query string too, in case the CDN ever signs URLs.
+  const m = text.match(/https:\/\/[^"\\\s]+\.(?:png|jpe?g)(?:\?[^"\\\s]*)?/i)
   return m ? m[0] : null
 }
 
@@ -29,6 +30,7 @@ export async function generateImage(
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({ model: KIE_MODEL, input: { prompt, aspect_ratio: aspectRatio } }),
   })
+  if (!createRes.ok) throw new Error(`kie: createTask HTTP ${createRes.status}`)
   const createBody = await createRes.json()
   const taskId = createBody?.data?.taskId ?? createBody?.taskId
   if (!taskId) throw new Error(`kie: no taskId in createTask response: ${JSON.stringify(createBody)}`)
@@ -37,6 +39,7 @@ export async function generateImage(
     const infoRes = await fetchImpl(`${RECORD_URL}?taskId=${encodeURIComponent(taskId)}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     })
+    if (!infoRes.ok) throw new Error(`kie: poll HTTP ${infoRes.status} (attempt ${i + 1})`)
     const info = await infoRes.json()
     const state = info?.data?.state ?? info?.state
     if (state === 'success') {
