@@ -12,8 +12,11 @@ export const KIE_MODEL = 'gpt-image-2-text-to-image'
 export function extractImageUrl(resultJson) {
   if (!resultJson) return null
   const text = typeof resultJson === 'string' ? resultJson : JSON.stringify(resultJson)
+  // The kie resultJson is malformed and double-encoded, so slashes can arrive
+  // backslash-escaped (https:\/\/...). Normalize before matching.
+  const unescaped = text.replace(/\\\//g, '/')
   // Capture an optional query string too, in case the CDN ever signs URLs.
-  const m = text.match(/https:\/\/[^"\\\s]+\.(?:png|jpe?g)(?:\?[^"\\\s]*)?/i)
+  const m = unescaped.match(/https:\/\/[^"\\\s]+\.(?:png|jpe?g)(?:\?[^"\\\s]*)?/i)
   return m ? m[0] : null
 }
 

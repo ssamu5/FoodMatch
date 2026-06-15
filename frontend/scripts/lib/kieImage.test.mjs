@@ -9,6 +9,11 @@ describe('extractImageUrl', () => {
   it('returns null when no URL is present', () => {
     expect(extractImageUrl('{"state":"success"}')).toBeNull()
   })
+  it('extracts the URL even when slashes are backslash-escaped (real kie shape)', () => {
+    // kie returns a malformed, double-encoded resultJson where slashes arrive as \/
+    const escaped = '{"resultUrls":["https:\\/\\/tempfile.aiquickdraw.com\\/abc.png"]}'
+    expect(extractImageUrl(escaped)).toBe('https://tempfile.aiquickdraw.com/abc.png')
+  })
 })
 
 describe('generateImage', () => {
