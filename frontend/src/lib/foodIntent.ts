@@ -11,6 +11,7 @@ import type {
 } from '../types/search'
 import type { Area, Cuisine, Vibe } from '../types/restaurant'
 import type { TasteProfile } from '../types/profile'
+import { normalizeSearchText } from './searchLexicon'
 
 // ---------- Vocab dictionaries ----------
 
@@ -109,6 +110,7 @@ const DISH_KEYWORDS: Array<{ canonical: string; keywords: string[] }> = [
   { canonical: 'falafel', keywords: ['falafel'] },
   { canonical: 'entrecot', keywords: ['entrecot', 'solomillo', 'chuleton', 'chuletón'] },
   { canonical: 'brunch', keywords: ['benedictinos', 'tortitas', 'pancakes', 'aguacate', 'avocado'] },
+  { canonical: 'dessert', keywords: ['dessert', 'desserts', 'postre', 'postres', 'tarta', 'cake', 'cookie', 'croissant', 'tiramisu', 'tiramisú', 'mochi', 'baklava', 'sweet', 'dulce'] },
   { canonical: 'vermut', keywords: ['vermut', 'vermouth'] },
   { canonical: 'gambas', keywords: ['gambas', 'prawns'] },
   { canonical: 'fideua', keywords: ['fideua', 'fideuà'] },
@@ -128,13 +130,7 @@ const NEAR_ME_KEYWORDS = ['near me', 'close', 'cerca', 'cerca de mi', 'closest',
 // ---------- Helpers ----------
 
 function normalize(query: string): string {
-  return query
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9€\s-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return normalizeSearchText(query)
 }
 
 function contains(haystack: string, needle: string): boolean {

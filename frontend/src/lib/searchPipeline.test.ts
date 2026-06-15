@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SEED_RESTAURANTS } from '../data/seedRestaurants'
 import { parseFoodIntent } from './foodIntent'
-import { SeedSource, runSearchPipeline } from './searchPipeline'
+import { buildCompactRerankPacket, SeedSource, runSearchPipeline } from './searchPipeline'
 
 const source = new SeedSource(SEED_RESTAURANTS)
 
@@ -62,5 +62,38 @@ describe('search pipeline', () => {
     expect(diagnostics.total).toBe(500)
     expect(diagnostics.shortlisted).toBe(25)
     expect(diagnostics.ranked).toBeLessThanOrEqual(25)
+  })
+
+  it('understands dessert as a dish intent and ranks matching gluten-free Ruzafa places first', async () => {
+    const intent = parseFoodIntent('gluten-free dessert near Ruzafa')
+    expect(intent.area).toBe('Ruzafa')
+    expect(intent.dietary).toContain('gluten-free')
+    expect(intent.dishes).toContain('dessert')
+
+    const { results, ranked } = await runSearchPipeline(intent, source, { minScore: 10 })
+    expect(results.length).toBeGreaterThan(0)
+    const top = results[0]
+    const topText = [
+      top.description,
+      ...top.tags,
+      ...(top.menuHighlights ?? []),
+      ...(top.menu ?? []).map((d) => d.name),
+    ].join(' ')
+    expect(top.area).toBe('Ruzafa')
+    expect(top.glutenFreeOptions).toBe(true)
+    expect(topText).toMatch(/dessert|postre|tarta|cake|cookie|croissant|tiramisu|tiramisú|mochi|baklava/i)
+    expect(ranked[0].score.reasons.join(' ')).toMatch(/dessert|gluten-free|Ruzafa/i)
+  })
+
+  it('builds a compact rerank packet that keeps future AI calls on a strict token budget', async () => {
+    const intent = parseFoodIntent('romantic gluten-free dessert near Ruzafa under 25')
+    const { results, ranked } = await runSearchPipeline(intent, source, { shortlistCap: 40 })
+    const packet = buildCompactRerankPacket(intent, results, ranked, { limit: 6, charBudget: 1400 })
+
+    expect(packet.candidates.length).toBeLessThanOrEqual(6)
+    expect(packet.estimatedChars).toBeLessThanOrEqual(1400)
+    expect(packet.query).toBe('romantic gluten-free dessert near Ruzafa under 25')
+    expect(packet.candidates[0]).toMatchObject({ id: expect.any(String), n: expect.any(String), a: expect.any(String) })
+    expect(JSON.stringify(packet)).not.toMatch(/description|address|opening|weeklySchedule|phone|website/i)
   })
 })

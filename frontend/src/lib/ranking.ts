@@ -10,6 +10,7 @@
 
 import type { FoodIntent, MatchScore, RankedResult } from '../types/search'
 import type { Restaurant, Vibe } from '../types/restaurant'
+import { firstMatchingDish } from './searchLexicon'
 
 // ---------- Helpers ----------
 
@@ -70,16 +71,16 @@ function isOpenAt(r: Restaurant, date = new Date()): boolean {
 function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?: string } {
   if (intent.dishes.length === 0) return { points: 6 } // neutral
   const haystack = [
+    r.name,
+    r.description,
     ...(r.menu?.map((d) => d.name) ?? []),
     ...(r.menuHighlights ?? []),
     ...r.tags,
+    ...r.bestFor,
     r.cuisine,
-  ]
-    .join(' ')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-  const hit = intent.dishes.find((d) => haystack.includes(d))
+    ...(r.secondaryCuisines ?? []),
+  ].join(' ')
+  const hit = firstMatchingDish(intent.dishes, haystack)
   if (hit) return { points: 12, reason: `serves ${hit}` }
   return { points: 0 }
 }

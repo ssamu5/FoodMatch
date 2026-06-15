@@ -11,6 +11,7 @@
 import type { Restaurant, Cuisine, Area } from '../types/restaurant'
 import type { FoodIntent, RankedResult } from '../types/search'
 import { rankRestaurants, isOpenAt } from './ranking'
+import { firstMatchingDish } from './searchLexicon'
 
 export interface HardFilter {
   cuisines?: Cuisine[]
@@ -41,8 +42,17 @@ export interface PipelineResult {
   diagnostics: PipelineDiagnostics
 }
 
-function norm(s: string): string {
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+function restaurantSearchText(r: Restaurant): string {
+  return [
+    r.name,
+    r.description,
+    ...(r.menu?.map((d) => d.name) ?? []),
+    ...(r.menuHighlights ?? []),
+    ...r.tags,
+    ...r.bestFor,
+    r.cuisine,
+    ...(r.secondaryCuisines ?? []),
+  ].join(' ')
 }
 
 function matchesFilter(r: Restaurant, f: HardFilter): boolean {
@@ -58,8 +68,8 @@ function matchesFilter(r: Restaurant, f: HardFilter): boolean {
     if (!f.cuisines.includes(r.cuisine) && !sec.some((c) => f.cuisines!.includes(c))) return false
   }
   if (f.dishes && f.dishes.length) {
-    const hay = norm([...(r.menu?.map((d) => d.name) ?? []), ...(r.menuHighlights ?? []), ...r.tags, r.cuisine].join(' '))
-    if (!f.dishes.some((d) => hay.includes(norm(d)))) return false
+    const hay = restaurantSearchText(r)
+    if (!firstMatchingDish(f.dishes, hay)) return false
   }
   return true
 }
@@ -89,14 +99,46 @@ function hardFilterFromIntent(intent: FoodIntent): HardFilter {
 // Cheap pre-score for the shortlist cap: count of hard signals a row hits.
 function cheapScore(r: Restaurant, intent: FoodIntent): number {
   let n = 0
-  if (intent.cuisines.includes(r.cuisine)) n += 2
-  if (intent.area && r.area === intent.area) n += 1
-  if (intent.maxSpendEur != null && r.averageSpend <= intent.maxSpendEur) n += 1
-  n += r.rating // rating (0-5) as a tie-break; deliberately below the hard-signal weights
+  if (intent.dishes.length && firstMatchingDish(intent.dishes, restaurantSearchText(r))) n += 5
+  if (intent.cuisines.includes(r.cuisine)) n += 3
+  if (r.secondaryCuisines?.some((c) => intent.cuisines.includes(c))) n += 2
+  if (intent.area && r.area === intent.area) n += 2
+  if (intent.maxSpendEur != null && r.averageSpend <= intent.maxSpendEur) n += 2
+  if (intent.dietary.includes('gluten-free') && r.glutenFreeOptions) n += 2
+  if (intent.dietary.includes('vegan') && r.veganFriendly) n += 2
+  if (intent.dietary.includes('vegetarian') && r.vegetarianFriendly) n += 1
+  if (intent.vibe.some((v) => r.vibe.includes(v))) n += 1
+  if (r.isPartner) n += 0.4
+  n += r.rating // rating (0-5) as a tie-break; deliberately below hard-signal weights
   return n
 }
 
 const MIN_CANDIDATES = 8
+
+export interface CompactRerankCandidate {
+  id: string
+  n: string // name
+  c: string // cuisine
+  a: string // area
+  p: number // average spend
+  r: number // rating
+  m: string[] // compact menu/tag evidence
+  e: string[] // current deterministic reasons
+}
+
+export interface CompactRerankPacket {
+  query: string
+  constraints: {
+    area: string | null
+    budget: number | null
+    dietary: string[]
+    dishes: string[]
+    vibe: string[]
+  }
+  candidates: CompactRerankCandidate[]
+  estimatedChars: number
+  truncated: boolean
+}
 
 export async function runSearchPipeline(
   intent: FoodIntent,
@@ -142,4 +184,66 @@ export async function runSearchPipeline(
     ranked: rankedResults,
     diagnostics: { total, filtered, shortlisted, ranked: results.length, ms: Date.now() - start, widened },
   }
+}
+
+function compactEvidence(r: Restaurant, intent: FoodIntent): string[] {
+  const menuNames = r.menu?.map((d) => d.name) ?? []
+  const dishHits = intent.dishes.length
+    ? menuNames.filter((name) => firstMatchingDish(intent.dishes, name)).slice(0, 3)
+    : []
+  const tags = [...r.tags, ...r.bestFor].slice(0, 3)
+  const fallbackMenu = menuNames.slice(0, Math.max(0, 3 - dishHits.length))
+  return Array.from(new Set([...dishHits, ...fallbackMenu, ...tags])).slice(0, 5)
+}
+
+export function buildCompactRerankPacket(
+  intent: FoodIntent,
+  restaurants: Restaurant[],
+  ranked: RankedResult[],
+  opts: { limit?: number; charBudget?: number } = {},
+): CompactRerankPacket {
+  const limit = opts.limit ?? 8
+  const charBudget = opts.charBudget ?? 2400
+  const rankedById = new Map(ranked.map((rr) => [rr.restaurantId, rr]))
+  const base: CompactRerankPacket = {
+    query: intent.rawQuery,
+    constraints: {
+      area: intent.area,
+      budget: intent.maxSpendEur,
+      dietary: intent.dietary,
+      dishes: intent.dishes,
+      vibe: intent.vibe,
+    },
+    candidates: [],
+    estimatedChars: 0,
+    truncated: false,
+  }
+
+  for (const r of restaurants.slice(0, limit)) {
+    const candidate: CompactRerankCandidate = {
+      id: r.id,
+      n: r.name,
+      c: r.cuisine,
+      a: r.area,
+      p: r.averageSpend,
+      r: r.rating,
+      m: compactEvidence(r, intent),
+      e: rankedById.get(r.id)?.score.reasons.slice(0, 3) ?? [],
+    }
+    const next = { ...base, candidates: [...base.candidates, candidate] }
+    const nextChars = JSON.stringify(next).length
+    if (nextChars > charBudget && base.candidates.length > 0) {
+      base.truncated = true
+      break
+    }
+    base.candidates.push(candidate)
+    base.estimatedChars = JSON.stringify(base).length
+    if (base.estimatedChars >= charBudget) {
+      base.truncated = true
+      break
+    }
+  }
+
+  base.estimatedChars = JSON.stringify(base).length
+  return base
 }
