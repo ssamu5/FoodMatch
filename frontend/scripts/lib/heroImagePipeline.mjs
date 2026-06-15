@@ -10,8 +10,8 @@ export const BUCKET = 'restaurant-images'
 
 export async function ensureBucket(supabase) {
   const { error } = await supabase.storage.createBucket(BUCKET, { public: true })
-  // Ignore "already exists"; surface anything else.
-  if (error && !/exist/i.test(error.message || '')) throw error
+  // Ignore "already exists" (HTTP 409, or a message that says so); surface anything else.
+  if (error && error.status !== 409 && !/exist/i.test(error.message || '')) throw error
 }
 
 export async function generateAndStoreHeroImage(restaurant, deps) {
@@ -27,11 +27,14 @@ export async function generateAndStoreHeroImage(restaurant, deps) {
 
   if (heroImage && !force) return { slug, url: heroImage, skipped: true }
 
+  // Ensure the storage bucket exists BEFORE spending on image generation, so a
+  // storage misconfiguration fails fast without wasting a paid generation.
+  await ensureBucket(supabase)
+
   const prompt = heroPrompt(cuisine, { vibe, name })
   const imageUrl = await generate({ prompt, aspectRatio: '3:2', apiKey: kieApiKey }, { fetchImpl })
   const bytes = await download(imageUrl, { fetchImpl })
 
-  await ensureBucket(supabase)
   const path = `${slug}.jpg`
   const up = await supabase.storage.from(BUCKET).upload(path, bytes, {
     contentType: 'image/jpeg',
@@ -42,8 +45,13 @@ export async function generateAndStoreHeroImage(restaurant, deps) {
   const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path)
   const url = pub.publicUrl
 
-  const { error: dbErr } = await supabase.from('restaurants').update({ hero_image: url }).eq('slug', slug)
+  const { data: updated, error: dbErr } = await supabase
+    .from('restaurants')
+    .update({ hero_image: url })
+    .eq('slug', slug)
+    .select('id')
   if (dbErr) throw dbErr
+  if (!updated || updated.length === 0) throw new Error(`no restaurant row found for slug: ${slug}`)
 
   return { slug, url, skipped: false }
 }
