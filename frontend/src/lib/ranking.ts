@@ -10,7 +10,7 @@
 
 import type { FoodIntent, MatchScore, RankedResult } from '../types/search'
 import type { Restaurant, Vibe } from '../types/restaurant'
-import { firstMatchingDish } from './searchLexicon'
+import { firstMatchingDish, textMatchesDish } from './searchLexicon'
 
 // ---------- Helpers ----------
 
@@ -65,9 +65,10 @@ function isOpenAt(r: Restaurant, date = new Date()): boolean {
 
 // ---------- Score components ----------
 
-// Dish match. A restaurant scores when its structured menu (or, fallback,
-// menuHighlights) contains a requested dish term. Neutral credit when no
-// dish was requested, so existing craving queries are unaffected.
+// Dish match. Credit scales with how many of the requested dishes the
+// restaurant serves: full credit (12) only when all requested dishes match,
+// partial credit when some match, zero when none match.
+// Neutral credit when no dish was requested, so cuisine-only queries are unaffected.
 function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?: string } {
   if (intent.dishes.length === 0) return { points: 6 } // neutral
   const haystack = [
@@ -80,9 +81,11 @@ function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?
     r.cuisine,
     ...(r.secondaryCuisines ?? []),
   ].join(' ')
-  const hit = firstMatchingDish(intent.dishes, haystack)
-  if (hit) return { points: 12, reason: `serves ${hit}` }
-  return { points: 0 }
+  const hits = intent.dishes.filter((dish) => textMatchesDish(haystack, dish))
+  if (hits.length === 0) return { points: 0 }
+  const points = Math.round((hits.length / intent.dishes.length) * 12)
+  const reason = hits.length > 1 ? `serves ${hits.slice(0, 2).join(' + ')}` : `serves ${hits[0]}`
+  return { points, reason }
 }
 
 function scoreCuisine(intent: FoodIntent, r: Restaurant): { points: number; reason?: string; warning?: string } {

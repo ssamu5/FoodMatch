@@ -11,7 +11,7 @@
 import type { Restaurant, Cuisine, Area } from '../types/restaurant'
 import type { FoodIntent, RankedResult } from '../types/search'
 import { rankRestaurants, isOpenAt } from './ranking'
-import { firstMatchingDish } from './searchLexicon'
+import { firstMatchingDish, textMatchesDish } from './searchLexicon'
 
 export interface HardFilter {
   cuisines?: Cuisine[]
@@ -99,7 +99,10 @@ function hardFilterFromIntent(intent: FoodIntent): HardFilter {
 // Cheap pre-score for the shortlist cap: count of hard signals a row hits.
 function cheapScore(r: Restaurant, intent: FoodIntent): number {
   let n = 0
-  if (intent.dishes.length && firstMatchingDish(intent.dishes, restaurantSearchText(r))) n += 5
+  if (intent.dishes.length) {
+    const dishHits = intent.dishes.filter((d) => textMatchesDish(restaurantSearchText(r), d)).length
+    n += (dishHits / intent.dishes.length) * 5
+  }
   if (intent.cuisines.includes(r.cuisine)) n += 3
   if (r.secondaryCuisines?.some((c) => intent.cuisines.includes(c))) n += 2
   if (intent.area && r.area === intent.area) n += 2

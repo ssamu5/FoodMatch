@@ -1,7 +1,35 @@
 import { describe, expect, it } from 'vitest'
 import { SEED_RESTAURANTS } from '../data/seedRestaurants'
+import type { Restaurant } from '../types/restaurant'
 import { parseFoodIntent } from './foodIntent'
+import { scoreRestaurant } from './ranking'
 import { buildCompactRerankPacket, SeedSource, runSearchPipeline } from './searchPipeline'
+
+function makeRestaurant(overrides: Partial<Restaurant>): Restaurant {
+  return {
+    id: 'test',
+    slug: 'test',
+    name: 'Test',
+    description: '',
+    cuisine: 'Spanish tapas',
+    tags: [],
+    vibe: ['casual'],
+    bestFor: [],
+    area: 'Ruzafa',
+    city: 'Valencia',
+    address: 'Test St 1',
+    priceLevel: 2,
+    averageSpend: 20,
+    rating: 4.0,
+    reviewCount: 100,
+    imagePlaceholder: 'lime',
+    vegetarianFriendly: false,
+    veganFriendly: false,
+    glutenFreeOptions: false,
+    isPartner: false,
+    ...overrides,
+  }
+}
 
 const source = new SeedSource(SEED_RESTAURANTS)
 
@@ -95,5 +123,31 @@ describe('search pipeline', () => {
     expect(packet.query).toBe('romantic gluten-free dessert near Ruzafa under 25')
     expect(packet.candidates[0]).toMatchObject({ id: expect.any(String), n: expect.any(String), a: expect.any(String) })
     expect(JSON.stringify(packet)).not.toMatch(/description|address|opening|weeklySchedule|phone|website/i)
+  })
+
+  it('scoreRestaurant gives strictly more dish points when ALL requested dishes match vs only one', () => {
+    // Two identical restaurants except menu: one serves both croquetas and bravas,
+    // the other serves only bravas. The one with both dishes must score higher.
+    const base = { id: 'base', cuisine: 'Spanish tapas' as const, area: 'Ruzafa' as const, priceLevel: 2 as const, averageSpend: 20, rating: 4.0 }
+    const servingBoth = makeRestaurant({ ...base, id: 'both', menu: [{ name: 'Croquetas caseras' }, { name: 'Patatas bravas' }] })
+    const servingOne  = makeRestaurant({ ...base, id: 'one',  menu: [{ name: 'Patatas bravas' }] })
+
+    const intent = parseFoodIntent('croquetas bravas')
+    expect(intent.dishes).toContain('croquetas')
+    expect(intent.dishes).toContain('bravas')
+
+    const bothScore = scoreRestaurant(intent, servingBoth)
+    const oneScore  = scoreRestaurant(intent, servingOne)
+
+    expect(bothScore.score).toBeGreaterThan(oneScore.score)
+  })
+
+  it('scoreRestaurant reason lists every matched dish when multiple dishes requested', () => {
+    const r = makeRestaurant({ menu: [{ name: 'Croquetas caseras' }, { name: 'Patatas bravas' }] })
+    const intent = parseFoodIntent('croquetas bravas')
+    const { reasons } = scoreRestaurant(intent, r)
+    const reasonText = reasons.join(' ')
+    expect(reasonText).toMatch(/croquetas/i)
+    expect(reasonText).toMatch(/bravas/i)
   })
 })
