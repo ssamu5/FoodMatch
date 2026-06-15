@@ -31,6 +31,9 @@ for (const raw of blocks) {
   const id = str(b, 'id'); const slug = str(b, 'slug')
   if (!id || !slug) continue
   const hoursKind = /brunchHours\(\)/.test(b) ? 'brunch' : /standardOpening\(true\)/.test(b) ? 'late' : 'standard'
+  // NOTE: hero_image is intentionally NOT written here. Generated cover images
+  // are owned by scripts/generateHeroImage.mjs; omitting the column from this
+  // upsert means re-seeding never clobbers them.
   restaurants.push({
     id, slug,
     name: str(b, 'name'),

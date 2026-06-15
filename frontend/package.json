@@ -13,7 +13,8 @@
     "ios:open": "npm run build && npx cap sync ios && npx cap open ios",
     "android:open": "npm run build && npx cap sync android && npx cap open android",
     "android:apk": "cd android && ./gradlew assembleDebug",
-    "db:migrate": "node scripts/migrateToSupabase.mjs"
+    "db:migrate": "node scripts/migrateToSupabase.mjs",
+    "hero-image": "node scripts/generateHeroImage.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.4",
