@@ -330,6 +330,12 @@ export default function RestaurantDetail() {
             </div>
           )}
         </div>
+        {/* Allergen + dietary disclaimer. Dietary flags come from public data or
+            restaurant input and can be incomplete; diners with allergies must
+            confirm with the restaurant. See docs/SECURITY.md. */}
+        <p className="mt-2 rounded-xl bg-mostaza/10 px-3 py-2 text-[11px] leading-relaxed text-tinta/65 ring-1 ring-mostaza/25">
+          {t('detail.allergenDisclaimer')}
+        </p>
       </section>
 
       <section className="mt-5 rounded-2xl glass p-4">

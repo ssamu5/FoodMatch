@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getAccount, markWelcomeSeen, saveAccount } from '../lib/storage'
+import { getAccount, markWelcomeSeen } from '../lib/storage'
 import { api } from '../lib/api'
 import { track } from '../lib/analytics'
 import { useT } from '../lib/i18n'
 import LanguageToggle from '../components/LanguageToggle'
-import type { Account } from '../types/profile'
+import AuthForm from '../components/AuthForm'
+import type { AuthUser } from '../lib/auth'
 
 // First-run welcome + lightweight sign-in. Shown once (see hasSeenWelcome).
 // Not real auth: a local on-device profile so the app feels like a product
@@ -14,8 +15,6 @@ export default function Welcome() {
   const navigate = useNavigate()
   const { t } = useT()
   const [step, setStep] = useState<'role' | 'intro' | 'signup'>('role')
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
 
   function finish() {
     markWelcomeSeen()
@@ -38,18 +37,9 @@ export default function Welcome() {
     navigate('/restaurants', { replace: true })
   }
 
-  function createAccount() {
-    const displayName = name.trim()
-    if (!displayName) return
-    const acct: Account = {
-      displayName,
-      email: email.trim() || null,
-      createdAt: new Date().toISOString(),
-    }
-    saveAccount(acct)
-    track('account_created', { hasEmail: Boolean(acct.email), source: 'welcome' })
-    if (acct.email) {
-      api.submitUserLead({ email: acct.email, source: 'other' })
+  function onAuthSuccess(user: AuthUser) {
+    if (user.email) {
+      api.submitUserLead({ email: user.email, source: 'other' })
       track('user_lead_submitted', { source: 'welcome' })
     }
     finish()
@@ -152,36 +142,15 @@ export default function Welcome() {
           <div className="mt-8 animate-fade-up">
             <div className="rounded-3xl glass p-5">
               <h2 className="font-display text-[20px] font-bold text-tinta">{t('welcome.signupHeading')}</h2>
-              <p className="mt-1 text-[13px] leading-relaxed text-tinta/65">
+              <p className="mt-1 mb-3 text-[13px] leading-relaxed text-tinta/65">
                 {t('welcome.signupDesc')}
               </p>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  createAccount()
-                }}
-                className="mt-3 space-y-2"
-              >
-                <input
-                  autoFocus
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder={t('welcome.namePlaceholder')}
-                  className="liquid-input w-full rounded-2xl px-3.5 py-3 text-[15px]"
-                />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t('welcome.emailPlaceholder')}
-                  className="liquid-input w-full rounded-2xl px-3.5 py-3 text-[15px]"
-                />
-                <button type="submit" disabled={!name.trim()} className="btn-tomate h-12 w-full text-[15px]">
-                  {t('welcome.start')}
-                </button>
-              </form>
+              <AuthForm onSuccess={onAuthSuccess} />
             </div>
-            <button onClick={() => setStep('intro')} className="mt-3 h-11 w-full text-[13px] text-tinta/60 hover:text-tinta">
+            <button onClick={skip} className="mt-3 h-11 w-full text-[13px] text-tinta/60 hover:text-tinta">
+              {t('welcome.enterWithout')}
+            </button>
+            <button onClick={() => setStep('intro')} className="mt-1 h-9 w-full text-[12px] text-tinta/40 hover:text-tinta">
               &larr; {t('welcome.back')}
             </button>
           </div>

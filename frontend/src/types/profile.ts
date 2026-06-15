@@ -64,6 +64,7 @@ export type AnalyticsEventType =
   | 'share_clicked'
   | 'partner_interest_started'
   | 'account_created'
+  | 'account_signed_in'
   | 'account_signed_out'
   | 'listing_claim_clicked'
   | 'onboarding_started'

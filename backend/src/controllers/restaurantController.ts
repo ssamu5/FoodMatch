@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient, ListingStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -10,18 +10,17 @@ export async function getAllRestaurants(req: Request, res: Response) {
     const limitNum = Math.min(parseInt(limit as string) || 10, 50)
     const offsetNum = parseInt(offset as string) || 0
 
-    const restaurants = await prisma.restaurant.findMany({
-      where: {
-        city: city as string
-      },
-      take: limitNum,
-      skip: offsetNum,
-      orderBy: { name: 'asc' }
-    })
+    const where: Prisma.RestaurantWhereInput = { city: city as string }
 
-    const total = await prisma.restaurant.count({
-      where: { city: city as string }
-    })
+    const [restaurants, total] = await Promise.all([
+      prisma.restaurant.findMany({
+        where,
+        take: limitNum,
+        skip: offsetNum,
+        orderBy: [{ rating: 'desc' }, { name: 'asc' }]
+      }),
+      prisma.restaurant.count({ where })
+    ])
 
     res.json({
       success: true,
@@ -38,34 +37,45 @@ export async function getAllRestaurants(req: Request, res: Response) {
   }
 }
 
-// BUSCAR restaurantes por nombre/descripción
+// BUSCAR restaurantes por nombre/descripción/cocina/tags
 export async function searchRestaurants(req: Request, res: Response) {
   try {
     const { query = '', limit = 10, offset = 0 } = req.query
+    const q = (query as string).trim()
     const limitNum = Math.min(parseInt(limit as string) || 10, 50)
     const offsetNum = parseInt(offset as string) || 0
 
-    const restaurants = await prisma.restaurant.findMany({
-      where: {
-        OR: [
-          { name: { contains: query as string, mode: 'insensitive' } },
-          { description: { contains: query as string, mode: 'insensitive' } },
-          { cuisine: { contains: query as string, mode: 'insensitive' } }
-        ]
-      },
-      take: limitNum,
-      skip: offsetNum,
-      orderBy: { name: 'asc' }
-    })
+    const where: Prisma.RestaurantWhereInput = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' } },
+            { description: { contains: q, mode: 'insensitive' } },
+            { cuisine: { contains: q, mode: 'insensitive' } },
+            // String[] arrays only support exact element match, not contains.
+            { tags: { has: q } }
+          ]
+        }
+      : {}
+
+    const [restaurants, total] = await Promise.all([
+      prisma.restaurant.findMany({
+        where,
+        take: limitNum,
+        skip: offsetNum,
+        orderBy: [{ rating: 'desc' }, { name: 'asc' }]
+      }),
+      prisma.restaurant.count({ where })
+    ])
 
     res.json({
       success: true,
       data: restaurants,
-      query,
+      query: q,
       pagination: {
-        total: restaurants.length,
+        total,
         limit: limitNum,
-        offset: offsetNum
+        offset: offsetNum,
+        hasMore: offsetNum + limitNum < total
       }
     })
   } catch (error) {
@@ -76,38 +86,63 @@ export async function searchRestaurants(req: Request, res: Response) {
 // FILTRAR restaurantes por múltiples criterios
 export async function filterRestaurants(req: Request, res: Response) {
   try {
-    const { cuisine, priceRange, city = 'Valencia', format, limit = 10, offset = 0 } = req.query
+    const {
+      cuisine,
+      area,
+      priceLevel,
+      city = 'Valencia',
+      vegetarian,
+      vegan,
+      glutenFree,
+      listingStatus,
+      limit = 10,
+      offset = 0
+    } = req.query
     const limitNum = Math.min(parseInt(limit as string) || 10, 50)
     const offsetNum = parseInt(offset as string) || 0
 
     // Construir filtro dinámico
-    const whereClause: any = { city }
+    const where: Prisma.RestaurantWhereInput = { city: city as string }
 
     if (cuisine && cuisine !== 'Todos') {
-      whereClause.cuisine = { contains: cuisine as string, mode: 'insensitive' }
+      where.cuisine = { contains: cuisine as string, mode: 'insensitive' }
     }
 
-    if (priceRange) {
-      whereClause.priceRange = priceRange as string
+    if (area && area !== 'Todos') {
+      where.area = { contains: area as string, mode: 'insensitive' }
     }
 
-    if (format && format !== 'Todos') {
-      whereClause.format = format as string
+    const priceLevelNum = parseInt(priceLevel as string)
+    if (!Number.isNaN(priceLevelNum)) {
+      where.priceLevel = priceLevelNum
     }
 
-    const restaurants = await prisma.restaurant.findMany({
-      where: whereClause,
-      take: limitNum,
-      skip: offsetNum,
-      orderBy: { name: 'asc' }
-    })
+    if (vegetarian === 'true') where.vegetarianFriendly = true
+    if (vegan === 'true') where.veganFriendly = true
+    if (glutenFree === 'true') where.glutenFreeOptions = true
 
-    const total = await prisma.restaurant.count({ where: whereClause })
+    // Validate listingStatus against the enum before applying it.
+    if (
+      typeof listingStatus === 'string' &&
+      (Object.values(ListingStatus) as string[]).includes(listingStatus)
+    ) {
+      where.listingStatus = listingStatus as ListingStatus
+    }
+
+    const [restaurants, total] = await Promise.all([
+      prisma.restaurant.findMany({
+        where,
+        take: limitNum,
+        skip: offsetNum,
+        orderBy: [{ rating: 'desc' }, { name: 'asc' }]
+      }),
+      prisma.restaurant.count({ where })
+    ])
 
     res.json({
       success: true,
       data: restaurants,
-      filters: { cuisine, priceRange, city, format },
+      filters: { cuisine, area, priceLevel, city, vegetarian, vegan, glutenFree, listingStatus },
       pagination: {
         total,
         limit: limitNum,
@@ -120,13 +155,17 @@ export async function filterRestaurants(req: Request, res: Response) {
   }
 }
 
-// Obtener un restaurante por ID
+// Obtener un restaurante por ID (con platos y conteo de reseñas)
 export async function getRestaurantById(req: Request, res: Response) {
   try {
     const { id } = req.params
 
     const restaurant = await prisma.restaurant.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        dishes: true,
+        _count: { select: { reviews: true } }
+      }
     })
 
     if (!restaurant) {

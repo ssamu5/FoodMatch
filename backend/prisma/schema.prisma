@@ -1,3 +1,23 @@
+// FoodMatch database schema (Valencia-first pilot).
+//
+// Design goals:
+//  1. Map 1:1 to the frontend domain types in frontend/src/types/* so the swap
+//     from bundled seed data to a live API is mechanical, not a rewrite.
+//  2. Model Samuel's BMC revenue streams explicitly: high-intent leads,
+//     booking/delivery commission, taste insights, premium subscription +
+//     guides, plus the approved restaurant pricing (Free listing / Pro /
+//     Founder cohort + Boost add-on).
+//  3. Capture the public-listing -> claim -> Pro upgrade lifecycle: a
+//     restaurant exists from public data first, then a restaurateur claims it.
+//  4. Record the MVP validation funnel: searches, recommendations + evidence,
+//     and feedback (good / bad / tried / saved) so kill/continue KPIs are
+//     queryable from day one.
+//
+// Conventions:
+//  - String[] / enum[] use native Postgres arrays.
+//  - All money is stored in integer minor units (cents) to avoid float drift.
+//  - Timestamps are UTC; the app localises for display.
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -7,127 +27,586 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Usuario registrado en la app
+// =============================================================================
+// Enums
+// =============================================================================
+
+enum UserRole {
+  DINER
+  RESTAURATEUR
+  ADMIN
+}
+
+// Lifecycle of a restaurant listing. Restaurants start as PUBLIC_BASIC built
+// from public information; a restaurateur can CLAIM and then upgrade.
+enum ListingStatus {
+  PUBLIC_BASIC // auto-generated from public data, no owner
+  CLAIM_PENDING // a claim has been submitted, awaiting verification
+  CLAIMED // owner verified, free claimed listing
+  VERIFIED // claimed + on a paid plan (badge shown)
+}
+
+// Where a restaurant record originated. Drives the fairness/attribution copy.
+enum ListingSource {
+  PUBLIC_DATA // assembled from publicly available information
+  PARTNER // provided/confirmed by the restaurant
+  MANUAL // curated by the FoodMatch team
+}
+
+enum PlanCode {
+  FREE // public/basic listing, no charge
+  PRO // 99 EUR/mo full features
+  FOUNDER // founder cohort discounted Pro
+}
+
+enum BillingInterval {
+  MONTH
+  YEAR
+  WEEK // used by Boost add-on
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentKind {
+  SUBSCRIPTION // recurring Pro/Founder
+  BOOST // weekly promoted placement
+  PHOTO_SHOOT // optional professional photo add-on
+  GUIDE // premium guide purchase
+  ONE_OFF
+}
+
+enum BoostStatus {
+  SCHEDULED
+  ACTIVE
+  ENDED
+  CANCELED
+}
+
+// Revenue-relevant lead types. RESTAURANT = a restaurateur onboarding lead;
+// USER = a diner email capture; HIGH_INTENT/BOOKING = monetisable diner intent.
+enum LeadType {
+  USER
+  RESTAURANT
+  HIGH_INTENT
+  BOOKING
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  WON
+  LOST
+}
+
+enum CommissionType {
+  BOOKING
+  DELIVERY
+}
+
+enum CommissionStatus {
+  PENDING
+  CONFIRMED
+  PAID
+  CANCELED
+}
+
+// Diner reaction to a recommendation. Powers the core MVP feedback loop.
+enum FeedbackVerdict {
+  GOOD
+  BAD
+  TRIED
+  SAVED
+}
+
+// =============================================================================
+// Identity + profile
+// =============================================================================
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String   // hasheada con bcrypt
-  name      String?
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String? // null for OAuth/Supabase-managed identities
+  displayName   String?
+  role          UserRole @default(DINER)
+  emailVerified Boolean  @default(false)
+  // Stable device/anon id captured before signup; lets us stitch pre-auth
+  // analytics + saves to the account after registration.
+  deviceId      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  reviews   Review[]
-  favorites Favorite[]
-  orders    Order[]
+  profile          TasteProfile?
+  favorites        Favorite[]
+  reviews          Review[]
+  claims           RestaurantClaim[]
+  recommendations  Recommendation[]
+  feedback         RecommendationFeedback[]
+  searches         SearchEvent[]
+  analyticsEvents  AnalyticsEvent[]
+  guidePurchases   GuidePurchase[]
+  ownedRestaurants Restaurant[]             @relation("RestaurantOwner")
 
+  @@index([deviceId])
   @@map("users")
 }
 
-// Restaurante
+// One-to-one taste graph for personalisation. Mirrors frontend TasteProfile.
+model TasteProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favoriteCuisines String[] // Cuisine union values
+  preferredAreas   String[] // Area union values
+  dietary          String[] // 'vegetarian' | 'vegan' | 'gluten-free'
+  vibePreferences  String[] // Vibe union values
+  budgetComfort    Int? // 1-4 comfortable spend level
+  marketingOptIn   Boolean  @default(false)
+  updatedAt        DateTime @updatedAt
+
+  @@map("taste_profiles")
+}
+
+// =============================================================================
+// Restaurants + listings
+// =============================================================================
+
 model Restaurant {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
+  slug        String @unique
   name        String
-  description String?
+  description String @default("")
 
-  // Ubicación
-  latitude    Float
-  longitude   Float
-  address     String
-  city        String
+  // Discovery taxonomy (mirrors frontend Cuisine / Area / Vibe unions).
+  cuisine           String // primary cuisine
+  secondaryCuisines String[]
+  tags              String[]
+  vibe              String[]
+  bestFor           String[]
 
-  // Contacto
-  phone       String
-  email       String?
-  website     String?
+  // Location
+  area       String
+  city       String  @default("Valencia")
+  address    String  @default("")
+  postalCode String?
+  latitude   Float?
+  longitude  Float?
 
-  // Tipo de comida
-  cuisine     String   // "Sushi", "Pizza", "Carne"
-  format      String   // "Buffet", "À la carte", "Menú del día"
-  priceRange  String   // "€", "€€", "€€€"
+  // Budget + reputation
+  priceLevel        Int    @default(2) // 1-4
+  averageSpend      Int    @default(0) // EUR per person
+  rating            Float  @default(0) // 0-5
+  reviewCount       Int    @default(0)
+  // Cached external reputation indicator (Google Places rating + count).
+  // Allowed under the Places API license; we never store full review text.
+  googleRating      Float?
+  googleReviewCount Int?
 
-  // Horarios
-  openingTime String
-  closingTime String
-  closedDays  String?
+  // Visual identity
+  imagePlaceholder String  @default("lime-bright") // gradient seed fallback
+  heroImage        String? // real photo once claimed/verified
 
-  // Imagen
-  imageUrl    String?
+  // Contact (only published when verified/provided by the restaurant)
+  website   String?
+  instagram String?
+  phone     String?
+  whatsapp  String?
 
-  // Relaciones
-  menu        Menu[]
-  reviews     Review[]
-  favorites   Favorite[]
-  orders      Order[]
+  // Dietary flags surfaced in cards/filters
+  vegetarianFriendly Boolean @default(false)
+  veganFriendly      Boolean @default(false)
+  glutenFreeOptions  Boolean @default(false)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  // Listing lifecycle + provenance
+  listingStatus     ListingStatus @default(PUBLIC_BASIC)
+  source            ListingSource @default(PUBLIC_DATA)
+  sourceAttribution String? // human-readable note on where public data came from
+  isPartner         Boolean       @default(false)
+  ownerId           String?
+  owner             User?         @relation("RestaurantOwner", fields: [ownerId], references: [id])
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dishes          Dish[]
+  reviews         Review[]
+  favorites       Favorite[]
+  claim           RestaurantClaim?
+  subscription    Subscription?
+  payments        Payment[]
+  boosts          BoostSlot[]
+  leads           Lead[]
+  recommendations Recommendation[]
+  feedback        RecommendationFeedback[]
+  commissions     CommissionEvent[]
+
+  @@index([city, area])
+  @@index([cuisine])
+  @@index([listingStatus])
   @@map("restaurants")
 }
 
-// Platos del menú
-model Menu {
-  id           String   @id @default(cuid())
+// Structured menu item. Allergens are explicit so dietary filtering and the
+// allergen disclaimer have real data to stand on.
+model Dish {
+  id           String     @id @default(cuid())
   restaurantId String
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
-  name         String
-  description  String?
-  price        Float
-  imageUrl     String?
-  category     String
+  name        String
+  description String?
+  priceEur    Float?
+  category    String?
+  tags        String[]
+  allergens   String[] // EU 14 allergen identifiers when known
+  isSignature Boolean  @default(false)
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  @@map("menus")
+  @@index([restaurantId])
+  @@map("dishes")
 }
 
-// Reseñas de usuarios
+// First-party reviews. Long-term moat: verified Valencia reviews nobody else has.
 model Review {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   restaurantId String
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
-  rating       Int      // 1-5
-  comment      String?
-  imageUrl     String?
+  rating        Int // 1-5
+  comment       String?
+  visitVerified Boolean @default(false)
+  ownerResponse String? // restaurant (Pro) public reply
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@unique([userId, restaurantId])
+  @@index([restaurantId])
   @@map("reviews")
 }
 
-// Restaurantes favoritos
 model Favorite {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   restaurantId String
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([userId, restaurantId])
   @@map("favorites")
 }
 
-// Pedidos
-model Order {
-  id           String   @id @default(cuid())
+// A restaurateur claiming a public listing. Approval flips the listing to
+// CLAIMED and links ownership.
+model RestaurantClaim {
+  id           String     @id @default(cuid())
+  restaurantId String     @unique
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  status       LeadStatus @default(NEW) // reuse pipeline states for review flow
+  contactName  String
+  contactEmail String
+  contactPhone String?
+  evidence     String? // how they proved ownership
+  note         String?
+
+  createdAt  DateTime  @default(now())
+  reviewedAt DateTime?
+
+  @@map("restaurant_claims")
+}
+
+// =============================================================================
+// Monetisation: plans, subscriptions, payments, boost, commission, insights
+// =============================================================================
+
+// Catalog of purchasable plans. Seeded, not user-editable.
+model Plan {
+  id            String          @id @default(cuid())
+  code          PlanCode        @unique
+  name          String
+  priceCents    Int // per interval, in EUR cents (0 for FREE)
+  currency      String          @default("EUR")
+  interval      BillingInterval @default(MONTH)
+  // Commission charged on bookings/delivery for this plan, in basis points.
+  // 0 keeps the approved "no commission" promise; left configurable for the
+  // BMC commission stream if it is ever switched on per cohort.
+  commissionBps Int             @default(0)
+  features      Json // marketing feature list (localised in the app)
+  active        Boolean         @default(true)
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id           String     @id @default(cuid())
+  restaurantId String     @unique
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  planId       String
+  plan         Plan       @relation(fields: [planId], references: [id])
+
+  status             SubscriptionStatus @default(TRIALING)
+  founderCohort      Boolean            @default(false)
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  trialEnd           DateTime?
+  cancelAt           DateTime?
+
+  // Stripe references. Populated only once real billing is enabled.
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  restaurantId   String
+  restaurant     Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  kind        PaymentKind
+  amountCents Int
+  currency    String        @default("EUR")
+  status      PaymentStatus @default(PENDING)
+  periodStart DateTime?
+  periodEnd   DateTime?
+
+  stripePaymentIntentId String?
+  note                  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([restaurantId])
+  @@map("payments")
+}
+
+// Weekly promoted placement. Business rules (max 3 active per postal code, max
+// 2 visible per AI response, "Promocionado" label) are enforced in app logic;
+// this table is the source of truth for what is active and where.
+model BoostSlot {
+  id           String      @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  postalCode   String
+  status       BoostStatus @default(SCHEDULED)
+  priceCents   Int         @default(5000) // 50 EUR/week
+  startsAt     DateTime
+  endsAt       DateTime
+  paymentId    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([postalCode, status])
+  @@map("boost_slots")
+}
+
+// High-intent diner leads + restaurateur onboarding leads + booking leads.
+// Covers the "leads, high intent" and "commission on bookings" BMC streams.
+model Lead {
+  id           String      @id @default(cuid())
+  type         LeadType
+  status       LeadStatus  @default(NEW)
+  restaurantId String?
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+
+  // Contact / payload. Kept flexible so the same table serves diner email
+  // capture, restaurant onboarding, and booking intents.
+  email   String?
+  name    String?
+  phone   String?
+  message String?
+  source  String? // 'profile_email' | 'home_email' | 'form' | 'assistant' | ...
+  payload Json?
+
+  // Monetisation: estimated value of a high-intent/booking lead, in cents.
+  valueCents Int?
+
+  deviceId  String?
+  createdAt DateTime @default(now())
+
+  commission CommissionEvent?
+
+  @@index([type, status])
+  @@map("leads")
+}
+
+// Realised commission on a confirmed booking/delivery (BMC commission stream).
+model CommissionEvent {
+  id           String     @id @default(cuid())
   restaurantId String
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  leadId       String?    @unique
+  lead         Lead?      @relation(fields: [leadId], references: [id])
 
-  status       String   @default("pending") // pending, confirmed, delivered
-  total        Float
+  type             CommissionType
+  grossAmountCents Int
+  commissionBps    Int
+  commissionCents  Int
+  status           CommissionStatus @default(PENDING)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
 
-  @@map("orders")
+  @@index([restaurantId])
+  @@map("commission_events")
+}
+
+// Premium guides (curated Valencia content) sold to diners. BMC premium stream.
+model PremiumGuide {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  title       String
+  description String
+  city        String  @default("Valencia")
+  priceCents  Int     @default(0)
+  published   Boolean @default(false)
+  content     Json? // structured guide body
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchases GuidePurchase[]
+
+  @@map("premium_guides")
+}
+
+model GuidePurchase {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guideId     String
+  guide       PremiumGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  amountCents Int
+  currency    String       @default("EUR")
+  createdAt   DateTime     @default(now())
+
+  @@unique([userId, guideId])
+  @@map("guide_purchases")
+}
+
+// Sale of aggregated, anonymised taste insights (BMC "access to user taste
+// insights" stream). Scope describes what was sold (e.g. a cuisine demand
+// report for an area). No raw personal data is ever sold.
+model InsightAccess {
+  id           String    @id @default(cuid())
+  restaurantId String?
+  buyerName    String?
+  scope        String // e.g. 'ruzafa-demand-q3', 'vegan-trend-valencia'
+  priceCents   Int       @default(0)
+  currency     String    @default("EUR")
+  periodStart  DateTime?
+  periodEnd    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@map("insight_access")
+}
+
+// =============================================================================
+// Discovery funnel: searches, recommendations, feedback, analytics
+// =============================================================================
+
+// One craving search. parsedIntent stores the FoodIntent the parser produced.
+model SearchEvent {
+  id           String  @id @default(cuid())
+  deviceId     String
+  userId       String?
+  user         User?   @relation(fields: [userId], references: [id])
+  rawQuery     String
+  parsedIntent Json?
+  resultCount  Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  recommendations Recommendation[]
+
+  @@index([deviceId])
+  @@map("search_events")
+}
+
+// A single dish/restaurant recommendation with its evidence. The MVP promise:
+// 3 of these per craving, each with reasons (and any warnings).
+model Recommendation {
+  id           String       @id @default(cuid())
+  searchId     String?
+  search       SearchEvent? @relation(fields: [searchId], references: [id], onDelete: SetNull)
+  restaurantId String
+  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?        @relation(fields: [userId], references: [id])
+  deviceId     String?
+
+  rank         Int // 1..n position in the shortlist
+  score        Float // 0-100 match score
+  reasons      String[] // evidence shown to the user ("why recommended")
+  warnings     String[] // e.g. dietary caveats
+  cravingQuery String?
+
+  createdAt DateTime @default(now())
+
+  feedback RecommendationFeedback[]
+
+  @@index([restaurantId])
+  @@map("recommendations")
+}
+
+// Diner feedback on a recommendation: good / bad / tried / saved.
+model RecommendationFeedback {
+  id               String          @id @default(cuid())
+  recommendationId String?
+  recommendation   Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: SetNull)
+  restaurantId     String
+  restaurant       Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?           @relation(fields: [userId], references: [id])
+  deviceId         String?
+
+  verdict FeedbackVerdict
+
+  createdAt DateTime @default(now())
+
+  @@index([restaurantId, verdict])
+  @@map("recommendation_feedback")
+}
+
+// Generic product analytics. Mirrors frontend AnalyticsEventType union.
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  deviceId  String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([deviceId])
+  @@map("analytics_events")
 }

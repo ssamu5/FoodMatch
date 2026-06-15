@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FoodMatch Strategy Mindmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f7efe1;
+    --surface:#fbf6ec;
+    --creamy:#f1e8d6;
+    --tinta:#1f1814;
+    --tomate:#e63946;
+    --tomateDeep:#b72c39;
+    --mostaza:#f2a93b;
+    --fresco:#3fae6b;
+    --azulejo:#1f4e5f;
+    --ceramica:#d9694d;
+    --hair:rgba(31,24,20,0.08);
+    --hair-strong:rgba(31,24,20,0.14);
+    --shadow-sm:0 2px 8px rgba(31,24,20,0.06);
+    --shadow-md:0 10px 30px rgba(31,24,20,0.10);
+    --shadow-lg:0 22px 60px rgba(31,24,20,0.14);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{margin:0;padding:0;}
+
+  body{
+    font-family:"Bricolage Grotesque",system-ui,-apple-system,Segoe UI,sans-serif;
+    color:var(--tinta);
+    background-color:var(--paper);
+    background-image:radial-gradient(rgba(31,24,20,0.05) 1.1px, transparent 1.1px);
+    background-size:24px 24px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  .wrap{
+    max-width:1280px;
+    margin:0 auto;
+    padding:36px 24px 64px;
+  }
+
+  /* ---------- Header ---------- */
+  header.masthead{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:18px;
+    padding-bottom:22px;
+    border-bottom:1px solid var(--hair-strong);
+    margin-bottom:30px;
+  }
+  .wordmark{
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:600;
+    font-size:clamp(34px,5vw,52px);
+    letter-spacing:-0.02em;
+    line-height:1;
+    margin:0;
+  }
+  .wordmark .accent{color:var(--tomate);font-style:italic;}
+  .subtitle{
+    margin:10px 0 0;
+    max-width:560px;
+    font-size:15px;
+    color:rgba(31,24,20,0.74);
+  }
+  .masthead-date{
+    font-family:"Fraunces",serif;
+    font-size:14px;
+    color:rgba(31,24,20,0.6);
+    text-align:right;
+    white-space:nowrap;
+  }
+  .masthead-date span{
+    display:block;
+    font-family:"Bricolage Grotesque",sans-serif;
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:rgba(31,24,20,0.45);
+    margin-bottom:4px;
+  }
+
+  /* ---------- Legend + controls ---------- */
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:26px;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 14px;
+    align-items:center;
+  }
+  .legend-item{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    color:rgba(31,24,20,0.72);
+    background:var(--surface);
+    border:1px solid var(--hair);
+    border-radius:999px;
+    padding:5px 11px 5px 8px;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .legend-item:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+  .legend-item .dot{
+    width:11px;height:11px;border-radius:50%;flex:0 0 auto;
+    box-shadow:0 0 0 3px rgba(255,255,255,0.5) inset;
+  }
+  .reset-btn{
+    font-family:"Bricolage Grotesque",sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--tinta);
+    background:var(--surface);
+    border:1px solid var(--hair-strong);
+    border-radius:999px;
+    padding:8px 16px;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease, opacity .2s ease;
+    opacity:0;
+    pointer-events:none;
+  }
+  .reset-btn.show{opacity:1;pointer-events:auto;}
+  .reset-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+
+  /* ---------- Mindmap canvas ---------- */
+  .map{
+    position:relative;
+    margin-top:8px;
+  }
+  .connectors{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+    overflow:visible;
+  }
+  .connectors path{
+    fill:none;
+    stroke-linecap:round;
+    transition:opacity .3s ease, stroke-width .3s ease;
+  }
+
+  /* central hub */
+  .hub{
+    position:relative;
+    z-index:2;
+    width:max-content;
+    max-width:340px;
+    margin:0 auto 30px;
+    text-align:center;
+    background:
+      radial-gradient(120% 120% at 30% 20%, #ffffff 0%, var(--surface) 55%, var(--creamy) 100%);
+    border:1px solid var(--hair-strong);
+    border-radius:26px;
+    padding:26px 30px;
+    box-shadow:var(--shadow-lg);
+  }
+  .hub .badge{
+    display:inline-block;
+    font-size:10.5px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--tomateDeep);
+    background:rgba(230,57,70,0.10);
+    border-radius:999px;
+    padding:4px 12px;
+    margin-bottom:12px;
+  }
+  .hub h2{
+    font-family:"Fraunces",serif;
+    font-weight:600;
+    font-size:32px;
+    letter-spacing:-0.02em;
+    margin:0 0 8px;
+  }
+  .hub h2 .accent{color:var(--tomate);font-style:italic;}
+  .hub p{
+    margin:0;
+    font-size:13.5px;
+    color:rgba(31,24,20,0.72);
+  }
+
+  /* ---------- branch grid ---------- */
+  .branches{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+  }
+  @media (max-width:980px){
+    .branches{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:640px){
+    .branches{grid-template-columns:1fr;}
+    .hub{margin-bottom:18px;}
+  }
+
+  .branch{
+    position:relative;
+    z-index:1;
+    background:var(--surface);
+    border:1px solid var(--hair);
+    border-top:4px solid var(--accent,var(--tomate));
+    border-radius:18px;
+    padding:20px 20px 22px;
+    box-shadow:var(--shadow-sm);
+    transition:transform .22s ease, box-shadow .22s ease, opacity .3s ease, filter .3s ease;
+    cursor:pointer;
+    outline:none;
+  }
+  .branch:hover,
+  .branch:focus-visible{
+    transform:translateY(-5px);
+    box-shadow:var(--shadow-md);
+  }
+  .branch:focus-visible{
+    border-color:var(--accent,var(--tomate));
+  }
+  .branch .head{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .branch .num{
+    font-family:"Fraunces",serif;
+    font-weight:600;
+    font-size:13px;
+    color:#fff;
+    background:var(--accent,var(--tomate));
+    border-radius:8px;
+    min-width:26px;
+    height:26px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    box-shadow:var(--shadow-sm);
+  }
+  .branch h3{
+    font-family:"Fraunces",serif;
+    font-weight:600;
+    font-size:18px;
+    letter-spacing:-0.01em;
+    line-height:1.15;
+    margin:0;
+    color:var(--tinta);
+  }
+  .branch .tag{
+    display:inline-block;
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent,var(--tomate));
+    margin:2px 0 0;
+    font-weight:600;
+  }
+  .branch .lede{
+    font-size:13.5px;
+    color:rgba(31,24,20,0.82);
+    margin:0 0 12px;
+  }
+  .branch ul{
+    margin:0;
+    padding:0;
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .branch li{
+    position:relative;
+    padding-left:16px;
+    font-size:12.8px;
+    color:rgba(31,24,20,0.78);
+  }
+  .branch li::before{
+    content:"";
+    position:absolute;
+    left:0;top:7px;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--accent,var(--tomate));
+    opacity:0.85;
+  }
+  .branch li b{font-weight:600;color:var(--tinta);}
+
+  .subgroup{
+    margin-top:12px;
+    padding-top:11px;
+    border-top:1px dashed var(--hair-strong);
+  }
+  .subgroup .label{
+    font-size:10.5px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--accent,var(--tomate));
+    margin-bottom:6px;
+  }
+
+  .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .pill{
+    font-size:11.5px;
+    background:var(--creamy);
+    border:1px solid var(--hair);
+    border-radius:999px;
+    padding:3px 10px;
+    color:rgba(31,24,20,0.8);
+  }
+
+  .note{
+    margin-top:12px;
+    font-size:11.8px;
+    font-style:italic;
+    color:rgba(31,24,20,0.62);
+    border-left:3px solid var(--accent,var(--tomate));
+    padding-left:10px;
+  }
+
+  /* funnel flow line */
+  .flow{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  .flow .step{
+    background:var(--creamy);
+    border:1px solid var(--hair);
+    border-radius:8px;
+    padding:4px 9px;
+  }
+  .flow .arrow{color:var(--accent,var(--tomate));font-weight:700;}
+
+  /* dimmed state when a branch is focused */
+  .map.has-active .branch:not(.active){
+    opacity:0.34;
+    filter:saturate(0.7);
+  }
+  .map.has-active .branch.active{
+    transform:translateY(-5px);
+    box-shadow:var(--shadow-lg);
+  }
+
+  /* ---------- footer ---------- */
+  footer.foot{
+    margin-top:46px;
+    padding-top:18px;
+    border-top:1px solid var(--hair-strong);
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:10px;
+    font-size:12px;
+    color:rgba(31,24,20,0.55);
+  }
+  footer.foot .brand{
+    font-family:"Fraunces",serif;
+    font-style:italic;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1 class="wordmark">Food<span class="accent">Match</span></h1>
+      <p class="subtitle">Valencia-first craving discovery. Strategy mindmap distilled from Samuel's VPC plus BMC plus MVP workshop.</p>
+    </div>
+    <div class="masthead-date">
+      <span>Strategy artifact</span>
+      2026-06-15
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="legend" aria-label="Branch color legend"></div>
+    <button class="reset-btn" id="resetBtn" type="button">Reset view</button>
+  </div>
+
+  <div class="map" id="map">
+    <svg class="connectors" id="connectors" aria-hidden="true" preserveAspectRatio="none"></svg>
+
+    <div class="hub" id="hub">
+      <span class="badge">Central hub</span>
+      <h2>Food<span class="accent">Match</span></h2>
+      <p>Tell us what you are craving. We find the best version of that dish nearby, fast, with evidence.</p>
+    </div>
+
+    <div class="branches" id="branches">
+
+      <!-- 1 -->
+      <article class="branch" data-key="cvp" style="--accent:var(--tomate);" tabindex="0" aria-label="Core value proposition">
+        <div class="head">
+          <span class="num">1</span>
+          <div>
+            <span class="tag">Core value</span>
+            <h3>Core Value Proposition</h3>
+          </div>
+        </div>
+        <p class="lede">Tell us what you are craving and we find the best version of that dish nearby, fast, with evidence.</p>
+        <ul>
+          <li><b>Dish-first, not restaurant-first.</b></li>
+          <li>Beats endless scrolling.</li>
+          <li>Beats untrustworthy reviews.</li>
+        </ul>
+      </article>
+
+      <!-- 2 -->
+      <article class="branch" data-key="segments" style="--accent:var(--azulejo);" tabindex="0" aria-label="Customer segments">
+        <div class="head">
+          <span class="num">2</span>
+          <div>
+            <span class="tag">Who</span>
+            <h3>Customer Segments</h3>
+          </div>
+        </div>
+        <ul>
+          <li>Urban foodies.</li>
+          <li>Tourists and visitors.</li>
+          <li>People with allergy or dietary needs.</li>
+          <li>Restaurants with one standout dish and low visibility.</li>
+        </ul>
+      </article>
+
+      <!-- 3 -->
+      <article class="branch" data-key="jpg" style="--accent:var(--mostaza);" tabindex="0" aria-label="Customer jobs, pains and gains">
+        <div class="head">
+          <span class="num">3</span>
+          <div>
+            <span class="tag">Why it matters</span>
+            <h3>Jobs, Pains, Gains</h3>
+          </div>
+        </div>
+        <div class="subgroup">
+          <div class="label">Jobs</div>
+          <ul>
+            <li>Find a craving fast.</li>
+            <li>Find hidden gems.</li>
+            <li>Decide without 20 to 30 min scrolling.</li>
+          </ul>
+        </div>
+        <div class="subgroup">
+          <div class="label">Pains</div>
+          <ul>
+            <li>Regret of a mediocre place.</li>
+            <li>Restaurant-based, not dish-based, search.</li>
+            <li>Untrustworthy reviews (Google, TikTok).</li>
+            <li>Decision fatigue.</li>
+          </ul>
+        </div>
+        <div class="subgroup">
+          <div class="label">Gains</div>
+          <ul>
+            <li>Best version of the craving.</li>
+            <li>Hidden gems.</li>
+            <li>Fast, confident decision.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 4 -->
+      <article class="branch" data-key="product" style="--accent:var(--fresco);" tabindex="0" aria-label="Product and features">
+        <div class="head">
+          <span class="num">4</span>
+          <div>
+            <span class="tag">What we build</span>
+            <h3>Product and Features</h3>
+          </div>
+        </div>
+        <ul>
+          <li>Describe craving in plain text.</li>
+          <li>Dish and craving-level ranking.</li>
+          <li><b>Why recommended</b> with evidence.</li>
+          <li>Taste personalization that learns.</li>
+          <li>Allergy awareness.</li>
+          <li>Discover hidden gems beyond influencers.</li>
+        </ul>
+      </article>
+
+      <!-- 5 -->
+      <article class="branch" data-key="mvp" style="--accent:var(--ceramica);" tabindex="0" aria-label="MVP scope">
+        <div class="head">
+          <span class="num">5</span>
+          <div>
+            <span class="tag">Build first</span>
+            <h3>MVP Scope: 3 Core Features</h3>
+          </div>
+        </div>
+        <ul>
+          <li><b>1. Craving input.</b></li>
+          <li><b>2.</b> 3 dish-level recommendations with short evidence.</li>
+          <li><b>3. Feedback:</b> good, bad, tried it, saved.</li>
+        </ul>
+        <div class="subgroup">
+          <div class="label">Plus one commit signal</div>
+          <div class="pill-row">
+            <span class="pill">Save</span>
+            <span class="pill">WhatsApp</span>
+            <span class="pill">Directions</span>
+            <span class="pill">Restaurant lead</span>
+          </div>
+        </div>
+        <p class="note">Lean-MVP rule: build the 20% that tests the core hypothesis, cut the rest.</p>
+      </article>
+
+      <!-- 6 -->
+      <article class="branch" data-key="funnel" style="--accent:var(--tinta);" tabindex="0" aria-label="MVP validation funnel">
+        <div class="head">
+          <span class="num">6</span>
+          <div>
+            <span class="tag">Validate</span>
+            <h3>MVP Validation Funnel</h3>
+          </div>
+        </div>
+        <div class="flow">
+          <span class="step">Problem-Solution Fit</span>
+          <span class="arrow">to</span>
+          <span class="step">MVP</span>
+          <span class="arrow">to</span>
+          <span class="step">Product-Market Fit</span>
+        </div>
+        <div class="subgroup">
+          <div class="label">Continue criteria</div>
+          <ul>
+            <li>30 to 50 real Valencia testers.</li>
+            <li>40% or more submit more than one craving.</li>
+            <li>30% or more save or click a recommendation.</li>
+            <li>10 or more users found a place faster than Google or TikTok.</li>
+            <li>3 or more restaurants interested in paying.</li>
+          </ul>
+        </div>
+        <div class="subgroup">
+          <div class="label">Kill criteria</div>
+          <ul>
+            <li>Users still prefer TikTok or Google.</li>
+            <li>Dish-level accuracy too hard.</li>
+            <li>No restaurant demand for dish-level leads.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 7 -->
+      <article class="branch" data-key="revenue" style="--accent:var(--tomate);" tabindex="0" aria-label="Business model revenue streams">
+        <div class="head">
+          <span class="num">7</span>
+          <div>
+            <span class="tag">Make money</span>
+            <h3>Revenue Streams</h3>
+          </div>
+        </div>
+        <div class="subgroup">
+          <div class="label">Restaurant plans</div>
+          <ul>
+            <li>Free public listing (built from public data) then claim or upgrade.</li>
+            <li><b>Pro 99 EUR/month</b> (founder cohort 49 EUR/month for first 50).</li>
+            <li><b>Boost add-on 50 EUR/week</b> (Pro only). Labelled "Promocionado", max 3 active per postal code, max 2 per AI response.</li>
+          </ul>
+        </div>
+        <div class="subgroup">
+          <div class="label">Future streams (BMC)</div>
+          <ul>
+            <li>High-intent leads.</li>
+            <li>Commission on bookings or delivery.</li>
+            <li>Access to anonymised taste insights.</li>
+            <li>Premium guides.</li>
+          </ul>
+        </div>
+        <p class="note">0% commission is the current promise. Commission is a future, optional stream.</p>
+      </article>
+
+      <!-- 8 -->
+      <article class="branch" data-key="listing" style="--accent:var(--azulejo);" tabindex="0" aria-label="Listing lifecycle">
+        <div class="head">
+          <span class="num">8</span>
+          <div>
+            <span class="tag">Supply side</span>
+            <h3>Listing Lifecycle</h3>
+          </div>
+        </div>
+        <div class="flow">
+          <span class="step">PUBLIC_BASIC</span>
+          <span class="arrow">to</span>
+          <span class="step">CLAIM_PENDING</span>
+          <span class="arrow">to</span>
+          <span class="step">CLAIMED</span>
+          <span class="arrow">to</span>
+          <span class="step">VERIFIED</span>
+        </div>
+        <ul>
+          <li><b>PUBLIC_BASIC:</b> public data, looks populated day one.</li>
+          <li><b>CLAIM_PENDING:</b> owner requests the listing.</li>
+          <li><b>CLAIMED:</b> free, owner verified.</li>
+          <li><b>VERIFIED:</b> paid plan, badge.</li>
+        </ul>
+        <p class="note">Fairness: public data helps diners discover. Restaurants can claim, correct, or remove their listing.</p>
+      </article>
+
+      <!-- 9 -->
+      <article class="branch" data-key="data" style="--accent:var(--fresco);" tabindex="0" aria-label="Data and AI architecture">
+        <div class="head">
+          <span class="num">9</span>
+          <div>
+            <span class="tag">How it runs</span>
+            <h3>Data and AI Architecture</h3>
+          </div>
+        </div>
+        <ul>
+          <li><b>Dish graph</b> (kept current).</li>
+          <li><b>User taste graph.</b></li>
+          <li>Data pipeline plus AI infra.</li>
+          <li>LLM providers.</li>
+          <li>Places and restaurant APIs.</li>
+        </ul>
+        <div class="subgroup">
+          <div class="label">Key resources</div>
+          <div class="pill-row">
+            <span class="pill">Dish graph</span>
+            <span class="pill">Taste graph</span>
+            <span class="pill">Brand</span>
+            <span class="pill">Partner platforms</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 10 -->
+      <article class="branch" data-key="gtm" style="--accent:var(--mostaza);" tabindex="0" aria-label="Go to market and channels">
+        <div class="head">
+          <span class="num">10</span>
+          <div>
+            <span class="tag">Reach people</span>
+            <h3>Go-to-Market and Channels</h3>
+          </div>
+        </div>
+        <ul>
+          <li>Valencia food communities.</li>
+          <li>Tourists, hostels, and hotels.</li>
+          <li>Local tourism agencies.</li>
+          <li>Content generated from dishes.</li>
+          <li>Direct sales to restaurants.</li>
+        </ul>
+        <p class="note">Distribution is built into the test from day one.</p>
+      </article>
+
+    </div>
+  </div>
+
+  <footer class="foot">
+    <span class="brand">FoodMatch</span>
+    <span>Internal strategy artifact. Generated for the FoodMatch team. 2026-06-15.</span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var map = document.getElementById("map");
+  var hub = document.getElementById("hub");
+  var svg = document.getElementById("connectors");
+  var branchesWrap = document.getElementById("branches");
+  var resetBtn = document.getElementById("resetBtn");
+  var branches = Array.prototype.slice.call(document.querySelectorAll(".branch"));
+  var legendWrap = document.querySelector(".legend");
+
+  // Build legend from branches
+  var legendData = [
+    {key:"cvp", color:"var(--tomate)", label:"Value proposition"},
+    {key:"segments", color:"var(--azulejo)", label:"Customers"},
+    {key:"jpg", color:"var(--mostaza)", label:"Jobs / Pains / Gains"},
+    {key:"product", color:"var(--fresco)", label:"Product"},
+    {key:"mvp", color:"var(--ceramica)", label:"MVP scope"},
+    {key:"funnel", color:"var(--tinta)", label:"Validation"},
+    {key:"revenue", color:"var(--tomate)", label:"Revenue"},
+    {key:"listing", color:"var(--azulejo)", label:"Listings"},
+    {key:"data", color:"var(--fresco)", label:"Data + AI"},
+    {key:"gtm", color:"var(--mostaza)", label:"Go-to-market"}
+  ];
+  legendData.forEach(function(d){
+    var el = document.createElement("button");
+    el.type = "button";
+    el.className = "legend-item";
+    el.setAttribute("data-legend", d.key);
+    el.innerHTML = '<span class="dot" style="background:' + d.color + '"></span>' + d.label;
+    el.addEventListener("click", function(){ toggleActive(d.key); });
+    legendWrap.appendChild(el);
+  });
+
+  // ---------- Connectors (SVG curves from hub to each branch) ----------
+  function colorForBranch(b){
+    return getComputedStyle(b).getPropertyValue("border-top-color").trim() || "#e63946";
+  }
+
+  function drawConnectors(){
+    // Only draw when branches sit beside/below hub in a real 2D layout.
+    var mapRect = map.getBoundingClientRect();
+    svg.setAttribute("viewBox", "0 0 " + mapRect.width + " " + mapRect.height);
+    svg.setAttribute("width", mapRect.width);
+    svg.setAttribute("height", mapRect.height);
+
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+
+    var hubRect = hub.getBoundingClientRect();
+    var hx = hubRect.left + hubRect.width/2 - mapRect.left;
+    var hy = hubRect.bottom - mapRect.top;
+
+    branches.forEach(function(b){
+      var r = b.getBoundingClientRect();
+      var bx = r.left + r.width/2 - mapRect.left;
+      var by = r.top - mapRect.top;
+
+      var midY = (hy + by) / 2;
+      var d = "M " + hx + " " + hy +
+              " C " + hx + " " + midY + ", " + bx + " " + (by - (by - hy) * 0.5) + ", " + bx + " " + by;
+
+      var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", colorForBranch(b));
+      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-opacity", "0.32");
+      path.setAttribute("data-conn", b.getAttribute("data-key"));
+      svg.appendChild(path);
+    });
+  }
+
+  // ---------- Active / highlight logic ----------
+  var activeKey = null;
+
+  function setConnectorEmphasis(){
+    var paths = svg.querySelectorAll("path");
+    Array.prototype.forEach.call(paths, function(p){
+      var k = p.getAttribute("data-conn");
+      if(activeKey === null){
+        p.setAttribute("stroke-opacity", "0.32");
+        p.setAttribute("stroke-width", "2");
+      } else if(k === activeKey){
+        p.setAttribute("stroke-opacity", "0.95");
+        p.setAttribute("stroke-width", "3.4");
+      } else {
+        p.setAttribute("stroke-opacity", "0.08");
+        p.setAttribute("stroke-width", "1.5");
+      }
+    });
+  }
+
+  function applyActive(){
+    if(activeKey === null){
+      map.classList.remove("has-active");
+      resetBtn.classList.remove("show");
+    } else {
+      map.classList.add("has-active");
+      resetBtn.classList.add("show");
+    }
+    branches.forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-key") === activeKey);
+    });
+    var legendItems = legendWrap.querySelectorAll(".legend-item");
+    Array.prototype.forEach.call(legendItems, function(li){
+      li.style.borderColor = (li.getAttribute("data-legend") === activeKey)
+        ? "var(--hair-strong)" : "var(--hair)";
+      li.style.opacity = (activeKey === null || li.getAttribute("data-legend") === activeKey) ? "1" : "0.45";
+    });
+    setConnectorEmphasis();
+  }
+
+  function toggleActive(key){
+    activeKey = (activeKey === key) ? null : key;
+    applyActive();
+  }
+
+  function clearActive(){
+    activeKey = null;
+    applyActive();
+  }
+
+  branches.forEach(function(b){
+    b.addEventListener("click", function(){
+      toggleActive(b.getAttribute("data-key"));
+    });
+    b.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        toggleActive(b.getAttribute("data-key"));
+      } else if(e.key === "Escape"){
+        clearActive();
+      }
+    });
+  });
+
+  resetBtn.addEventListener("click", clearActive);
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){ clearActive(); }
+  });
+
+  // ---------- Lifecycle ----------
+  var rafId = null;
+  function scheduleDraw(){
+    if(rafId){ cancelAnimationFrame(rafId); }
+    rafId = requestAnimationFrame(function(){
+      drawConnectors();
+      setConnectorEmphasis();
+    });
+  }
+
+  window.addEventListener("resize", scheduleDraw);
+  window.addEventListener("load", scheduleDraw);
+
+  // Fonts can shift layout once loaded; redraw after they settle.
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(scheduleDraw);
+  }
+
+  // Initial draw (in case load already fired)
+  scheduleDraw();
+})();
+</script>
+</body>
+</html>

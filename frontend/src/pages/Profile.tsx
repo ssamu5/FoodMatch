@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import AppShell from '../components/AppShell'
 import LanguageToggle from '../components/LanguageToggle'
 import { useT } from '../lib/i18n'
-import { clearAccount, getAccount, getTasteProfile, saveAccount, saveTasteProfile } from '../lib/storage'
+import { getAccount, getTasteProfile, saveTasteProfile } from '../lib/storage'
+import { logout } from '../lib/auth'
+import AuthForm from '../components/AuthForm'
 import { api } from '../lib/api'
 import { track } from '../lib/analytics'
 import type { Account, TasteProfile } from '../types/profile'
@@ -28,35 +30,23 @@ export default function Profile() {
   const [savedAt, setSavedAt] = useState<string | null>(null)
 
   const [account, setAccount] = useState<Account | null>(() => getAccount())
-  const [nameDraft, setNameDraft] = useState('')
-  const [acctEmailDraft, setAcctEmailDraft] = useState('')
 
   useEffect(() => {
     setEmailDraft(profile.email || '')
   }, [profile.email])
 
-  function createAccount() {
-    const name = nameDraft.trim()
-    if (!name) return
-    const acct: Account = {
-      displayName: name,
-      email: acctEmailDraft.trim() || null,
-      createdAt: new Date().toISOString(),
-    }
-    saveAccount(acct)
+  function onAuthSuccess() {
+    const acct = getAccount()
     setAccount(acct)
-    track('account_created', { hasEmail: Boolean(acct.email) })
-    if (acct.email) {
+    if (acct?.email) {
       api.submitUserLead({ email: acct.email, source: 'other' })
       track('user_lead_submitted', { source: 'account' })
     }
   }
 
-  function signOut() {
-    clearAccount()
+  async function signOut() {
+    await logout()
     setAccount(null)
-    setNameDraft('')
-    setAcctEmailDraft('')
     track('account_signed_out')
   }
 
@@ -111,34 +101,10 @@ export default function Profile() {
         ) : (
           <>
             <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">{t('profile.createProfileHeading')}</h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-tinta/70">
+            <p className="mt-1 mb-3 text-[13px] leading-relaxed text-tinta/70">
               {t('profile.createProfileBody')}
             </p>
-            <div className="mt-3 space-y-2">
-              <input
-                value={nameDraft}
-                onChange={(e) => setNameDraft(e.target.value)}
-                placeholder={t('profile.namePlaceholder')}
-                className="liquid-input w-full rounded-2xl px-3 py-2.5 text-[14px]"
-              />
-              <input
-                type="email"
-                value={acctEmailDraft}
-                onChange={(e) => setAcctEmailDraft(e.target.value)}
-                placeholder={t('profile.emailPlaceholder')}
-                className="liquid-input w-full rounded-2xl px-3 py-2.5 text-[14px]"
-              />
-              <button
-                onClick={createAccount}
-                disabled={!nameDraft.trim()}
-                className="btn-lime h-11 w-full text-[13px]"
-              >
-                {t('profile.continue')}
-              </button>
-            </div>
-            <p className="mt-2 text-[11px] text-tinta/50">
-              {t('profile.demoNote')}
-            </p>
+            <AuthForm onSuccess={onAuthSuccess} />
           </>
         )}
       </section>

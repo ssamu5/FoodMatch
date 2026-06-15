@@ -155,6 +155,76 @@ export default function RestaurantPartner() {
         </div>
       </section>
 
+      {/* Plans + pricing (revenue streams surfaced for restaurateurs). Maps to
+          the Plan / Subscription / Payment / BoostSlot models in the backend. */}
+      <section className="mt-5">
+        <h2 className="font-display text-[23px] font-bold leading-tight text-tinta">{t('partner.plansHeading')}</h2>
+        <p className="mt-1 text-[13px] text-tinta/70">{t('partner.plansSubtitle')}</p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {/* Free */}
+          <div className="flex flex-col rounded-3xl glass p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-tinta/55">{t('partner.planFreeName')}</p>
+            <p className="mt-1.5 font-display text-[26px] font-bold leading-none text-tinta">
+              {t('partner.planFreePrice')}<span className="ml-1 text-[12px] font-medium text-tinta/55">{t('partner.planFreeUnit')}</span>
+            </p>
+            <p className="mt-1 text-[12px] text-tinta/65">{t('partner.planFreeTagline')}</p>
+            <ul className="mt-3 space-y-1.5 text-[12.5px] text-tinta/75">
+              {[t('partner.planFreeF1'), t('partner.planFreeF2'), t('partner.planFreeF3')].map((f, i) => (
+                <li key={i} className="flex gap-2"><span className="text-fresco">+</span><span>{f}</span></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Founder (highlighted) */}
+          <div className="relative flex flex-col rounded-3xl stamp-card p-4 ring-2 ring-tomate/60">
+            <span className="absolute -top-2.5 left-4 inline-flex rounded-full bg-tomate px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-cream shadow-warm">
+              {t('partner.planFounderBadge')}
+            </span>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-tomate">{t('partner.planFounderName')}</p>
+            <p className="mt-1.5 font-display text-[26px] font-bold leading-none text-tinta">
+              {t('partner.planFounderPrice')}<span className="ml-1 text-[12px] font-medium text-tinta/55">{t('partner.planFounderUnit')}</span>
+            </p>
+            <p className="mt-1 text-[12px] text-tinta/65">{t('partner.planFounderTagline')}</p>
+            <ul className="mt-3 space-y-1.5 text-[12.5px] text-tinta/80">
+              {[t('partner.planFounderF1'), t('partner.planFounderF2'), t('partner.planFounderF3'), t('partner.planFounderF4')].map((f, i) => (
+                <li key={i} className="flex gap-2"><span className="text-tomate">+</span><span>{f}</span></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Pro */}
+          <div className="flex flex-col rounded-3xl glass p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-tinta/55">{t('partner.planProName')}</p>
+            <p className="mt-1.5 font-display text-[26px] font-bold leading-none text-tinta">
+              {t('partner.planProPrice')}<span className="ml-1 text-[12px] font-medium text-tinta/55">{t('partner.planProUnit')}</span>
+            </p>
+            <p className="mt-1 text-[12px] text-tinta/65">{t('partner.planProTagline')}</p>
+            <ul className="mt-3 space-y-1.5 text-[12.5px] text-tinta/75">
+              {[t('partner.planFounderF2'), t('partner.planFounderF3'), t('partner.planFounderF4')].map((f, i) => (
+                <li key={i} className="flex gap-2"><span className="text-fresco">+</span><span>{f}</span></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Boost add-on */}
+        <div className="mt-3 flex items-start gap-3 rounded-2xl bg-creamy/60 p-4 ring-1 ring-tinta/10">
+          <span className="mt-0.5 inline-flex shrink-0 items-center rounded-full bg-mostaza/20 px-2 py-0.5 text-[11px] font-bold text-mostaza ring-1 ring-mostaza/40">
+            {t('partner.planBoostPrice')}{t('partner.planBoostUnit')}
+          </span>
+          <div>
+            <p className="text-[13px] font-semibold text-tinta">{t('partner.planBoostName')}</p>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-tinta/70">{t('partner.planBoostBody')}</p>
+          </div>
+        </div>
+
+        <p className="mt-3 rounded-2xl bg-tomate/8 px-3 py-2 text-center text-[12.5px] font-semibold text-tomateDeep ring-1 ring-tomate/20">
+          {t('partner.planCommission')}
+        </p>
+        <p className="mt-2 text-[11px] leading-relaxed text-tinta/55">{t('partner.planFootnote')}</p>
+      </section>
+
       <section className="mt-5 rounded-3xl glass p-5">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-tinta/65">{t('partner.pilotHeading')}</h2>
         <div className="mt-3 grid gap-2">
