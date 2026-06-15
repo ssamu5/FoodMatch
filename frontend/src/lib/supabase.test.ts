@@ -46,3 +46,24 @@ describe('rowToRestaurant opening reconstruction', () => {
     expect(isOpenAt(standard, FRI_0100)).toBe(false)
   })
 })
+
+describe('rowToRestaurant hero_image mapping', () => {
+  const base: RestaurantRow = {
+    id: 'r1', slug: 'r1', name: 'R1', description: '', cuisine: 'paella',
+    secondary_cuisines: [], tags: [], vibe: [], best_for: [],
+    area: 'Ruzafa', city: 'Valencia', address: '',
+    price_level: 2, average_spend: 20, rating: 4, review_count: 0,
+    image_placeholder: 'lime-muted', hero_image: 'https://store/r1.jpg',
+    instagram: null, phone: null, whatsapp: null, hours_kind: 'standard',
+    vegetarian_friendly: false, vegan_friendly: false, gluten_free_options: false,
+    is_partner: false,
+  }
+
+  it('maps hero_image to heroImage', () => {
+    expect(rowToRestaurant(base).heroImage).toBe('https://store/r1.jpg')
+  })
+
+  it('maps a null hero_image to undefined', () => {
+    expect(rowToRestaurant({ ...base, hero_image: null }).heroImage).toBeUndefined()
+  })
+})
