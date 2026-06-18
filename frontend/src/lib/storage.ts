@@ -63,6 +63,12 @@ export function unsaveRestaurant(id: string): string[] {
   return updated
 }
 
+export function setSavedIds(ids: string[]): string[] {
+  const unique = [...new Set(ids)]
+  safeSet(KEY_SAVED, unique)
+  return unique
+}
+
 // ---------- Recent searches ----------
 
 const MAX_RECENT = 12

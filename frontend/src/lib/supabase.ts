@@ -10,7 +10,7 @@ const anon: string | undefined = env.VITE_SUPABASE_ANON_KEY
 export const supabaseEnabled = Boolean(url && anon)
 
 export const supabase: SupabaseClient | null = supabaseEnabled
-  ? createClient(url as string, anon as string, { auth: { persistSession: false } })
+  ? createClient(url as string, anon as string, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'foodmatch.supabase.auth' } })
   : null
 
 // Rows come back snake_case, with optional nested dishes.
