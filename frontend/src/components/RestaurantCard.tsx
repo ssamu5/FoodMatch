@@ -4,7 +4,8 @@ import type { Restaurant } from '../types/restaurant'
 import type { MatchScore } from '../types/search'
 import OpenBadge from './OpenBadge'
 import RestaurantCover from './RestaurantCover'
-import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
+import { isSaved } from '../lib/storage'
+import { addFavorite, removeFavorite } from '../lib/userData'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap } from '../lib/native'
 import { useT } from '../lib/i18n'
@@ -30,12 +31,12 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
 
   function toggleSave() {
     if (saved) {
-      unsaveRestaurant(restaurant.id)
+      void removeFavorite(restaurant.id)
       setSaved(false)
       track('restaurant_unsaved', { restaurantId: restaurant.id, source: 'card' })
       void hapticTap()
     } else {
-      saveRestaurant(restaurant.id)
+      void addFavorite(restaurant.id)
       setSaved(true)
       track('restaurant_saved', { restaurantId: restaurant.id, source: 'card' })
       void hapticSuccess()

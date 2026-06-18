@@ -8,10 +8,9 @@ import { useT } from '../lib/i18n'
 import {
   clearRecentSearches,
   getRecentSearches,
-  getSavedIds,
   removeRecentSearch,
-  unsaveRestaurant,
 } from '../lib/storage'
+import { syncFavorites, removeFavorite } from '../lib/userData'
 import { track } from '../lib/analytics'
 import type { SearchEvent } from '../types/search'
 import type { Restaurant } from '../types/restaurant'
@@ -23,11 +22,13 @@ export default function Saved() {
 
   useEffect(() => {
     let cancelled = false
-    const ids = getSavedIds()
-    api.getRestaurantsByIds(ids).then((rows) => {
+    async function load() {
+      const ids = await syncFavorites()
+      const rows = await api.getRestaurantsByIds(ids)
       if (cancelled) return
       setSaved(rows)
-    })
+    }
+    void load()
     setRecent(getRecentSearches())
     return () => {
       cancelled = true
@@ -35,7 +36,7 @@ export default function Saved() {
   }, [])
 
   function removeSaved(id: string) {
-    unsaveRestaurant(id)
+    void removeFavorite(id)
     setSaved((list) => list.filter((r) => r.id !== id))
     track('restaurant_unsaved', { restaurantId: id, source: 'saved' })
   }

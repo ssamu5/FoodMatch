@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import AppShell from '../components/AppShell'
 import LanguageToggle from '../components/LanguageToggle'
 import { useT } from '../lib/i18n'
-import { getAccount, getTasteProfile, saveTasteProfile } from '../lib/storage'
+import { getAccount, getTasteProfile } from '../lib/storage'
+import { saveProfile, syncProfile } from '../lib/userData'
 import { logout } from '../lib/auth'
 import AuthForm from '../components/AuthForm'
 import { api } from '../lib/api'
@@ -35,6 +36,12 @@ export default function Profile() {
     setEmailDraft(profile.email || '')
   }, [profile.email])
 
+  useEffect(() => {
+    let cancelled = false
+    syncProfile().then((p) => { if (!cancelled) setProfile(p) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
   function onAuthSuccess() {
     const acct = getAccount()
     setAccount(acct)
@@ -55,7 +62,7 @@ export default function Profile() {
   }
 
   function persist(next: TasteProfile = profile) {
-    saveTasteProfile(next)
+    void saveProfile(next)
     setSavedAt(new Date().toLocaleTimeString())
   }
 
@@ -63,7 +70,7 @@ export default function Profile() {
     if (!emailDraft.trim()) return
     const next = { ...profile, email: emailDraft.trim() }
     setProfile(next)
-    saveTasteProfile(next)
+    void saveProfile(next)
     api.submitUserLead({ email: emailDraft.trim(), source: 'profile_email' })
     track('user_lead_submitted', { source: 'profile_email' })
     setSavedAt(new Date().toLocaleTimeString())

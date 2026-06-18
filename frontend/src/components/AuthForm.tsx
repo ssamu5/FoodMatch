@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useT } from '../lib/i18n'
 import { activeProvider, login, register, type AuthUser } from '../lib/auth'
+import { syncOnLogin } from '../lib/userData'
 import { track } from '../lib/analytics'
 
 type Mode = 'signin' | 'signup'
@@ -64,6 +65,7 @@ export default function AuthForm({ initialMode = 'signup', onSuccess, compact = 
         hasEmail: Boolean(result.user.email),
         source: 'auth_form',
       })
+      void syncOnLogin()
       onSuccess(result.user)
     } finally {
       setBusy(false)

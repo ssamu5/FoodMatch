@@ -4,7 +4,8 @@ import AppShell from '../components/AppShell'
 import EmptyState from '../components/EmptyState'
 import RestaurantCover from '../components/RestaurantCover'
 import { api } from '../lib/api'
-import { isSaved, saveRestaurant, unsaveRestaurant } from '../lib/storage'
+import { isSaved } from '../lib/storage'
+import { addFavorite, removeFavorite } from '../lib/userData'
 import { parseFoodIntent } from '../lib/foodIntent'
 import { buildMatchExplanation, scoreRestaurant } from '../lib/ranking'
 import { buildWhatsAppUrl, hasVerifiedWhatsApp, lastCraving, menuHighlightsFor } from '../lib/leads'
@@ -98,12 +99,12 @@ export default function RestaurantDetail() {
   function toggleSave() {
     if (!r) return
     if (saved) {
-      unsaveRestaurant(r.id)
+      void removeFavorite(r.id)
       setSaved(false)
       track('restaurant_unsaved', { restaurantId: r.id })
       void hapticTap()
     } else {
-      saveRestaurant(r.id)
+      void addFavorite(r.id)
       setSaved(true)
       track('restaurant_saved', { restaurantId: r.id })
       void hapticSuccess()
