@@ -24,6 +24,74 @@ function heroCollage(restaurants, lang) {
   </div>`
 }
 
+// ---------- ABOUT / FOUNDERS ----------
+export function aboutPage(lang) {
+  const L = (p) => localePath(lang, p)
+  const c = t.about
+  return `
+<section class="hero section">
+  <div class="wrap" style="max-width:62ch">
+    <p class="eyebrow">${c.eyebrow[lang]}</p>
+    <h1 class="display-xl">${c.h1a[lang]}<br /><span class="it" style="font-weight:400;color:var(--tomate)">${c.h1b[lang]}</span></h1>
+    <p class="lede" style="margin-top:1.2rem">${c.lede[lang]}</p>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap">
+    <h2 class="display-md center">${c.storyTitle[lang]}</h2>
+    <div class="grid grid-3" style="margin-top:2.4rem">
+      ${c.story[lang]
+        .map(
+          ([title, body], i) => `<div class="card card-pad">
+        <span class="feature-num" style="color:${['var(--tomate)', 'var(--mostaza)', 'var(--fresco)'][i]}">0${i + 1}</span>
+        <h3 class="serif" style="font-size:1.2rem;margin-top:0.5rem">${esc(title)}</h3>
+        <p class="muted" style="margin-top:0.4rem">${esc(body)}</p>
+      </div>`,
+        )
+        .join('')}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap center">
+    <h2 class="display-md">${c.foundersTitle[lang]}</h2>
+    <p class="lede" style="margin:0.6rem auto 0">${esc(c.foundersSub[lang])}</p>
+    <div class="grid grid-2" style="margin-top:2.4rem;text-align:left;max-width:760px;margin-left:auto;margin-right:auto">
+      ${c.founders[lang]
+        .map(
+          (f) => `<div class="card" style="overflow:hidden">
+        <div style="aspect-ratio:4/5;overflow:hidden;background:var(--azulejo)">
+          <img src="/img/${f.img}.jpg" alt="${esc(f.name)}" loading="lazy" decoding="async" style="display:block;width:100%;height:100%;object-fit:cover;object-position:center" />
+        </div>
+        <div class="card-pad">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem">
+            <h3 class="serif" style="font-size:1.5rem">${esc(f.name)}</h3>
+            <span class="muted" style="font-size:0.85rem">${esc(f.place)}</span>
+          </div>
+          <p class="muted" style="margin-top:0.5rem">${esc(f.bio)}</p>
+        </div>
+      </div>`,
+        )
+        .join('')}
+    </div>
+    <p class="lede" style="max-width:48ch;margin:2.2rem auto 0">${esc(c.closing[lang])}</p>
+  </div>
+</section>
+
+<section class="section-tight" style="background:var(--azulejo);color:#fff">
+  <div class="wrap center">
+    <h2 class="display-md" style="color:#fff">${c.ctaTitle[lang]}</h2>
+    <p class="lede" style="margin:0.8rem auto 1.6rem;color:rgba(255,255,255,0.85)">${c.ctaSub[lang]}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:0.8rem;justify-content:center">
+      <a class="btn" style="background:#fff;color:var(--azulejo)" href="${L('/valencia')}">${c.ctaDiner[lang]} →</a>
+      <a class="btn btn-primary" href="${L('/reclamar')}">${c.ctaRestaurant[lang]} →</a>
+    </div>
+  </div>
+</section>`
+}
+
 // ---------- MAIN LANDING ----------
 export function homePage(lang, restaurants) {
   const L = (p) => localePath(lang, p)

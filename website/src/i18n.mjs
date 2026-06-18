@@ -17,6 +17,7 @@ export const t = {
     discover: { es: 'Descubrir', en: 'Discover' },
     forRestaurants: { es: 'Para restaurantes', en: 'For restaurants' },
     explore: { es: 'Explorar Valencia', en: 'Explore Valencia' },
+    about: { es: 'Sobre nosotros', en: 'About' },
     claim: { es: 'Añadir restaurante', en: 'Add your restaurant' },
   },
 
@@ -242,6 +243,58 @@ export const t = {
       es: 'Esto abre tu app de email o WhatsApp con el mensaje preparado.',
       en: 'This opens your email or WhatsApp app with the message ready.',
     },
+  },
+
+  // ---------- about / company ----------
+  about: {
+    metaTitle: { es: 'Sobre nosotros · FoodMatch', en: 'About us · FoodMatch' },
+    metaDesc: {
+      es: 'FoodMatch es un proyecto de dos personas, Samu y Max, para ayudar a la gente a encontrar dónde comer en Valencia y a los restaurantes locales a que los encuentren.',
+      en: 'FoodMatch is a two-person project, by Samu and Max, helping people find where to eat in Valencia and helping local restaurants get found.',
+    },
+    eyebrow: { es: 'Quiénes somos', en: 'Who we are' },
+    h1a: { es: 'Un proyecto de dos,', en: 'A project of two,' },
+    h1b: { es: 'hecho para Valencia.', en: 'made for Valencia.' },
+    lede: {
+      es: 'FoodMatch es una app que ayuda a la gente a encontrar dónde comer en Valencia, y le da a cada restaurante una página bonita y fácil de encontrar. No es una multinacional: somos dos personas construyendo algo que queremos que exista.',
+      en: 'FoodMatch is an app that helps people find where to eat in Valencia, and gives every restaurant a beautiful page that is easy to find. It is not a multinational: we are two people building something we want to exist.',
+    },
+    storyTitle: { es: 'Por qué lo hacemos', en: 'Why we do it' },
+    story: {
+      es: [
+        ['Lo construimos porque queremos que exista', 'Estábamos cansados de buscar dónde comer entre 200 resultados iguales y reseñas que no llevan a ningún sitio. FoodMatch es lo que nos gustaría usar a nosotros.'],
+        ['Cuidamos cada restaurante en persona', 'Empezamos por los primeros 100 restaurantes de Valencia y los atendemos uno a uno: te llamamos, te ayudamos con la ficha y te explicamos cómo va.'],
+        ['Sin comisiones, tus datos son tuyos', 'Cero comisión sobre reservas o pedidos, una cuota plana y transparente. Respetamos el GDPR y la AEPD, y no vendemos datos a nadie.'],
+      ],
+      en: [
+        ['We built it because we want it to exist', 'We were tired of hunting for somewhere to eat among 200 identical results and reviews that lead nowhere. FoodMatch is what we would want to use ourselves.'],
+        ['We look after every restaurant in person', 'We start with the first 100 restaurants in Valencia and take care of them one by one: we call you, help with your page and explain how it works.'],
+        ['No commissions, your data is yours', 'Zero commission on bookings or orders, a flat and transparent fee. We comply with GDPR and the Spanish AEPD, and we never sell data.'],
+      ],
+    },
+    foundersTitle: { es: 'Los fundadores', en: 'The founders' },
+    foundersSub: { es: 'Veinte años. Dos países. Una idea.', en: 'Twenty years old. Two countries. One idea.' },
+    founders: {
+      es: [
+        { name: 'Samu', img: 'samu', place: 'Valencia', bio: 'Lleva El Mesón Smashburgers en Navarra y vive cerca de Valencia. Conoce el mundo de los restaurantes desde dentro y se encarga de hablar con cada sitio que entra en FoodMatch.' },
+        { name: 'Max', img: 'max', place: 'Alemania', bio: 'Desarrollador en Alemania. Construye la parte técnica de FoodMatch, desde la app hasta la IA que recomienda los restaurantes.' },
+      ],
+      en: [
+        { name: 'Samu', img: 'samu', place: 'Valencia', bio: 'Runs El Mesón Smashburgers in Navarra and lives near Valencia. He knows the restaurant world from the inside and talks to every place that joins FoodMatch.' },
+        { name: 'Max', img: 'max', place: 'Germany', bio: 'A developer based in Germany. He builds the technical side of FoodMatch, from the app to the AI that recommends restaurants.' },
+      ],
+    },
+    closing: {
+      es: 'No es una multinacional, es un proyecto de dos. Por eso podemos cuidar cada detalle.',
+      en: 'It is not a multinational, it is a project of two. That is why we can care about every detail.',
+    },
+    ctaTitle: { es: '¿Comemos?', en: 'Shall we eat?' },
+    ctaSub: {
+      es: 'Explora los restaurantes de Valencia o añade el tuyo a la guía.',
+      en: 'Explore Valencia\'s restaurants or add yours to the guide.',
+    },
+    ctaDiner: { es: 'Explorar restaurantes', en: 'Explore restaurants' },
+    ctaRestaurant: { es: 'Añadir mi restaurante', en: 'Add my restaurant' },
   },
 
   footer: {

@@ -96,6 +96,7 @@ export function header(lang, path) {
       <a href="${L('/descubrir')}">${t.nav.discover[lang]}</a>
       <a href="${L('/restaurantes')}">${t.nav.forRestaurants[lang]}</a>
       <a href="${L('/valencia')}">${t.nav.explore[lang]}</a>
+      <a href="${L('/sobre-nosotros')}">${t.nav.about[lang]}</a>
       <a class="btn btn-primary" style="padding:0.6rem 1.1rem;font-size:0.92rem" href="${L('/reclamar')}">${t.nav.claim[lang]}</a>
     </nav>
     <div class="lang-switch" aria-label="Language">
@@ -134,6 +135,7 @@ export function footer(lang) {
     </div>
     <hr style="border:0;border-top:1px solid rgba(248,241,229,0.14);margin:2.2rem 0 1.4rem" />
     <div style="display:flex;flex-wrap:wrap;gap:0.6rem 1.4rem;font-size:0.82rem;color:rgba(248,241,229,0.6)">
+      <a href="${L('/sobre-nosotros')}">${t.nav.about[lang]}</a>
       <a href="${L('/aviso-legal')}">${lang === 'es' ? 'Aviso legal' : 'Legal notice'}</a>
       <a href="${L('/privacidad')}">${lang === 'es' ? 'Privacidad' : 'Privacy'}</a>
       <a href="${L('/cookies')}">Cookies</a>

@@ -9,7 +9,7 @@ import { LANGS, localePath, t } from './src/i18n.mjs'
 import { getRestaurants } from './src/placesService.mjs'
 import { page } from './src/components.mjs'
 import {
-  homePage, dinerPage, restaurantPage, explorePage, detailPage, claimPage, restaurantJsonLd,
+  homePage, dinerPage, restaurantPage, explorePage, detailPage, claimPage, aboutPage, restaurantJsonLd,
 } from './src/pages.mjs'
 import { LEGAL } from './src/legal.mjs'
 
@@ -45,6 +45,7 @@ async function build() {
       ['/descubrir', t.diner.metaTitle, t.diner.metaDesc, dinerPage(lang, restaurants)],
       ['/restaurantes', t.rest.metaTitle, t.rest.metaDesc, restaurantPage(lang, restaurants)],
       ['/valencia', t.explore.metaTitle, t.explore.metaDesc, explorePage(lang, restaurants)],
+      ['/sobre-nosotros', t.about.metaTitle, t.about.metaDesc, aboutPage(lang)],
       ['/reclamar', t.claim.metaTitle, t.claim.metaTitle, claimPage(lang, null)],
     ]
     for (const [path, title, desc, body] of landings) {
