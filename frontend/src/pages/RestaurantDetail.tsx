@@ -46,6 +46,11 @@ export default function RestaurantDetail() {
       if (cancelled) return
       setR(found)
       setLoading(false)
+    }).catch(() => {
+      // A rejected fetch must still resolve the page out of the loading state;
+      // r stays undefined so the existing not-found EmptyState renders instead
+      // of an infinite spinner.
+      if (!cancelled) setLoading(false)
     })
     return () => {
       cancelled = true
@@ -171,7 +176,7 @@ export default function RestaurantDetail() {
         <button
           type="button"
           onClick={sendWhatsAppLead}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-full font-semibold text-white transition active:scale-[0.99]"
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-full font-semibold text-cream transition hover:brightness-95 active:scale-[0.99]"
           style={{ background: '#25D366' }}
         >
           <WhatsAppIcon className="h-5 w-5" />
@@ -193,7 +198,7 @@ export default function RestaurantDetail() {
               {personalised.score.reasons.slice(0, 4).map((x) => {
                 const label = formatReason(x, lang)
                 return (
-                  <span key={label} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
+                  <span key={label} className="rounded-full bg-fresco/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
                     {label}
                   </span>
                 )
@@ -233,7 +238,7 @@ export default function RestaurantDetail() {
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {r.bestFor.slice(0, 4).map((b) => (
-            <span key={b} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
+            <span key={b} className="rounded-full bg-fresco/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
               {bestForLabel(b, lang)}
             </span>
           ))}
@@ -246,7 +251,7 @@ export default function RestaurantDetail() {
             <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.menu')}</h2>
             {!r.isPartner && <span className="text-[10px] text-tinta/40">{t('detail.menuSample')}</span>}
           </div>
-          <ul className="mt-2 divide-y divide-tinta/8">
+          <ul className="mt-2 divide-y divide-tinta/12">
             {r.menu.slice(0, 8).map((d) => (
               <li key={d.name} className="flex items-baseline justify-between gap-3 py-2">
                 <span className="text-[14px] text-tinta">{d.name}</span>
@@ -263,7 +268,7 @@ export default function RestaurantDetail() {
             <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.menuHighlights')}</h2>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {highlights.map((h) => (
-                <span key={h} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
+                <span key={h} className="rounded-full bg-fresco/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
                   {h}
                 </span>
               ))}
@@ -313,11 +318,11 @@ export default function RestaurantDetail() {
             <GlobeIcon className="h-4 w-4" /> {t('detail.website')}
           </a>
         )}
-        <button onClick={toggleSave} className={['h-12', saved ? 'btn-lime' : 'btn-ghost'].join(' ')}>
+        <button type="button" aria-pressed={saved} onClick={toggleSave} className={['h-12', saved ? 'btn-lime' : 'btn-ghost'].join(' ')}>
           <BookmarkIcon className="h-4 w-4" />
           {saved ? t('common.saved') : t('common.save')}
         </button>
-        <button onClick={share} className="btn-ghost h-12">
+        <button type="button" onClick={share} className="btn-ghost h-12">
           <ShareIcon className="h-4 w-4" /> {t('detail.share')}
         </button>
       </section>
@@ -383,7 +388,7 @@ export default function RestaurantDetail() {
             </Link>
             <p className="mt-2 text-[11px] leading-relaxed text-tinta/50">
               {t('detail.wrongInfoPre')}
-              <a href="mailto:hola@foodmatch.es?subject=FoodMatch%20listing%20correction" className="underline underline-offset-2 hover:text-tinta">
+              <a href="mailto:hola@foodmatch.es?subject=FoodMatch%20listing%20correction" className="text-tinta/70 underline underline-offset-2 hover:text-tinta focus-visible:text-tinta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/40 rounded-sm">
                 hola@foodmatch.es
               </a>
               {t('detail.wrongInfoPost')}
@@ -411,7 +416,18 @@ export default function RestaurantDetail() {
           ))}
         </div>
         {feedbackSent && (
-          <p className="mt-2 text-[12px] text-tinta/70">{t('detail.feedbackLogged', { label: feedbackSent })}</p>
+          <p className="mt-2 text-[12px] text-tinta/70">
+            {t('detail.feedbackLogged', {
+              label:
+                feedbackSent === 'Good match'
+                  ? t('detail.feedbackGood')
+                  : feedbackSent === 'Too expensive'
+                    ? t('detail.feedbackExpensive')
+                    : feedbackSent === 'Too far'
+                      ? t('detail.feedbackFar')
+                      : t('detail.feedbackVibe'),
+            })}
+          </p>
         )}
       </section>
 

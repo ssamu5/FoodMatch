@@ -19,21 +19,33 @@ export default function Saved() {
   const { t, tn } = useT()
   const [saved, setSaved] = useState<Restaurant[]>([])
   const [recent, setRecent] = useState<SearchEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const ids = await syncFavorites()
-      const rows = await api.getRestaurantsByIds(ids)
-      if (cancelled) return
-      setSaved(rows)
+      setLoading(true)
+      setError(false)
+      try {
+        const ids = await syncFavorites()
+        const rows = await api.getRestaurantsByIds(ids)
+        if (cancelled) return
+        setSaved(rows)
+      } catch {
+        if (cancelled) return
+        setError(true)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
     void load()
     setRecent(getRecentSearches())
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [reloadKey])
 
   function removeSaved(id: string) {
     void removeFavorite(id)
@@ -62,7 +74,26 @@ export default function Saved() {
 
       <section className="mt-5">
         <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('saved.sectionRestaurants')}</h2>
-        {saved.length === 0 ? (
+        {loading ? (
+          <div className="space-y-2" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex gap-4 rounded-3xl glass p-3.5">
+                <div className="h-20 w-20 shrink-0 animate-pulse-soft rounded-2xl bg-tinta/10" />
+                <div className="flex flex-1 flex-col justify-center gap-2.5">
+                  <div className="h-4 w-2/3 animate-pulse-soft rounded-full bg-tinta/10" />
+                  <div className="h-3 w-1/2 animate-pulse-soft rounded-full bg-tinta/10" />
+                  <div className="h-3 w-1/3 animate-pulse-soft rounded-full bg-tinta/10" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <EmptyState
+            title={t('saved.errorTitle')}
+            hint={t('saved.errorHint')}
+            action={{ label: t('saved.retry'), onClick: () => setReloadKey((k) => k + 1) }}
+          />
+        ) : saved.length === 0 ? (
           <EmptyState
             title={t('saved.emptyTitle')}
             hint={t('saved.emptyHint')}
@@ -83,7 +114,7 @@ export default function Saved() {
             <button
               type="button"
               onClick={clearAllRecent}
-              className="text-[11px] text-tinta/60 underline-offset-4 hover:text-tinta hover:underline"
+              className="-mx-2 -my-1.5 inline-flex items-center rounded-lg px-2 py-1.5 text-[11px] text-tinta/60 underline-offset-4 transition hover:text-tinta hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/50 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               {t('saved.clearAll')}
             </button>
@@ -97,9 +128,9 @@ export default function Saved() {
               <li key={e.id} className="relative">
                 <Link
                   to={`/ask?q=${encodeURIComponent(e.query)}`}
-                  className="block rounded-2xl glass glass-hover py-3 pl-3 pr-12 text-[13px] text-tinta"
+                  className="flex min-h-[44px] items-center rounded-2xl glass glass-hover py-3 pl-3 pr-12 text-[13px] text-tinta"
                 >
-                  <div className="flex items-baseline justify-between gap-2">
+                  <div className="flex w-full items-baseline justify-between gap-2">
                     <span className="truncate">{e.query}</span>
                     <span className="shrink-0 text-[11px] text-tinta/70">{tn('saved.resultCount', e.resultCount)}</span>
                   </div>
@@ -108,8 +139,9 @@ export default function Saved() {
                   type="button"
                   aria-label={t('saved.removeSearch', { query: e.query })}
                   onClick={() => removeRecent(e.query)}
-                  className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-tinta/50 transition hover:bg-creamy hover:text-tinta active:scale-90"
+                  className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-tinta/50 transition hover:bg-creamy hover:text-tinta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/50 focus-visible:ring-offset-2 focus-visible:ring-offset-paper active:scale-90"
                 >
+                  <span className="absolute -inset-2" aria-hidden="true" />
                   <CloseIcon className="h-4 w-4" />
                 </button>
               </li>

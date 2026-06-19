@@ -77,6 +77,15 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
     }
   }, [open, intent, sortKey])
 
+  useEffect(() => {
+    if (!open) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
+
   function toggleCuisine(c: Cuisine) {
     setDraft((d) => ({
       ...d,
@@ -108,7 +117,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end" role="dialog" aria-label={t('filters.ariaLabel')}>
+    <div className="fixed inset-0 z-50 flex items-end" role="dialog" aria-modal="true" aria-label={t('filters.ariaLabel')}>
       <button
         type="button"
         aria-label={t('filters.ariaClose')}
@@ -116,12 +125,17 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
         onClick={onClose}
       />
 
-      <div className="relative w-full animate-fade-up rounded-t-4xl border-t border-tinta/15 bg-creamy px-5 pb-6 pt-3 sm:mx-auto sm:max-w-md sm:rounded-4xl sm:border sm:mb-6">
+      <div className="relative w-full animate-fade-up rounded-t-4xl border-t border-tinta/15 bg-surface px-5 pb-6 pt-3 sm:mx-auto sm:max-w-md sm:rounded-4xl sm:border sm:mb-6">
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-tinta/20" />
 
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-[18px] font-semibold text-tinta">{t('filters.title')}</h2>
-          <button onClick={onClose} className="text-[12px] text-tinta/70 hover:text-tinta">{t('filters.close')}</button>
+          <button
+            onClick={onClose}
+            className="-m-2 inline-flex min-h-[44px] min-w-[44px] items-center justify-end p-2 text-[12px] text-tinta/70 hover:text-tinta focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgba(230,57,70,0.3)]"
+          >
+            {t('filters.close')}
+          </button>
         </div>
 
         <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
@@ -132,6 +146,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                 <button
                   key={s.key}
                   type="button"
+                  aria-pressed={sort === s.key}
                   className={['chip', sort === s.key ? 'active' : ''].join(' ')}
                   onClick={() => setSort(s.key)}
                 >
@@ -148,6 +163,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                 <button
                   key={c}
                   type="button"
+                  aria-pressed={draft.cuisines.includes(c)}
                   className={['chip', draft.cuisines.includes(c) ? 'active' : ''].join(' ')}
                   onClick={() => toggleCuisine(c)}
                 >
@@ -162,6 +178,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
+                aria-pressed={draft.area === null}
                 className={['chip', draft.area === null ? 'active' : ''].join(' ')}
                 onClick={() => setArea(null)}
               >
@@ -171,6 +188,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                 <button
                   key={a}
                   type="button"
+                  aria-pressed={draft.area === a}
                   className={['chip', draft.area === a ? 'active' : ''].join(' ')}
                   onClick={() => setArea(a)}
                 >
@@ -185,6 +203,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
+                aria-pressed={draft.budgetLevel === null}
                 className={['chip', draft.budgetLevel === null ? 'active' : ''].join(' ')}
                 onClick={() => setBudget(null)}
               >
@@ -194,6 +213,8 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                 <button
                   key={l}
                   type="button"
+                  aria-pressed={draft.budgetLevel === l}
+                  aria-label={t('filters.budgetLevel', { level: l })}
                   className={['chip', draft.budgetLevel === l ? 'active' : ''].join(' ')}
                   onClick={() => setBudget(l as 1 | 2 | 3 | 4)}
                 >
@@ -210,6 +231,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                 <button
                   key={v}
                   type="button"
+                  aria-pressed={draft.vibe.includes(v)}
                   className={['chip', draft.vibe.includes(v) ? 'active' : ''].join(' ')}
                   onClick={() => toggleVibe(v)}
                 >
@@ -226,6 +248,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                 <button
                   key={d}
                   type="button"
+                  aria-pressed={draft.dietary.includes(d)}
                   className={['chip', draft.dietary.includes(d) ? 'active' : ''].join(' ')}
                   onClick={() => toggleDietary(d)}
                 >
@@ -240,6 +263,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
+                aria-pressed={draft.mustBeOpenNow}
                 className={['chip', draft.mustBeOpenNow ? 'active' : ''].join(' ')}
                 onClick={toggleOpenNow}
               >

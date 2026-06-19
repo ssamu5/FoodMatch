@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import AppShell from '../components/AppShell'
 import LanguageToggle from '../components/LanguageToggle'
-import { useT } from '../lib/i18n'
+import { useT, useLang } from '../lib/i18n'
 import { getAccount, getTasteProfile } from '../lib/storage'
 import { saveProfile, syncProfile } from '../lib/userData'
 import { logout } from '../lib/auth'
@@ -14,7 +14,7 @@ import type { Area, Cuisine, Vibe, Restaurant } from '../types/restaurant'
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2)
-  return parts.map((p) => p[0]?.toUpperCase() ?? '').join('') || 'You'.slice(0, 1)
+  return parts.map((p) => p[0]?.toUpperCase() ?? '').join('') || '?'
 }
 
 const CUISINES: Cuisine[] = [
@@ -27,6 +27,7 @@ const VIBES: Vibe[] = ['romantic', 'casual', 'lively', 'quiet', 'family', 'work'
 
 export default function Profile() {
   const { t } = useT()
+  const { lang } = useLang()
   const [profile, setProfile] = useState<TasteProfile>(() => getTasteProfile())
   const [emailDraft, setEmailDraft] = useState(profile.email || '')
   const [savedAt, setSavedAt] = useState<string | null>(null)
@@ -39,6 +40,10 @@ export default function Profile() {
   const [manageMsg, setManageMsg] = useState<string | null>(null)
   // Per-restaurant edit drafts keyed by slug
   const [editDrafts, setEditDrafts] = useState<Record<string, Partial<Restaurant>>>({})
+  // In-flight flags so buttons can show progress and block double-submits.
+  const [savingSlug, setSavingSlug] = useState<string | null>(null)
+  const [claiming, setClaiming] = useState(false)
+  const [loadingRestaurants, setLoadingRestaurants] = useState(false)
 
   useEffect(() => {
     setEmailDraft(profile.email || '')
@@ -53,9 +58,12 @@ export default function Profile() {
   useEffect(() => {
     if (!account) return
     let cancelled = false
+    setLoadingRestaurants(true)
     getMyRestaurants().then((list) => {
       if (!cancelled) setMyRestaurants(list)
-    }).catch(() => {})
+    }).catch(() => {}).finally(() => {
+      if (!cancelled) setLoadingRestaurants(false)
+    })
     return () => { cancelled = true }
   }, [account])
 
@@ -80,7 +88,7 @@ export default function Profile() {
 
   function persist(next: TasteProfile = profile) {
     void saveProfile(next)
-    setSavedAt(new Date().toLocaleTimeString())
+    setSavedAt(new Date().toLocaleTimeString(lang === 'es' ? 'es-ES' : 'en-US'))
   }
 
   function submitEmail() {
@@ -90,7 +98,7 @@ export default function Profile() {
     void saveProfile(next)
     api.submitUserLead({ email: emailDraft.trim(), source: 'profile_email' })
     track('user_lead_submitted', { source: 'profile_email' })
-    setSavedAt(new Date().toLocaleTimeString())
+    setSavedAt(new Date().toLocaleTimeString(lang === 'es' ? 'es-ES' : 'en-US'))
   }
 
   // Restaurateur helpers
@@ -103,38 +111,49 @@ export default function Profile() {
   }
 
   async function handleSave(r: Restaurant) {
+    if (savingSlug) return
     const d = draftFor(r)
     setManageMsg(null)
-    const res = await updateMyRestaurant({
-      slug: r.slug,
-      name: d.name ?? '',
-      description: d.description ?? '',
-      address: d.address ?? '',
-      phone: d.phone ?? '',
-      instagram: d.instagram ?? '',
-      whatsapp: d.whatsapp ?? '',
-    })
-    if (res.ok) {
-      const list = await getMyRestaurants()
-      setMyRestaurants(list)
-      setEditDrafts((prev) => { const n = { ...prev }; delete n[r.slug]; return n })
-      setManageMsg('Saved.')
-    } else {
-      setManageMsg(res.error ?? 'Error saving.')
+    setSavingSlug(r.slug)
+    try {
+      const res = await updateMyRestaurant({
+        slug: r.slug,
+        name: d.name ?? '',
+        description: d.description ?? '',
+        address: d.address ?? '',
+        phone: d.phone ?? '',
+        instagram: d.instagram ?? '',
+        whatsapp: d.whatsapp ?? '',
+      })
+      if (res.ok) {
+        const list = await getMyRestaurants()
+        setMyRestaurants(list)
+        setEditDrafts((prev) => { const n = { ...prev }; delete n[r.slug]; return n })
+        setManageMsg(t('profile.msgSaved'))
+      } else {
+        setManageMsg(t('profile.msgSaveError'))
+      }
+    } finally {
+      setSavingSlug(null)
     }
   }
 
   async function handleClaim() {
-    if (!claimSlug.trim()) return
+    if (claiming || !claimSlug.trim()) return
     setManageMsg(null)
-    const res = await claimRestaurant(claimSlug)
-    if (res.ok) {
-      const list = await getMyRestaurants()
-      setMyRestaurants(list)
-      setClaimSlug('')
-      setManageMsg('Restaurant claimed!')
-    } else {
-      setManageMsg(res.error ?? 'Could not claim.')
+    setClaiming(true)
+    try {
+      const res = await claimRestaurant(claimSlug)
+      if (res.ok) {
+        const list = await getMyRestaurants()
+        setMyRestaurants(list)
+        setClaimSlug('')
+        setManageMsg(t('profile.msgClaimed'))
+      } else {
+        setManageMsg(t('profile.msgClaimError'))
+      }
+    } finally {
+      setClaiming(false)
     }
   }
 
@@ -163,7 +182,7 @@ export default function Profile() {
                 </p>
               </div>
             </div>
-            <button onClick={signOut} className="btn-ghost mt-4 h-10 w-full text-[13px]">
+            <button type="button" onClick={signOut} className="btn-ghost mt-4 h-10 w-full text-[13px]">
               {t('profile.signOut')}
             </button>
           </>
@@ -305,9 +324,9 @@ export default function Profile() {
 
       {/* Restaurateur dashboard */}
       <section className="mt-7">
-        <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">Manage your restaurant</h2>
+        <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">{t('profile.manageHeading')}</h2>
         <p className="mt-1 text-[13px] text-tinta/70">
-          {account ? 'Claim and update your restaurant listing.' : 'Sign in to manage your restaurant.'}
+          {account ? t('profile.manageBodySignedIn') : t('profile.manageBodySignedOut')}
         </p>
       </section>
 
@@ -317,19 +336,19 @@ export default function Profile() {
             const d = draftFor(r)
             return (
               <div key={r.slug} className="rounded-2xl glass p-4">
-                <h3 className="mb-3 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{r.slug}</h3>
+                <h3 className="mb-3 font-display text-[16px] font-bold leading-tight text-tinta">{draftFor(r).name || r.name || r.slug}</h3>
                 <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     value={d.name ?? ''}
                     onChange={(e) => patchDraft(r.slug, { name: e.target.value })}
-                    placeholder="Name"
+                    placeholder={t('profile.fieldName')}
                     className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
                   />
                   <textarea
                     value={d.description ?? ''}
                     onChange={(e) => patchDraft(r.slug, { description: e.target.value })}
-                    placeholder="Description"
+                    placeholder={t('profile.fieldDescription')}
                     rows={3}
                     className="liquid-input w-full rounded-2xl px-4 py-2 text-[14px] focus:outline-none resize-none"
                   />
@@ -337,57 +356,66 @@ export default function Profile() {
                     type="text"
                     value={d.address ?? ''}
                     onChange={(e) => patchDraft(r.slug, { address: e.target.value })}
-                    placeholder="Address"
+                    placeholder={t('profile.fieldAddress')}
                     className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
                   />
                   <input
                     type="text"
                     value={d.phone ?? ''}
                     onChange={(e) => patchDraft(r.slug, { phone: e.target.value })}
-                    placeholder="Phone"
+                    placeholder={t('profile.fieldPhone')}
                     className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
                   />
                   <input
                     type="text"
                     value={d.instagram ?? ''}
                     onChange={(e) => patchDraft(r.slug, { instagram: e.target.value })}
-                    placeholder="Instagram (e.g. @yourplace)"
+                    placeholder={t('profile.fieldInstagram')}
                     className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
                   />
                   <input
                     type="text"
                     value={d.whatsapp ?? ''}
                     onChange={(e) => patchDraft(r.slug, { whatsapp: e.target.value })}
-                    placeholder="WhatsApp (E.164)"
+                    placeholder={t('profile.fieldWhatsapp')}
                     className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
                   />
                 </div>
                 <button
+                  type="button"
                   onClick={() => void handleSave(r)}
+                  disabled={savingSlug === r.slug || !editDrafts[r.slug] || !(draftFor(r).name ?? '').trim()}
                   className="btn-lime mt-3 h-10 w-full text-[13px]"
                 >
-                  Save
+                  {savingSlug === r.slug ? t('auth.working') : t('profile.save')}
                 </button>
               </div>
             )
           })}
 
+          {myRestaurants.length === 0 && (
+            <p className="text-[13px] text-tinta/70">
+              {loadingRestaurants ? t('auth.working') : t('profile.noListings')}
+            </p>
+          )}
+
           <div className="rounded-2xl glass p-4">
-            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Claim a listing</h3>
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.claimHeading')}</h3>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={claimSlug}
                 onChange={(e) => setClaimSlug(e.target.value)}
-                placeholder="Restaurant slug"
+                placeholder={t('profile.claimSlugPlaceholder')}
                 className="liquid-input flex-1 rounded-full px-4 py-2 text-[14px] focus:outline-none"
               />
               <button
+                type="button"
                 onClick={() => void handleClaim()}
-                disabled={!claimSlug.trim()}
+                disabled={claiming || !claimSlug.trim()}
                 className="btn-lime h-10 px-4 text-[13px]"
               >
-                Claim
+                {claiming ? t('auth.working') : t('profile.claim')}
               </button>
             </div>
           </div>
@@ -411,11 +439,11 @@ export default function Profile() {
             placeholder={t('profile.emailPlaceholderPicks')}
             className="liquid-input flex-1 rounded-full px-4 py-2 text-[14px] focus:outline-none"
           />
-          <button onClick={submitEmail} className="btn-lime h-10 px-4 text-[13px]" disabled={!emailDraft.trim()}>
+          <button type="button" onClick={submitEmail} className="btn-lime h-10 px-4 text-[13px]" disabled={!emailDraft.trim()}>
             {t('profile.subscribe')}
           </button>
         </div>
-        {savedAt && <p className="mt-2 text-[11px] text-tinta/70">{t('profile.savedAt', { time: savedAt })}</p>}
+        {savedAt && <p className="mt-2 animate-fade-up text-[11px] text-tinta/70">{t('profile.savedAt', { time: savedAt })}</p>}
       </section>
     </AppShell>
   )

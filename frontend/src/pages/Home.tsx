@@ -76,7 +76,7 @@ export default function Home() {
             {t('home.browseAll')}
           </Link>
           <Link to="/restaurants" className="text-tinta/55 underline-offset-4 hover:text-tinta hover:underline">
-            {t('common.forRestaurants')} &rarr;
+            {t('common.forRestaurants')} <span aria-hidden="true">&rarr;</span>
           </Link>
         </div>
       </section>

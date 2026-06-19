@@ -17,7 +17,7 @@ export default function Results() {
   const [params, setParams] = useSearchParams()
   const initialQuery = params.get('q') || ''
   const navigate = useNavigate()
-  const { t } = useT()
+  const { t, tn } = useT()
 
   // When the user browses without a query, personalise from saved taste.
   const profile = getTasteProfile()
@@ -38,20 +38,37 @@ export default function Results() {
   // the loading indicator visible immediately and prevents the result_viewed
   // analytics effect below from firing once at count 0 before data arrives.
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  // Bumped by retry() to re-run the search effect after a failure.
+  const [retryNonce, setRetryNonce] = useState(0)
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    api.searchByIntent(intent).then((r) => {
-      if (cancelled) return
-      setResults(r.results)
-      setRankedResults(r.rankedResults)
-      setLoading(false)
-    })
+    setError(false)
+    api
+      .searchByIntent(intent)
+      .then((r) => {
+        if (cancelled) return
+        setResults(r.results)
+        setRankedResults(r.rankedResults)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setError(true)
+      })
+      .finally(() => {
+        if (cancelled) return
+        setLoading(false)
+      })
     return () => {
       cancelled = true
     }
-  }, [intent, query])
+  }, [intent, query, retryNonce])
+
+  function retry() {
+    setRetryNonce((n) => n + 1)
+  }
 
   const ranked = useMemo(() => {
     const byId = new Map(results.map((x) => [x.id, x]))
@@ -133,7 +150,7 @@ export default function Results() {
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
-            className="ml-2 inline-flex items-center gap-1.5 text-tinta/70 hover:text-tinta"
+            className="ml-2 -my-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-2 text-tinta/70 hover:text-tinta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/50"
           >
             <FilterIcon className="h-3.5 w-3.5" />
             {t('results.filters')}
@@ -147,14 +164,38 @@ export default function Results() {
         )}
       </section>
 
+      {/* Single persistent live region: announces loading then the result count
+          to assistive tech without showing a visible count in the UI. */}
+      <p role="status" aria-live="polite" className="sr-only">
+        {loading ? t('results.loading') : !error ? tn('results.found', ranked.length) : ''}
+      </p>
+
       {loading && (
-        <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
-          <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
-          {t('results.loading')}
+        <section className="mt-5 space-y-2" aria-hidden="true">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="flex gap-4 rounded-3xl glass p-3.5">
+              <div className="h-20 w-20 shrink-0 rounded-2xl bg-creamy animate-pulse-soft" />
+              <div className="min-w-0 flex-1 space-y-2 py-1">
+                <div className="h-4 w-2/5 rounded-full bg-creamy animate-pulse-soft" />
+                <div className="h-3 w-3/5 rounded-full bg-tinta/10 animate-pulse-soft" />
+                <div className="h-3 w-4/5 rounded-full bg-tinta/10 animate-pulse-soft" />
+              </div>
+            </div>
+          ))}
         </section>
       )}
 
-      {!loading && ranked.length === 0 && (
+      {!loading && error && (
+        <section className="mt-6">
+          <EmptyState
+            title={t('results.errorTitle')}
+            hint={t('results.errorHint')}
+            action={{ label: t('common.retry'), onClick: retry }}
+          />
+        </section>
+      )}
+
+      {!loading && !error && ranked.length === 0 && (
         <section className="mt-6">
           <EmptyState
             title={t('results.noMatchTitle')}
@@ -164,7 +205,7 @@ export default function Results() {
         </section>
       )}
 
-      {!loading && (
+      {!loading && !error && (
         <section className="mt-5 space-y-2">
           {ranked.map(({ restaurant, rr }, idx) => (
             <RestaurantCard

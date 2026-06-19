@@ -78,9 +78,10 @@ export default function AuthForm({ initialMode = 'signup', onSuccess, compact = 
       <div className="mb-3 inline-flex rounded-full bg-creamy/70 p-1 ring-1 ring-tinta/10">
         <button
           type="button"
+          aria-pressed={isSignup}
           onClick={() => { setMode('signup'); setError(null) }}
           className={[
-            'rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition',
+            'inline-flex min-h-[44px] items-center justify-center rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition',
             isSignup ? 'bg-surface text-tinta shadow-soft' : 'text-tinta/55',
           ].join(' ')}
         >
@@ -88,9 +89,10 @@ export default function AuthForm({ initialMode = 'signup', onSuccess, compact = 
         </button>
         <button
           type="button"
+          aria-pressed={!isSignup}
           onClick={() => { setMode('signin'); setError(null) }}
           className={[
-            'rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition',
+            'inline-flex min-h-[44px] items-center justify-center rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition',
             !isSignup ? 'bg-surface text-tinta shadow-soft' : 'text-tinta/55',
           ].join(' ')}
         >
@@ -133,12 +135,18 @@ export default function AuthForm({ initialMode = 'signup', onSuccess, compact = 
         )}
 
         {notice && (
-          <p role="status" className="rounded-xl bg-fresco/12 px-3 py-2 text-[12px] text-fresco">
+          <p role="status" className="rounded-xl bg-fresco/12 px-3 py-2 text-[12px] text-oliva">
             {notice}
           </p>
         )}
 
-        <button type="submit" disabled={busy} className="btn-tomate h-12 w-full text-[15px]">
+        <button type="submit" disabled={busy} className="btn-tomate inline-flex h-12 w-full items-center justify-center gap-2 text-[15px]">
+          {busy && (
+            <span
+              aria-hidden="true"
+              className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
+            />
+          )}
           {busy ? t('auth.working') : isSignup ? t('auth.createButton') : t('auth.signinButton')}
         </button>
       </form>

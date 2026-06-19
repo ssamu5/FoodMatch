@@ -56,7 +56,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
           <RestaurantCover restaurant={restaurant} variant="thumb" />
           {restaurant.isPartner && (
             <span className="absolute left-1 top-1 rounded-full bg-tomate px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-cream">
-              Partner
+              {t('results.partner')}
             </span>
           )}
           {typeof rank === 'number' && (
@@ -135,12 +135,12 @@ function HeartIcon({ filled, className }: { filled?: boolean; className?: string
   return (
     <svg
       viewBox="0 0 24 24"
-      fill={filled ? '#e63946' : 'none'}
-      stroke={filled ? '#e63946' : 'currentColor'}
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={['text-cream', className || ''].join(' ')}
+      className={[filled ? 'text-tomate' : 'text-cream', className || ''].join(' ')}
       aria-hidden="true"
     >
       <path d="M12 21s-7-4.35-9.5-8.5C1 9.5 2.5 6 6 6c2 0 3.2 1.2 4 2.3C10.8 7.2 12 6 14 6c3.5 0 5 3.5 3.5 6.5C19 16.65 12 21 12 21z" />

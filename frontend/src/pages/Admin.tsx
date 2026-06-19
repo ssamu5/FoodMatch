@@ -21,12 +21,16 @@ export default function Admin() {
     }
   })
   const [code, setCode] = useState('')
+  const [codeError, setCodeError] = useState(false)
   const [, setTick] = useState(0)
   const [copied, setCopied] = useState(false)
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
+  const [restaurantsLoading, setRestaurantsLoading] = useState(true)
   const [adminUser, setAdminUser] = useState<boolean>(false)
   const [claims, setClaims] = useState<ClaimRow[]>([])
+  const [claimsLoading, setClaimsLoading] = useState(false)
   const [claimError, setClaimError] = useState<string | null>(null)
+  const [claimBusy, setClaimBusy] = useState(false)
 
   useEffect(() => {
     const id = window.setInterval(() => setTick((t) => t + 1), 5000)
@@ -35,9 +39,11 @@ export default function Admin() {
 
   useEffect(() => {
     let cancelled = false
+    setRestaurantsLoading(true)
     api.listRestaurants().then((rows) => {
       if (cancelled) return
       setRestaurants(rows)
+      setRestaurantsLoading(false)
     })
     return () => {
       cancelled = true
@@ -50,9 +56,11 @@ export default function Admin() {
       if (cancelled) return
       setAdminUser(admin)
       if (admin) {
+        setClaimsLoading(true)
         listClaims().then((rows) => {
           if (cancelled) return
           setClaims(rows)
+          setClaimsLoading(false)
         })
       }
     })
@@ -72,7 +80,10 @@ export default function Admin() {
           <div className="mt-5 flex gap-2">
             <input
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => {
+                setCode(e.target.value)
+                if (codeError) setCodeError(false)
+              }}
               type="password"
               placeholder={t('admin.codePlaceholder')}
               className="liquid-input flex-1 rounded-full px-4 py-2 text-[14px]"
@@ -84,12 +95,17 @@ export default function Admin() {
                 if (code === ADMIN_CODE) {
                   try { localStorage.setItem(KEY, '1') } catch {}
                   setUnlocked(true)
+                } else {
+                  setCodeError(true)
                 }
               }}
             >
               {t('admin.unlockButton')}
             </button>
           </div>
+          {codeError && (
+            <p className="mt-2 text-[12px] text-tomate">{t('admin.wrongCode')}</p>
+          )}
         </section>
       </AppShell>
     )
@@ -119,21 +135,33 @@ export default function Admin() {
   }
 
   async function handleApprove(claim: ClaimRow) {
+    if (claimBusy) return
+    setClaimBusy(true)
     setClaimError(null)
-    const result = await approveClaim(claim)
-    if (!result.ok) {
-      setClaimError(result.error ?? 'Approve failed')
+    try {
+      const result = await approveClaim(claim)
+      if (!result.ok) {
+        setClaimError(result.error ?? t('admin.approveError'))
+      }
+      await refreshClaims()
+    } finally {
+      setClaimBusy(false)
     }
-    await refreshClaims()
   }
 
   async function handleReject(claim: ClaimRow) {
+    if (claimBusy) return
+    setClaimBusy(true)
     setClaimError(null)
-    const result = await rejectClaim(claim)
-    if (!result.ok) {
-      setClaimError(result.error ?? 'Reject failed')
+    try {
+      const result = await rejectClaim(claim)
+      if (!result.ok) {
+        setClaimError(result.error ?? t('admin.rejectError'))
+      }
+      await refreshClaims()
+    } finally {
+      setClaimBusy(false)
     }
-    await refreshClaims()
   }
 
   async function copyJson() {
@@ -154,17 +182,17 @@ export default function Admin() {
       <section className="pt-2">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-[28px] font-bold text-tinta">{t('admin.heading')}</h1>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
             <button
               type="button"
-              className="text-[12px] font-medium text-fresco hover:underline"
+              className="inline-flex min-h-[44px] items-center px-2 text-[12px] font-medium text-fresco hover:underline"
               onClick={copyJson}
             >
               {copied ? t('admin.copied') : t('admin.exportJson')}
             </button>
             <button
               type="button"
-              className="text-[12px] text-tinta/70 hover:text-tomate"
+              className="inline-flex min-h-[44px] items-center px-2 text-[12px] text-tinta/70 hover:text-tomate"
               onClick={() => {
                 if (confirm(t('admin.clearConfirm'))) {
                   clearEvents()
@@ -208,7 +236,8 @@ export default function Admin() {
       <section className="mt-5">
         <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionMostOpened')}</h2>
         <div className="rounded-2xl glass p-3">
-          {topClicks.length === 0 && <p className="text-[13px] text-tinta/70">{t('admin.emptyOpens')}</p>}
+          {restaurantsLoading && <p className="text-[13px] text-tinta/70">{t('admin.loading')}</p>}
+          {!restaurantsLoading && topClicks.length === 0 && <p className="text-[13px] text-tinta/70">{t('admin.emptyOpens')}</p>}
           {topClicks.map(({ count, restaurant }, i) => (
             <div key={(restaurant?.id || 'x') + i} className="flex items-baseline justify-between border-b border-tinta/12 py-1.5 last:border-0">
               <span className="text-[13px] text-tinta">
@@ -224,7 +253,8 @@ export default function Admin() {
       <section className="mt-5">
         <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.sectionWaLeads')}</h2>
         <div className="rounded-2xl glass p-3">
-          {topLeads.length === 0 && <p className="text-[13px] text-tinta/70">{t('admin.emptyWaLeads')}</p>}
+          {restaurantsLoading && <p className="text-[13px] text-tinta/70">{t('admin.loading')}</p>}
+          {!restaurantsLoading && topLeads.length === 0 && <p className="text-[13px] text-tinta/70">{t('admin.emptyWaLeads')}</p>}
           {topLeads.map(({ count, restaurant }, i) => (
             <div key={(restaurant?.id || 'x') + i} className="flex items-baseline justify-between border-b border-tinta/12 py-1.5 last:border-0">
               <span className="text-[13px] text-tinta">
@@ -271,10 +301,10 @@ export default function Admin() {
       </section>
 
       <section className="mt-5 pb-6">
-        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Restaurant claims</h2>
+        <h2 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('admin.claimsHeading')}</h2>
         {!adminUser ? (
           <div className="rounded-2xl glass p-3 text-[13px] text-tinta/70">
-            Sign in as an admin to review restaurant claims.
+            {t('admin.claimsSignIn')}
           </div>
         ) : (
           <>
@@ -282,8 +312,11 @@ export default function Admin() {
               <p className="mb-2 rounded-xl bg-tomate/10 px-3 py-2 text-[12px] text-tomate">{claimError}</p>
             )}
             <div className="rounded-2xl glass p-3">
-              {claims.length === 0 && (
-                <p className="text-[13px] text-tinta/70">No claims yet.</p>
+              {claimsLoading && (
+                <p className="text-[13px] text-tinta/70">{t('admin.loading')}</p>
+              )}
+              {!claimsLoading && claims.length === 0 && (
+                <p className="text-[13px] text-tinta/70">{t('admin.noClaims')}</p>
               )}
               {pendingFirst(claims).map((claim) => (
                 <div key={claim.id} className="border-b border-tinta/12 py-2 last:border-0">
@@ -297,28 +330,30 @@ export default function Admin() {
                     </div>
                     <span className={[
                       'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
-                      claim.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                      claim.status === 'pending' ? 'bg-mostaza/20 text-mostaza ring-1 ring-mostaza/40' :
                       claim.status === 'approved' ? 'bg-fresco/15 text-fresco' :
                       'bg-tomate/10 text-tomate',
                     ].join(' ')}>
-                      {claim.status}
+                      {claimStatusLabel(claim.status, t)}
                     </span>
                   </div>
                   {claim.status === 'pending' && (
                     <div className="mt-1.5 flex gap-2">
                       <button
                         type="button"
-                        className="rounded-full bg-fresco/15 px-3 py-1 text-[12px] font-medium text-fresco hover:bg-fresco/25"
+                        disabled={claimBusy}
+                        className="inline-flex min-h-[44px] items-center rounded-full bg-fresco/15 px-4 py-1 text-[12px] font-medium text-fresco hover:bg-fresco/25 disabled:opacity-50"
                         onClick={() => handleApprove(claim)}
                       >
-                        Approve
+                        {t('admin.approve')}
                       </button>
                       <button
                         type="button"
-                        className="rounded-full bg-tomate/10 px-3 py-1 text-[12px] font-medium text-tomate hover:bg-tomate/20"
+                        disabled={claimBusy}
+                        className="inline-flex min-h-[44px] items-center rounded-full bg-tomate/10 px-4 py-1 text-[12px] font-medium text-tomate hover:bg-tomate/20 disabled:opacity-50"
                         onClick={() => handleReject(claim)}
                       >
-                        Reject
+                        {t('admin.reject')}
                       </button>
                     </div>
                   )}
@@ -357,6 +392,16 @@ function KvList({ rows, emptyLabel }: { rows: { key: string; value: number }[]; 
       ))}
     </div>
   )
+}
+
+function claimStatusLabel(
+  status: string,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
+  if (status === 'pending') return t('admin.statusPending')
+  if (status === 'approved') return t('admin.statusApproved')
+  if (status === 'rejected') return t('admin.statusRejected')
+  return status
 }
 
 function topRows(map: Record<string, number>): { key: string; value: number }[] {

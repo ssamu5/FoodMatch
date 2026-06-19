@@ -39,22 +39,34 @@ export default function Ask() {
   const [results, setResults] = useState<Restaurant[]>([])
   const [rankedResults, setRankedResults] = useState<RankedResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     if (!query) {
       setResults([])
       setRankedResults([])
       setLoading(false)
+      setError(false)
       return
     }
     let cancelled = false
     setLoading(true)
-    api.searchByIntent(intent).then((r) => {
-      if (cancelled) return
-      setResults(r.results)
-      setRankedResults(r.rankedResults)
-      setLoading(false)
-    })
+    setError(false)
+    api
+      .searchByIntent(intent)
+      .then((r) => {
+        if (cancelled) return
+        setResults(r.results)
+        setRankedResults(r.rankedResults)
+        setLoading(false)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setResults([])
+        setRankedResults([])
+        setError(true)
+        setLoading(false)
+      })
     return () => {
       cancelled = true
     }
@@ -116,7 +128,6 @@ export default function Ask() {
         <PromptComposer
           initialValue={query}
           placeholder={t('ask.placeholder')}
-          starterChips={!query ? undefined : undefined}
           refinementChips={query ? refinementLabels : undefined}
           onSubmit={handleSubmit}
           onRefine={handleRefine}
@@ -135,13 +146,34 @@ export default function Ask() {
       )}
 
       {query && loading && (
-        <section className="mt-6 flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-tinta/50">
-          <span className="h-2 w-2 rounded-full bg-tomate shadow-glow animate-pulse-soft" />
-          {t('ask.loading')}
+        <section className="mt-6 space-y-5" aria-busy="true" aria-label={t('ask.loading')}>
+          <div className="h-7 w-40 rounded-full glass animate-pulse-soft" />
+          <div className="overflow-hidden rounded-4xl glass animate-pulse-soft">
+            <div className="h-44 w-full bg-tinta/5 sm:h-56" />
+            <div className="space-y-3 px-5 pb-5 pt-4">
+              <div className="h-4 w-3/4 rounded-full bg-tinta/8" />
+              <div className="h-4 w-1/2 rounded-full bg-tinta/8" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-16 rounded-3xl glass animate-pulse-soft" />
+            ))}
+          </div>
         </section>
       )}
 
-      {query && !loading && (
+      {query && error && !loading && (
+        <section className="mt-6 space-y-3">
+          <EmptyState
+            title={t('ask.errorTitle')}
+            hint={t('ask.errorHint')}
+            action={{ label: t('common.retry'), onClick: () => handleSubmit(query) }}
+          />
+        </section>
+      )}
+
+      {query && !loading && !error && (
         <section className="mt-6 space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-[12px] uppercase tracking-[0.18em] text-tinta/50">
@@ -151,7 +183,7 @@ export default function Ask() {
               onClick={() => navigate(`/results?q=${encodeURIComponent(query)}`)}
               className="text-[12px] text-tinta/70 hover:text-tinta"
             >
-              {t('ask.seeAll')} &rarr;
+              {t('ask.seeAll')} <span aria-hidden="true">&rarr;</span>
             </button>
           </div>
 

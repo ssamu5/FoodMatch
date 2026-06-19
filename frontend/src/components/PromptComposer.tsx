@@ -61,7 +61,7 @@ export default function PromptComposer({
           type="submit"
           disabled={!value.trim()}
           aria-label={resolvedCta}
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-tomate text-cream transition enabled:hover:bg-tomateDeep enabled:active:scale-95 disabled:opacity-30"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-tomate text-cream transition-[transform,background-color] duration-150 enabled:hover:bg-tomateDeep enabled:active:scale-95 disabled:opacity-30"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
             <path d="M5 12h14M13 6l6 6-6 6" />

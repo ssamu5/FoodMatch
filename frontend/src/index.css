@@ -4,6 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Respect the OS "reduce motion" setting. Disable the entrance fade-up and the
+   infinite soft pulse, and keep transitions/animations effectively instant so
+   nothing animates while content stays visible at its final/static styles. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-pulse-soft {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
 /* Theme tokens. RGB triplets (space-separated) so Tailwind's `<alpha-value>`
    substitution works (e.g. `bg-paper/80`).
 
@@ -127,7 +143,7 @@ body::before {
 .liquid-input::placeholder {
   color: rgb(var(--tinta) / 0.4);
 }
-.liquid-input:focus {
+.liquid-input:focus-within {
   outline: none;
   border-color: rgb(230 57 70 / 0.55);
   box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.14);
@@ -154,6 +170,9 @@ body::before {
   background: rgb(var(--creamy));
   border-color: rgb(var(--tinta) / 0.18);
 }
+.chip:active {
+  transform: scale(0.97);
+}
 .chip.active {
   background: rgba(230, 57, 70, 0.10);
   border-color: rgba(230, 57, 70, 0.6);
@@ -162,6 +181,20 @@ body::before {
 }
 .dark .chip.active {
   color: #ff6f7c;
+}
+/* Disabled chips (e.g. after feedback is submitted) must read as inert: dim
+   them, drop the pointer cursor, and neutralize the hover change so they no
+   longer look interactive. The chosen answer keeps full opacity for legibility. */
+.chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.chip:disabled:hover {
+  background: rgb(var(--surface));
+  border-color: rgb(var(--tinta) / 0.10);
+}
+.chip.active:disabled {
+  opacity: 1;
 }
 
 /* Primary button: tinta with paper text (flips with theme) */
@@ -240,6 +273,25 @@ body::before {
   box-shadow: var(--shadow-md);
 }
 
+/* Keyboard focus ring. Mirrors the .liquid-input tomate ring so keyboard
+   users get a visible indicator (tap-highlight is globally removed). Uses
+   :focus-visible so it shows only for keyboard nav, not on tap/click.
+   Elements that already carry a box-shadow keep it alongside the ring. */
+.btn-primary:focus-visible,
+.btn-lime:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.3);
+}
+.btn-tomate:focus-visible {
+  outline: none;
+  box-shadow: 0 12px 28px -10px rgba(230, 57, 70, 0.5), 0 0 0 3px rgba(230, 57, 70, 0.3);
+}
+.btn-ghost:focus-visible,
+.chip:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-sm), 0 0 0 3px rgba(230, 57, 70, 0.3);
+}
+
 /* Squiggle divider (matches the website). Light + dark variants. */
 .squiggle {
   height: 18px;
@@ -264,3 +316,23 @@ body::before {
 
 .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
 .safe-top { padding-top: max(env(safe-area-inset-top), 0.75rem); }
+
+/* Honor the OS Reduce Motion setting. Fully stop the infinite loading pulse,
+   skip fade-up entrances, and drop the transform/transition motion on
+   interactive elements. Theme color transitions are intentionally left
+   alone so light/dark switching stays smooth. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-soft,
+  .animate-fade-up {
+    animation: none !important;
+  }
+  .btn-primary,
+  .btn-lime,
+  .btn-tomate,
+  .btn-ghost,
+  .chip,
+  .glass-hover,
+  .liquid-input {
+    transition: none;
+  }
+}

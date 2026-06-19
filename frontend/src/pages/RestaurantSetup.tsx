@@ -286,14 +286,14 @@ export default function RestaurantSetup() {
         {/* progress bar */}
         <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-tinta/10">
           <div
-            className="h-full rounded-full bg-tomate transition-all duration-500"
+            className="h-full rounded-full bg-tomate transition-[width] duration-500"
             style={{ width: `${done ? 100 : progress}%` }}
           />
         </div>
       </section>
 
       {/* chat */}
-      <section ref={scrollRef} className="mt-4 max-h-[58vh] space-y-3 overflow-y-auto pb-2">
+      <section ref={scrollRef} aria-live="polite" className="mt-4 max-h-[58vh] space-y-3 overflow-y-auto pb-2">
         {lines.map((l, i) => (
           <div key={i} className={l.from === 'foody' ? 'flex items-end gap-2' : 'flex justify-end'}>
             {l.from === 'foody' && (
@@ -321,7 +321,7 @@ export default function RestaurantSetup() {
           {step.options && (
             <div className="mb-2 flex flex-wrap gap-1.5">
               {step.options.map((opt) => (
-                <button key={opt.value} type="button" className="chip" onClick={() => commit(opt.value)}>
+                <button key={opt.value} type="button" className="chip min-h-[44px]" onClick={() => commit(opt.value)}>
                   {t(opt.labelKey)}
                 </button>
               ))}

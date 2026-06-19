@@ -22,7 +22,7 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
   return (
     <Link
       to={`/restaurant/${restaurant.slug}`}
-      className="group block animate-fade-up overflow-hidden rounded-4xl glass shadow-glass transition hover:shadow-glow"
+      className="group block animate-fade-up overflow-hidden rounded-4xl glass glass-hover transition active:scale-[0.99]"
     >
       <div className="relative h-44 w-full sm:h-56" aria-hidden="true">
         <RestaurantCover restaurant={restaurant} variant="hero" />
@@ -89,7 +89,7 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
 
         <div className="mt-4 flex items-center justify-between text-[12px] text-tinta/70">
           <span>{restaurant.bestFor[0] ? t('results.bestFor', { tag: bestForLabel(restaurant.bestFor[0], lang) }) : restaurant.tags.slice(0, 2).join(' · ')}</span>
-          <span className="font-medium text-tinta group-hover:text-tomate">{t('common.viewDetails')} &rarr;</span>
+          <span className="font-medium text-tinta transition-colors group-hover:text-tomate">{t('common.viewDetails')} <span aria-hidden="true">&rarr;</span></span>
         </div>
       </div>
     </Link>

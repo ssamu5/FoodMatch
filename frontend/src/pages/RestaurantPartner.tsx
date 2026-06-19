@@ -34,17 +34,24 @@ export default function RestaurantPartner() {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (submitting) return
     if (!form.restaurantName.trim() || !form.ownerName.trim() || !form.email.trim()) return
-    api.submitRestaurantLead(form)
-    track('restaurant_lead_submitted', { area: form.area, city: form.city })
-    setSubmitted(true)
+    setSubmitting(true)
+    try {
+      await api.submitRestaurantLead(form)
+      track('restaurant_lead_submitted', { area: form.area, city: form.city })
+      setSubmitted(true)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function contactEmail() {
@@ -117,7 +124,7 @@ export default function RestaurantPartner() {
         <Link
           to="/restaurants/setup"
           onClick={() => track('partner_interest_started', { method: 'assistant_cta' })}
-          className="flex items-center gap-3 rounded-3xl bg-tomate p-4 text-cream shadow-warm transition active:scale-[0.99]"
+          className="flex items-center gap-3 rounded-3xl bg-tomate p-4 text-cream shadow-warm transition-[transform,box-shadow,background-color] hover:bg-tomateDeep hover:shadow-glow active:scale-[0.99]"
         >
           <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cream/15 font-display text-[19px] font-bold">
             F
@@ -136,7 +143,7 @@ export default function RestaurantPartner() {
           <p className="mt-1 text-tinta/70">{t('partner.statCommission')}</p>
         </div>
         <div className="rounded-2xl glass p-3">
-          <div className="font-display text-[18px] font-bold text-tomate">€69/mo</div>
+          <div className="font-display text-[18px] font-bold text-tomate">€69{t('partner.planFounderUnit')}</div>
           <p className="mt-1 text-tinta/75">{t('partner.statPriceNote')}</p>
         </div>
       </section>
@@ -219,7 +226,7 @@ export default function RestaurantPartner() {
           </div>
         </div>
 
-        <p className="mt-3 rounded-2xl bg-tomate/8 px-3 py-2 text-center text-[12.5px] font-semibold text-tomateDeep ring-1 ring-tomate/20">
+        <p className="mt-3 rounded-2xl bg-tomate/8 px-3 py-2 text-center text-[12.5px] font-semibold text-tomate ring-1 ring-tomate/20">
           {t('partner.planCommission')}
         </p>
         <p className="mt-2 text-[11px] leading-relaxed text-tinta/55">{t('partner.planFootnote')}</p>
@@ -351,8 +358,14 @@ export default function RestaurantPartner() {
               placeholder={t('partner.placeholderMessage')}
             />
           </div>
-          <button type="submit" className="btn-lime h-12 w-full">
-            {t('partner.submitButton')}
+          <button type="submit" disabled={submitting} className="btn-lime inline-flex h-12 w-full items-center justify-center gap-2">
+            {submitting && (
+              <span
+                aria-hidden="true"
+                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
+              />
+            )}
+            {submitting ? t('partner.submitWorking') : t('partner.submitButton')}
           </button>
           <p className="text-center text-[11px] leading-relaxed text-tinta/65">
             {t('partner.gdprNote')}

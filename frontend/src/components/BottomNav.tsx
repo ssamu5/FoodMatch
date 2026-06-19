@@ -12,7 +12,7 @@ export default function BottomNav() {
   const { t } = useT()
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-tinta/8 bg-surface/90 backdrop-blur-xl safe-bottom"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-tinta/10 bg-surface/90 backdrop-blur-xl safe-bottom"
       aria-label="Primary"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2 pt-2">
@@ -25,7 +25,7 @@ export default function BottomNav() {
                 end={l.to === '/'}
                 className={({ isActive }) =>
                   [
-                    'flex flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium',
+                    'flex flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/50',
                     isActive
                       ? 'text-tomate'
                       : 'text-tinta/70 hover:text-tinta',

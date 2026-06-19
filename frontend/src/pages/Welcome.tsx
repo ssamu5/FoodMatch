@@ -5,6 +5,7 @@ import { api } from '../lib/api'
 import { track } from '../lib/analytics'
 import { useT } from '../lib/i18n'
 import LanguageToggle from '../components/LanguageToggle'
+import ThemeToggle from '../components/ThemeToggle'
 import AuthForm from '../components/AuthForm'
 import type { AuthUser } from '../lib/auth'
 
@@ -60,7 +61,10 @@ export default function Welcome() {
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-tomate font-display text-[24px] font-bold text-cream shadow-warm">
               <span>f</span><span className="italic">m</span>
             </span>
-            <LanguageToggle />
+            <div className="flex items-center gap-2">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
           </div>
           <h1 className="mt-5 font-display text-[40px] font-bold leading-[0.98] tracking-tight text-tinta">
             {t('welcome.headingPrefix')}<br />
@@ -81,7 +85,7 @@ export default function Welcome() {
             <div className="mt-3 space-y-3">
               <button
                 onClick={chooseDiner}
-                className="flex w-full items-center gap-4 rounded-3xl border border-tinta/10 bg-surface p-4 text-left shadow-soft transition hover:shadow-softMd active:scale-[0.99]"
+                className="flex w-full items-center gap-4 rounded-3xl border border-tinta/10 bg-surface p-4 text-left shadow-soft transition hover:shadow-softMd active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/55 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
               >
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-tomate/12 text-tomate">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true"><path d="M6 3v6a2 2 0 0 0 2 2v10M6 3v6M9 3v6M18 3c-1.5 0-2.5 2-2.5 5s1 4 2.5 4v9" /></svg>
@@ -95,7 +99,7 @@ export default function Welcome() {
 
               <button
                 onClick={chooseRestaurant}
-                className="flex w-full items-center gap-4 rounded-3xl border border-tinta/10 bg-surface p-4 text-left shadow-soft transition hover:shadow-softMd active:scale-[0.99]"
+                className="flex w-full items-center gap-4 rounded-3xl border border-tinta/10 bg-surface p-4 text-left shadow-soft transition hover:shadow-softMd active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/55 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
               >
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-azulejo/12 text-azulejo">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true"><path d="M3 9 4.5 4h15L21 9M4 9v10h16V9M4 9h16M9 19v-5h6v5" /></svg>
@@ -130,10 +134,10 @@ export default function Welcome() {
               <button onClick={() => setStep('signup')} className="btn-tomate h-12 w-full text-[15px]">
                 {t('welcome.createProfile')}
               </button>
-              <button onClick={skip} className="mt-2 h-11 w-full text-[13px] text-tinta/55 hover:text-tinta">
+              <button onClick={skip} className="mt-2 h-11 w-full text-[13px] text-tinta/60 transition-colors hover:text-tinta">
                 {t('welcome.enterWithout')}
               </button>
-              <button onClick={() => setStep('role')} className="mt-1 h-9 w-full text-[12px] text-tinta/40 hover:text-tinta">
+              <button onClick={() => setStep('role')} className="mt-1 h-11 w-full text-[12px] text-tinta/40 transition-colors hover:text-tinta">
                 &larr; {t('welcome.back')}
               </button>
             </div>
@@ -147,10 +151,10 @@ export default function Welcome() {
               </p>
               <AuthForm onSuccess={onAuthSuccess} />
             </div>
-            <button onClick={skip} className="mt-3 h-11 w-full text-[13px] text-tinta/60 hover:text-tinta">
+            <button onClick={skip} className="mt-3 h-11 w-full text-[13px] text-tinta/60 transition-colors hover:text-tinta">
               {t('welcome.enterWithout')}
             </button>
-            <button onClick={() => setStep('intro')} className="mt-1 h-9 w-full text-[12px] text-tinta/40 hover:text-tinta">
+            <button onClick={() => setStep('intro')} className="mt-1 h-11 w-full text-[12px] text-tinta/40 transition-colors hover:text-tinta">
               &larr; {t('welcome.back')}
             </button>
           </div>

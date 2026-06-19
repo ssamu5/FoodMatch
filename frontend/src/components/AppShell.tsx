@@ -26,7 +26,7 @@ export default function AppShell({
     <div className="relative min-h-full">
       <header className="relative z-20 safe-top">
         <div className="mx-auto flex max-w-md items-center justify-between px-5 py-3">
-          <Link to="/" className="group inline-flex items-center gap-2" aria-label="FoodMatch home">
+          <Link to="/" className="group inline-flex items-center gap-2 rounded-full transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomate/50" aria-label="FoodMatch home">
             <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-tomate/15 ring-1 ring-tomate/40">
               <span className="h-2 w-2 rounded-full bg-tomate shadow-glow" />
             </span>
