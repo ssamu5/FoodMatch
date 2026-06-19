@@ -8,9 +8,14 @@
 //   rating:          5
 // Total max: 100.
 
-import type { FoodIntent, MatchScore, RankedResult } from '../types/search'
+import type { FoodIntent, MatchScore, RankedResult, ReasonToken, WarningToken } from '../types/search'
 import type { Restaurant, Vibe } from '../types/restaurant'
-import { firstMatchingDish, textMatchesDish } from './searchLexicon'
+import { textMatchesDish } from './searchLexicon'
+import type { Lang } from '../locales/types'
+import { formatReason } from './reasonFormatter'
+
+// Re-export for convenience of callers that only import from ranking.
+export type { ReasonToken, WarningToken }
 
 // ---------- Helpers ----------
 
@@ -69,7 +74,7 @@ function isOpenAt(r: Restaurant, date = new Date()): boolean {
 // restaurant serves: full credit (12) only when all requested dishes match,
 // partial credit when some match, zero when none match.
 // Neutral credit when no dish was requested, so cuisine-only queries are unaffected.
-function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?: string } {
+function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?: ReasonToken } {
   if (intent.dishes.length === 0) return { points: 6 } // neutral
   const haystack = [
     r.name,
@@ -84,34 +89,38 @@ function scoreDish(intent: FoodIntent, r: Restaurant): { points: number; reason?
   const hits = intent.dishes.filter((dish) => textMatchesDish(haystack, dish))
   if (hits.length === 0) return { points: 0 }
   const points = Math.round((hits.length / intent.dishes.length) * 12)
-  const reason = hits.length > 1 ? `serves ${hits.slice(0, 2).join(' + ')}` : `serves ${hits[0]}`
+  const reason: ReasonToken = hits.length > 1
+    ? { key: 'servesMany', vars: { dish1: hits[0], dish2: hits[1] } }
+    : { key: 'servesOne', vars: { dish: hits[0] } }
   return { points, reason }
 }
 
-function scoreCuisine(intent: FoodIntent, r: Restaurant): { points: number; reason?: string; warning?: string } {
+function scoreCuisine(intent: FoodIntent, r: Restaurant): { points: number; reason?: ReasonToken; warning?: WarningToken } {
   if (intent.avoidCuisines.includes(r.cuisine)) {
-    return { points: -15, warning: `You said no ${r.cuisine}` }
+    // No WarningToken for this case in the current set; omit from pill display.
+    return { points: -15 }
   }
   if (intent.cuisines.length === 0) {
     return { points: 12 } // partial neutral credit when user didn't specify cuisine
   }
   if (intent.cuisines.includes(r.cuisine)) {
-    return { points: 24, reason: `${r.cuisine} match` }
+    return { points: 24, reason: { key: 'cuisineMatch', vars: { cuisine: r.cuisine } } }
   }
   if (r.secondaryCuisines && r.secondaryCuisines.some((s) => intent.cuisines.includes(s))) {
-    return { points: 14, reason: `also serves ${intent.cuisines.find((c) => r.secondaryCuisines?.includes(c))}` }
+    const matched = intent.cuisines.find((c) => r.secondaryCuisines?.includes(c)) ?? r.cuisine
+    return { points: 14, reason: { key: 'alsoServes', vars: { cuisine: matched } } }
   }
   return { points: 0 }
 }
 
-function scoreArea(intent: FoodIntent, r: Restaurant): { points: number; reason?: string } {
+function scoreArea(intent: FoodIntent, r: Restaurant): { points: number; reason?: ReasonToken } {
   if (intent.distancePreference === 'near_me') {
     // No real geo signal in MVP. Treat near_me as "anywhere with mild center bias".
-    if (r.area === 'City center') return { points: 14, reason: 'central location' }
+    if (r.area === 'City center') return { points: 14, reason: { key: 'centralLocation' } }
     return { points: 10 }
   }
   if (intent.area && r.area === intent.area) {
-    return { points: 18, reason: `in ${r.area}` }
+    return { points: 18, reason: { key: 'areaIn', vars: { area: r.area } } }
   }
   if (intent.area) {
     // Different area to the one requested
@@ -120,7 +129,7 @@ function scoreArea(intent: FoodIntent, r: Restaurant): { points: number; reason?
   return { points: 10 } // no preference, gentle baseline
 }
 
-function scoreBudget(intent: FoodIntent, r: Restaurant): { points: number; reason?: string; warning?: string } {
+function scoreBudget(intent: FoodIntent, r: Restaurant): { points: number; reason?: ReasonToken; warning?: WarningToken } {
   const targetLevel = intent.budgetLevel ?? pricelevelFromBudget(intent.maxSpendEur)
   if (!targetLevel && intent.maxSpendEur === null) {
     return { points: 12 } // neutral when no budget signal
@@ -129,23 +138,26 @@ function scoreBudget(intent: FoodIntent, r: Restaurant): { points: number; reaso
     if (r.averageSpend <= intent.maxSpendEur) {
       const slack = intent.maxSpendEur - r.averageSpend
       const points = 18 - Math.min(8, slack * 0.4) // strong fit, slight ding if way under
-      return { points: Math.round(points), reason: `~€${r.averageSpend} fits €${intent.maxSpendEur} budget` }
+      return {
+        points: Math.round(points),
+        reason: { key: 'budgetFits', vars: { spend: String(r.averageSpend) } },
+      }
     }
     // Over budget
     if (r.averageSpend <= intent.maxSpendEur * 1.2) {
-      return { points: 8, warning: `slightly over your €${intent.maxSpendEur} budget` }
+      return { points: 8, warning: { key: 'slightlyOver', vars: { budget: String(intent.maxSpendEur) } } }
     }
-    return { points: -5, warning: `over your €${intent.maxSpendEur} budget` }
+    return { points: -5, warning: { key: 'over', vars: { budget: String(intent.maxSpendEur) } } }
   }
   if (targetLevel) {
-    if (r.priceLevel === targetLevel) return { points: 18, reason: `price level matches` }
+    if (r.priceLevel === targetLevel) return { points: 18, reason: { key: 'priceLevelMatches' } }
     if (Math.abs(r.priceLevel - targetLevel) === 1) return { points: 10 }
     return { points: 0 }
   }
   return { points: 10 }
 }
 
-function scoreVibeAndOccasion(intent: FoodIntent, r: Restaurant): { points: number; reason?: string } {
+function scoreVibeAndOccasion(intent: FoodIntent, r: Restaurant): { points: number; reason?: ReasonToken } {
   let pts = 0
   const matched: string[] = []
   const wanted: Vibe[] = [...intent.vibe]
@@ -163,12 +175,13 @@ function scoreVibeAndOccasion(intent: FoodIntent, r: Restaurant): { points: numb
   }
   if (wanted.length === 0) pts = 9 // neutral when no vibe signal
   pts = Math.min(pts, 13)
+  // Use the first matched vibe for the token; the formatter can join multiple.
   return matched.length > 0
-    ? { points: pts, reason: `${matched.slice(0, 2).join(', ')} vibe` }
+    ? { points: pts, reason: { key: 'vibe', vars: { vibe: matched.slice(0, 2).join(', ') } } }
     : { points: pts }
 }
 
-function scoreDietary(intent: FoodIntent, r: Restaurant): { points: number; reason?: string; warning?: string } {
+function scoreDietary(intent: FoodIntent, r: Restaurant): { points: number; reason?: ReasonToken; warning?: WarningToken } {
   if (intent.dietary.length === 0) return { points: 7 }
   let ok = true
   const okFlags: string[] = []
@@ -178,21 +191,24 @@ function scoreDietary(intent: FoodIntent, r: Restaurant): { points: number; reas
     else if (d === 'gluten-free' && !r.glutenFreeOptions) ok = false
     else okFlags.push(d)
   }
-  if (!ok) return { points: -5, warning: `may not cover your ${intent.dietary.join(', ')} needs` }
-  return { points: 10, reason: `${okFlags.join(' + ')} options` }
+  if (!ok) return { points: -5, warning: { key: 'mayNotCover', vars: { flags: intent.dietary.join(', ') } } }
+  return { points: 10, reason: { key: 'dietary', vars: { flags: okFlags.join(' + ') } } }
 }
 
-function scoreRating(r: Restaurant): { points: number; reason?: string } {
+function scoreRating(r: Restaurant): { points: number; reason?: ReasonToken } {
   // 5 points max. Rating 4.5+ = 5, 4.0 = 3, 3.5 = 1.5, etc.
   const pts = Math.max(0, Math.min(5, (r.rating - 3.5) * 5))
-  return { points: Math.round(pts * 10) / 10, reason: r.rating >= 4.5 ? `rated ${r.rating}★` : undefined }
+  return {
+    points: Math.round(pts * 10) / 10,
+    reason: r.rating >= 4.5 ? { key: 'rated', vars: { rating: `${r.rating}★` } } : undefined,
+  }
 }
 
 // ---------- Public API ----------
 
 export function scoreRestaurant(intent: FoodIntent, r: Restaurant): MatchScore {
-  const reasons: string[] = []
-  const warnings: string[] = []
+  const reasons: ReasonToken[] = []
+  const warnings: WarningToken[] = []
   let total = 0
 
   const parts = [
@@ -204,7 +220,7 @@ export function scoreRestaurant(intent: FoodIntent, r: Restaurant): MatchScore {
     scoreDietary(intent, r),
     scoreRating(r),
   ]
-  for (const p of parts as Array<{ points: number; reason?: string; warning?: string }>) {
+  for (const p of parts as Array<{ points: number; reason?: ReasonToken; warning?: WarningToken }>) {
     total += p.points
     if (p.reason) reasons.push(p.reason)
     if (p.warning) warnings.push(p.warning)
@@ -214,7 +230,7 @@ export function scoreRestaurant(intent: FoodIntent, r: Restaurant): MatchScore {
   // Soft penalty if mustBeOpenNow but not open.
   if (intent.mustBeOpenNow && !isOpenAt(r)) {
     total -= 20
-    warnings.push('closed right now')
+    warnings.push({ key: 'closedNow' })
   }
 
   // Clamp final score 0..100
@@ -245,13 +261,19 @@ export function buildMatchExplanation(
   intent: FoodIntent,
   r: Restaurant,
   score: MatchScore,
+  lang: Lang = 'es',
 ): string {
   // Short, plain, useful one-liner explanation for the top match.
   // Falls back to a generic sentence if no specific reasons emerged.
-  const positives = score.reasons.slice(0, 3)
-  const lead = positives.length > 0 ? positives.join(' • ') : `${r.cuisine} in ${r.area}`
-  const fit =
-    intent.maxSpendEur !== null && r.averageSpend <= intent.maxSpendEur
+  const positives = score.reasons.slice(0, 3).map((t) => formatReason(t, lang))
+  const lead = positives.length > 0
+    ? positives.join(' • ')
+    : `${r.cuisine} ${lang === 'es' ? 'en' : 'in'} ${r.area}`
+  const fit = lang === 'es'
+    ? intent.maxSpendEur !== null && r.averageSpend <= intent.maxSpendEur
+      ? ` Encaja en tu presupuesto de €${intent.maxSpendEur} con ~€${r.averageSpend} por persona.`
+      : ` Unos €${r.averageSpend} por persona.`
+    : intent.maxSpendEur !== null && r.averageSpend <= intent.maxSpendEur
       ? ` Fits your €${intent.maxSpendEur} budget at ~€${r.averageSpend} per person.`
       : ` Around €${r.averageSpend} per person.`
   return `${lead}.${fit}`

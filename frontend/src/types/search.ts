@@ -21,10 +21,31 @@ export interface FoodIntent {
   mustBeOpenNow: boolean
 }
 
+// Structured reason/warning tokens emitted by the ranker.
+// Use formatReason/formatWarning in lib/reasonFormatter.ts to localize them.
+export type ReasonToken =
+  | { key: 'cuisineMatch'; vars: { cuisine: string } }
+  | { key: 'alsoServes'; vars: { cuisine: string } }
+  | { key: 'servesOne'; vars: { dish: string } }
+  | { key: 'servesMany'; vars: { dish1: string; dish2: string } }
+  | { key: 'vibe'; vars: { vibe: string } }
+  | { key: 'rated'; vars: { rating: string } }
+  | { key: 'areaIn'; vars: { area: string } }
+  | { key: 'centralLocation' }
+  | { key: 'budgetFits'; vars: { spend: string } }
+  | { key: 'priceLevelMatches' }
+  | { key: 'dietary'; vars: { flags: string } }
+
+export type WarningToken =
+  | { key: 'closedNow' }
+  | { key: 'slightlyOver'; vars: { budget: string } }
+  | { key: 'over'; vars: { budget: string } }
+  | { key: 'mayNotCover'; vars: { flags: string } }
+
 export interface MatchScore {
   score: number          // 0-100
-  reasons: string[]
-  warnings: string[]
+  reasons: ReasonToken[]
+  warnings: WarningToken[]
 }
 
 export interface RankedResult {

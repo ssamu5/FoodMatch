@@ -3,6 +3,7 @@ import { SEED_RESTAURANTS } from '../data/seedRestaurants'
 import { parseFoodIntent, intentFromProfile, profileHasSignal } from './foodIntent'
 import { buildLeadMessage, buildWhatsAppUrl, hasVerifiedWhatsApp, menuHighlightsFor } from './leads'
 import { rankRestaurants } from './ranking'
+import { formatReason } from './reasonFormatter'
 import { getSavedIds, saveRestaurant, unsaveRestaurant } from './storage'
 import type { TasteProfile } from '../types/profile'
 
@@ -41,7 +42,8 @@ describe('FoodMatch MVP craving flow', () => {
     // names the cuisine, area, or budget fit.
     expect(topR.cuisine).toBe('burgers')
     expect(topR.area).toBe('Ruzafa')
-    expect(top.score.reasons.join(' ')).toMatch(/burgers|Ruzafa|budget/i)
+    const reasonText = top.score.reasons.map((r) => formatReason(r, 'en')).join(' ')
+    expect(reasonText).toMatch(/burgers|Ruzafa|budget/i)
   })
 
   it('uses saved taste profile when browsing without a query', () => {

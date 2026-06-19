@@ -8,7 +8,8 @@ import { isSaved } from '../lib/storage'
 import { addFavorite, removeFavorite } from '../lib/userData'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap } from '../lib/native'
-import { useT } from '../lib/i18n'
+import { useT, useLang } from '../lib/i18n'
+import { formatReason, cuisineLabel, areaLabel } from '../lib/reasonFormatter'
 
 interface RestaurantCardProps {
   restaurant: Restaurant
@@ -28,6 +29,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
   const link = `/restaurant/${restaurant.slug}`
   const [saved, setSaved] = useState(() => isSaved(restaurant.id))
   const { t } = useT()
+  const { lang } = useLang()
 
   function toggleSave() {
     if (saved) {
@@ -106,7 +108,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
           </div>
 
           <p className="mt-0.5 truncate text-[12px] text-tinta/70">
-            {restaurant.cuisine} · {restaurant.area}
+            {cuisineLabel(restaurant.cuisine, lang)} · {areaLabel(restaurant.area, lang)}
           </p>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-tinta/70">
@@ -120,7 +122,7 @@ export default function RestaurantCard({ restaurant, score, rank, onOpen, onRemo
 
           {score && score.reasons.length > 0 && (
             <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-tinta">
-              {score.reasons.slice(0, 2).join(' · ')}
+              {score.reasons.slice(0, 2).map((r) => formatReason(r, lang)).join(' · ')}
             </p>
           )}
         </div>

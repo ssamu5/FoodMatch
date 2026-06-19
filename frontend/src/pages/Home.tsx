@@ -4,12 +4,30 @@ import AppShell from '../components/AppShell'
 import PromptComposer from '../components/PromptComposer'
 import { getAccount } from '../lib/storage'
 import { track } from '../lib/analytics'
-import { useT } from '../lib/i18n'
+import { useT, useLang } from '../lib/i18n'
+
+// Per-language queries for suggestion chips. Spanish queries parse correctly
+// via foodIntent.ts which already understands Spanish keywords.
+const CHIP_QUERIES: Record<string, string[]> = {
+  es: [
+    'Cena por menos de 20 euros',
+    'Cena romántica sushi',
+    'Almuerzo sano cerca de mí',
+    'Cena en grupo esta noche',
+  ],
+  en: [
+    'Dinner under €20',
+    'Date night sushi',
+    'Healthy lunch near me',
+    'Group dinner tonight',
+  ],
+}
 
 export default function Home() {
   const navigate = useNavigate()
   const account = getAccount()
   const { t } = useT()
+  const { lang } = useLang()
 
   useEffect(() => {
     track('landing_viewed')
@@ -19,11 +37,12 @@ export default function Home() {
     navigate(`/ask?q=${encodeURIComponent(query)}`)
   }
 
+  const queries = CHIP_QUERIES[lang] ?? CHIP_QUERIES.es
   const starterChips = [
-    { label: t('home.chipDinner'), query: 'Dinner under €20' },
-    { label: t('home.chipDate'), query: 'Date night sushi' },
-    { label: t('home.chipHealthy'), query: 'Healthy lunch near me' },
-    { label: t('home.chipGroup'), query: 'Group dinner tonight' },
+    { label: t('home.chipDinner'), query: queries[0] },
+    { label: t('home.chipDate'), query: queries[1] },
+    { label: t('home.chipHealthy'), query: queries[2] },
+    { label: t('home.chipGroup'), query: queries[3] },
   ]
 
   return (

@@ -3,7 +3,8 @@ import type { Restaurant } from '../types/restaurant'
 import type { MatchScore } from '../types/search'
 import OpenBadge from './OpenBadge'
 import RestaurantCover from './RestaurantCover'
-import { useT } from '../lib/i18n'
+import { useT, useLang } from '../lib/i18n'
+import { formatReason, formatWarning, bestForLabel, cuisineLabel, areaLabel } from '../lib/reasonFormatter'
 
 interface MatchCardProps {
   restaurant: Restaurant
@@ -17,6 +18,7 @@ function priceMark(level: 1 | 2 | 3 | 4): string {
 
 export default function MatchCard({ restaurant, score, explanation }: MatchCardProps) {
   const { t } = useT()
+  const { lang } = useLang()
   return (
     <Link
       to={`/restaurant/${restaurant.slug}`}
@@ -39,7 +41,7 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
               {restaurant.name}
             </h2>
             <p className="text-[12px] text-cream/85">
-              {restaurant.cuisine} · {restaurant.area}
+              {cuisineLabel(restaurant.cuisine, lang)} · {areaLabel(restaurant.area, lang)}
             </p>
             <OpenBadge restaurant={restaurant} onImage className="mt-1" />
           </div>
@@ -55,32 +57,38 @@ export default function MatchCard({ restaurant, score, explanation }: MatchCardP
 
         {score.reasons.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {score.reasons.slice(0, 4).map((r) => (
-              <span
-                key={r}
-                className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco"
-              >
-                {r}
-              </span>
-            ))}
+            {score.reasons.slice(0, 4).map((r) => {
+              const label = formatReason(r, lang)
+              return (
+                <span
+                  key={label}
+                  className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco"
+                >
+                  {label}
+                </span>
+              )
+            })}
           </div>
         )}
 
         {score.warnings.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {score.warnings.slice(0, 2).map((w) => (
-              <span
-                key={w}
-                className="rounded-full bg-warn/10 px-2.5 py-1 text-[11px] font-medium text-warn"
-              >
-                ! {w}
-              </span>
-            ))}
+            {score.warnings.slice(0, 2).map((w) => {
+              const label = formatWarning(w, lang)
+              return (
+                <span
+                  key={label}
+                  className="rounded-full bg-warn/10 px-2.5 py-1 text-[11px] font-medium text-warn"
+                >
+                  ! {label}
+                </span>
+              )
+            })}
           </div>
         )}
 
         <div className="mt-4 flex items-center justify-between text-[12px] text-tinta/70">
-          <span>{restaurant.bestFor[0] ? t('results.bestFor', { tag: restaurant.bestFor[0] }) : restaurant.tags.slice(0, 2).join(' · ')}</span>
+          <span>{restaurant.bestFor[0] ? t('results.bestFor', { tag: bestForLabel(restaurant.bestFor[0], lang) }) : restaurant.tags.slice(0, 2).join(' · ')}</span>
           <span className="font-medium text-tinta group-hover:text-tomate">{t('common.viewDetails')} &rarr;</span>
         </div>
       </div>

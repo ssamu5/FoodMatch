@@ -3,6 +3,7 @@ import { SEED_RESTAURANTS } from '../data/seedRestaurants'
 import type { Restaurant } from '../types/restaurant'
 import { parseFoodIntent } from './foodIntent'
 import { scoreRestaurant } from './ranking'
+import { formatReason } from './reasonFormatter'
 import { buildCompactRerankPacket, SeedSource, runSearchPipeline } from './searchPipeline'
 
 function makeRestaurant(overrides: Partial<Restaurant>): Restaurant {
@@ -70,7 +71,7 @@ describe('search pipeline', () => {
     const { results, ranked } = await runSearchPipeline(intent, source)
     expect(results.length).toBeGreaterThan(0)
     const top = ranked[0]
-    expect(top.score.reasons.join(' ')).toMatch(/serves sushi/)
+    expect(top.score.reasons.map((r) => formatReason(r, 'en')).join(' ')).toMatch(/serves sushi/)
   })
 
   it('widens rather than returning empty when the hard filter is too narrow', async () => {
@@ -110,7 +111,7 @@ describe('search pipeline', () => {
     expect(top.area).toBe('Ruzafa')
     expect(top.glutenFreeOptions).toBe(true)
     expect(topText).toMatch(/dessert|postre|tarta|cake|cookie|croissant|tiramisu|tiramisú|mochi|baklava/i)
-    expect(ranked[0].score.reasons.join(' ')).toMatch(/dessert|gluten-free|Ruzafa/i)
+    expect(ranked[0].score.reasons.map((r) => formatReason(r, 'en')).join(' ')).toMatch(/dessert|gluten-free|Ruzafa/i)
   })
 
   it('builds a compact rerank packet that keeps future AI calls on a strict token budget', async () => {
@@ -146,7 +147,7 @@ describe('search pipeline', () => {
     const r = makeRestaurant({ menu: [{ name: 'Croquetas caseras' }, { name: 'Patatas bravas' }] })
     const intent = parseFoodIntent('croquetas bravas')
     const { reasons } = scoreRestaurant(intent, r)
-    const reasonText = reasons.join(' ')
+    const reasonText = reasons.map((x) => formatReason(x, 'en')).join(' ')
     expect(reasonText).toMatch(/croquetas/i)
     expect(reasonText).toMatch(/bravas/i)
   })

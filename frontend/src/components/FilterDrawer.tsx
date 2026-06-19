@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { FoodIntent } from '../types/search'
 import type { Area, Cuisine, Vibe } from '../types/restaurant'
-import { useT } from '../lib/i18n'
+import { useT, useLang } from '../lib/i18n'
+import { cuisineLabel, areaLabel, vibeLabel, dietaryLabel } from '../lib/reasonFormatter'
 
 type SortKey = 'best' | 'closest' | 'cheapest' | 'rating'
 
@@ -60,6 +61,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
   const [draft, setDraft] = useState<FoodIntent>(intent)
   const [sort, setSort] = useState<SortKey>(sortKey)
   const { t } = useT()
+  const { lang } = useLang()
 
   const SORTS: { key: SortKey; label: string }[] = [
     { key: 'best', label: t('filters.sortBest') },
@@ -149,7 +151,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                   className={['chip', draft.cuisines.includes(c) ? 'active' : ''].join(' ')}
                   onClick={() => toggleCuisine(c)}
                 >
-                  {c}
+                  {cuisineLabel(c, lang)}
                 </button>
               ))}
             </div>
@@ -172,7 +174,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                   className={['chip', draft.area === a ? 'active' : ''].join(' ')}
                   onClick={() => setArea(a)}
                 >
-                  {a}
+                  {areaLabel(a, lang)}
                 </button>
               ))}
             </div>
@@ -211,7 +213,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                   className={['chip', draft.vibe.includes(v) ? 'active' : ''].join(' ')}
                   onClick={() => toggleVibe(v)}
                 >
-                  {v}
+                  {vibeLabel(v, lang)}
                 </button>
               ))}
             </div>
@@ -227,7 +229,7 @@ export default function FilterDrawer({ open, intent, sortKey, onClose, onApply }
                   className={['chip', draft.dietary.includes(d) ? 'active' : ''].join(' ')}
                   onClick={() => toggleDietary(d)}
                 >
-                  {d}
+                  {dietaryLabel(d, lang)}
                 </button>
               ))}
             </div>

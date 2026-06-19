@@ -11,7 +11,8 @@ import { buildMatchExplanation, scoreRestaurant } from '../lib/ranking'
 import { buildWhatsAppUrl, hasVerifiedWhatsApp, lastCraving, menuHighlightsFor } from '../lib/leads'
 import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap, openExternal, shareNative } from '../lib/native'
-import { useT } from '../lib/i18n'
+import { useT, useLang } from '../lib/i18n'
+import { formatReason, formatWarning, bestForLabel, vibeLabel, cuisineLabel, areaLabel } from '../lib/reasonFormatter'
 import type { Restaurant } from '../types/restaurant'
 
 const LAST_QUERY_KEY = 'foodmatch.lastIntentQuery'
@@ -28,6 +29,7 @@ export default function RestaurantDetail() {
   const { slug = '' } = useParams()
   const navigate = useNavigate()
   const { t } = useT()
+  const { lang } = useLang()
 
   const [r, setR] = useState<Restaurant | undefined>(undefined)
   // This page always fetches on mount, so start in the loading state. The
@@ -68,8 +70,8 @@ export default function RestaurantDetail() {
     if (!q || !q.trim()) return null
     const intent = parseFoodIntent(q)
     const score = scoreRestaurant(intent, r)
-    return { explanation: buildMatchExplanation(intent, r, score), score }
-  }, [r])
+    return { explanation: buildMatchExplanation(intent, r, score, lang), score }
+  }, [r, lang])
 
   if (loading) {
     return (
@@ -160,7 +162,7 @@ export default function RestaurantDetail() {
       <section className="mt-4 space-y-2">
         <h1 className="font-display text-[26px] font-bold leading-tight text-tinta">{r.name}</h1>
         <p className="text-[13px] text-tinta/70">
-          {r.cuisine} · {r.area} · {priceMark(r.priceLevel)} · ★ {r.rating.toFixed(1)} ({r.reviewCount})
+          {cuisineLabel(r.cuisine, lang)} · {areaLabel(r.area, lang)} · {priceMark(r.priceLevel)} · ★ {r.rating.toFixed(1)} ({r.reviewCount})
         </p>
         <p className="text-[14px] leading-relaxed text-tinta">{r.description}</p>
       </section>
@@ -188,20 +190,26 @@ export default function RestaurantDetail() {
           <p className="mt-2 text-[14px] leading-relaxed text-tinta">{personalised.explanation}</p>
           {personalised.score.reasons.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {personalised.score.reasons.slice(0, 4).map((x) => (
-                <span key={x} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
-                  {x}
-                </span>
-              ))}
+              {personalised.score.reasons.slice(0, 4).map((x) => {
+                const label = formatReason(x, lang)
+                return (
+                  <span key={label} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
+                    {label}
+                  </span>
+                )
+              })}
             </div>
           )}
           {personalised.score.warnings.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {personalised.score.warnings.slice(0, 2).map((w) => (
-                <span key={w} className="rounded-full bg-warn/10 px-2.5 py-1 text-[11px] font-medium text-warn">
-                  ! {w}
-                </span>
-              ))}
+              {personalised.score.warnings.slice(0, 2).map((w) => {
+                const label = formatWarning(w, lang)
+                return (
+                  <span key={label} className="rounded-full bg-warn/10 px-2.5 py-1 text-[11px] font-medium text-warn">
+                    ! {label}
+                  </span>
+                )
+              })}
             </div>
           )}
         </section>
@@ -210,13 +218,23 @@ export default function RestaurantDetail() {
       <section className="mt-4 rounded-2xl glass p-4">
         <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('detail.whyPicks')}</h2>
         <p className="mt-2 text-[14px] leading-relaxed text-tinta">
-          {r.bestFor.length > 0 ? t('detail.bestForShort', { tags: r.bestFor.slice(0, 2).join(` ${t('common.and')} `) }) : ''}
-          {t('detail.typicalSpend', { spend: String(r.averageSpend), vibe: r.vibe.slice(0, 3).join(', ') })}
+          {r.bestFor.length > 0
+            ? t('detail.bestForShort', {
+                tags: r.bestFor
+                  .slice(0, 2)
+                  .map((b) => bestForLabel(b, lang))
+                  .join(` ${t('common.and')} `),
+              })
+            : ''}
+          {t('detail.typicalSpend', {
+            spend: String(r.averageSpend),
+            vibe: r.vibe.slice(0, 3).map((v) => vibeLabel(v, lang)).join(', '),
+          })}
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {r.bestFor.slice(0, 4).map((b) => (
             <span key={b} className="rounded-full bg-tomate/10 px-2.5 py-1 text-[11px] font-medium text-fresco">
-              {b}
+              {bestForLabel(b, lang)}
             </span>
           ))}
         </div>

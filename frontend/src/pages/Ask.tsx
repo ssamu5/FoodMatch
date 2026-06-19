@@ -9,7 +9,7 @@ import { api } from '../lib/api'
 import { applyRefinement, parseFoodIntent } from '../lib/foodIntent'
 import { buildMatchExplanation } from '../lib/ranking'
 import { track } from '../lib/analytics'
-import { useT } from '../lib/i18n'
+import { useT, useLang } from '../lib/i18n'
 import type { Restaurant } from '../types/restaurant'
 import type { FoodIntent, RankedResult } from '../types/search'
 
@@ -18,6 +18,7 @@ export default function Ask() {
   const initialQuery = params.get('q') || ''
   const navigate = useNavigate()
   const { t, tn } = useT()
+  const { lang } = useLang()
 
   const [query, setQuery] = useState(initialQuery)
   const [intent, setIntent] = useState<FoodIntent>(() => parseFoodIntent(initialQuery))
@@ -158,7 +159,7 @@ export default function Ask() {
             <MatchCard
               restaurant={top}
               score={topScore}
-              explanation={buildMatchExplanation(intent, top, topScore)}
+              explanation={buildMatchExplanation(intent, top, topScore, lang)}
             />
           )}
 

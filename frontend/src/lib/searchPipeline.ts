@@ -11,6 +11,7 @@
 import type { Restaurant, Cuisine, Area } from '../types/restaurant'
 import type { FoodIntent, RankedResult } from '../types/search'
 import { rankRestaurants, isOpenAt } from './ranking'
+import { formatReason } from './reasonFormatter'
 import { firstMatchingDish, textMatchesDish } from './searchLexicon'
 
 export interface HardFilter {
@@ -231,7 +232,7 @@ export function buildCompactRerankPacket(
       p: r.averageSpend,
       r: r.rating,
       m: compactEvidence(r, intent),
-      e: rankedById.get(r.id)?.score.reasons.slice(0, 3) ?? [],
+      e: (rankedById.get(r.id)?.score.reasons.slice(0, 3) ?? []).map((t) => formatReason(t, 'en')),
     }
     const next = { ...base, candidates: [...base.candidates, candidate] }
     const nextChars = JSON.stringify(next).length
