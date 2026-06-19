@@ -8,8 +8,9 @@ import { logout } from '../lib/auth'
 import AuthForm from '../components/AuthForm'
 import { api } from '../lib/api'
 import { track } from '../lib/analytics'
+import { getMyRestaurants, claimRestaurant, updateMyRestaurant } from '../lib/restaurateur'
 import type { Account, TasteProfile } from '../types/profile'
-import type { Area, Cuisine, Vibe } from '../types/restaurant'
+import type { Area, Cuisine, Vibe, Restaurant } from '../types/restaurant'
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2)
@@ -32,6 +33,13 @@ export default function Profile() {
 
   const [account, setAccount] = useState<Account | null>(() => getAccount())
 
+  // Restaurateur dashboard state
+  const [myRestaurants, setMyRestaurants] = useState<Restaurant[]>([])
+  const [claimSlug, setClaimSlug] = useState('')
+  const [manageMsg, setManageMsg] = useState<string | null>(null)
+  // Per-restaurant edit drafts keyed by slug
+  const [editDrafts, setEditDrafts] = useState<Record<string, Partial<Restaurant>>>({})
+
   useEffect(() => {
     setEmailDraft(profile.email || '')
   }, [profile.email])
@@ -41,6 +49,15 @@ export default function Profile() {
     syncProfile().then((p) => { if (!cancelled) setProfile(p) }).catch(() => {})
     return () => { cancelled = true }
   }, [])
+
+  useEffect(() => {
+    if (!account) return
+    let cancelled = false
+    getMyRestaurants().then((list) => {
+      if (!cancelled) setMyRestaurants(list)
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [account])
 
   function onAuthSuccess() {
     const acct = getAccount()
@@ -74,6 +91,51 @@ export default function Profile() {
     api.submitUserLead({ email: emailDraft.trim(), source: 'profile_email' })
     track('user_lead_submitted', { source: 'profile_email' })
     setSavedAt(new Date().toLocaleTimeString())
+  }
+
+  // Restaurateur helpers
+  function draftFor(r: Restaurant): Restaurant {
+    return { ...r, ...editDrafts[r.slug] }
+  }
+
+  function patchDraft(slug: string, patch: Partial<Restaurant>) {
+    setEditDrafts((prev) => ({ ...prev, [slug]: { ...prev[slug], ...patch } }))
+  }
+
+  async function handleSave(r: Restaurant) {
+    const d = draftFor(r)
+    setManageMsg(null)
+    const res = await updateMyRestaurant({
+      slug: r.slug,
+      name: d.name ?? '',
+      description: d.description ?? '',
+      address: d.address ?? '',
+      phone: d.phone ?? '',
+      instagram: d.instagram ?? '',
+      whatsapp: d.whatsapp ?? '',
+    })
+    if (res.ok) {
+      const list = await getMyRestaurants()
+      setMyRestaurants(list)
+      setEditDrafts((prev) => { const n = { ...prev }; delete n[r.slug]; return n })
+      setManageMsg('Saved.')
+    } else {
+      setManageMsg(res.error ?? 'Error saving.')
+    }
+  }
+
+  async function handleClaim() {
+    if (!claimSlug.trim()) return
+    setManageMsg(null)
+    const res = await claimRestaurant(claimSlug)
+    if (res.ok) {
+      const list = await getMyRestaurants()
+      setMyRestaurants(list)
+      setClaimSlug('')
+      setManageMsg('Restaurant claimed!')
+    } else {
+      setManageMsg(res.error ?? 'Could not claim.')
+    }
   }
 
   return (
@@ -240,6 +302,101 @@ export default function Profile() {
           <LanguageToggle />
         </div>
       </section>
+
+      {/* Restaurateur dashboard */}
+      <section className="mt-7">
+        <h2 className="font-display text-[20px] font-bold leading-tight text-tinta">Manage your restaurant</h2>
+        <p className="mt-1 text-[13px] text-tinta/70">
+          {account ? 'Claim and update your restaurant listing.' : 'Sign in to manage your restaurant.'}
+        </p>
+      </section>
+
+      {account && (
+        <section className="mt-4 flex flex-col gap-4">
+          {myRestaurants.map((r) => {
+            const d = draftFor(r)
+            return (
+              <div key={r.slug} className="rounded-2xl glass p-4">
+                <h3 className="mb-3 text-[11px] uppercase tracking-[0.15em] text-tinta/50">{r.slug}</h3>
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="text"
+                    value={d.name ?? ''}
+                    onChange={(e) => patchDraft(r.slug, { name: e.target.value })}
+                    placeholder="Name"
+                    className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
+                  />
+                  <textarea
+                    value={d.description ?? ''}
+                    onChange={(e) => patchDraft(r.slug, { description: e.target.value })}
+                    placeholder="Description"
+                    rows={3}
+                    className="liquid-input w-full rounded-2xl px-4 py-2 text-[14px] focus:outline-none resize-none"
+                  />
+                  <input
+                    type="text"
+                    value={d.address ?? ''}
+                    onChange={(e) => patchDraft(r.slug, { address: e.target.value })}
+                    placeholder="Address"
+                    className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={d.phone ?? ''}
+                    onChange={(e) => patchDraft(r.slug, { phone: e.target.value })}
+                    placeholder="Phone"
+                    className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={d.instagram ?? ''}
+                    onChange={(e) => patchDraft(r.slug, { instagram: e.target.value })}
+                    placeholder="Instagram (e.g. @yourplace)"
+                    className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={d.whatsapp ?? ''}
+                    onChange={(e) => patchDraft(r.slug, { whatsapp: e.target.value })}
+                    placeholder="WhatsApp (E.164)"
+                    className="liquid-input w-full rounded-full px-4 py-2 text-[14px] focus:outline-none"
+                  />
+                </div>
+                <button
+                  onClick={() => void handleSave(r)}
+                  className="btn-lime mt-3 h-10 w-full text-[13px]"
+                >
+                  Save
+                </button>
+              </div>
+            )
+          })}
+
+          <div className="rounded-2xl glass p-4">
+            <h3 className="mb-2 text-[11px] uppercase tracking-[0.15em] text-tinta/50">Claim a listing</h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={claimSlug}
+                onChange={(e) => setClaimSlug(e.target.value)}
+                placeholder="Restaurant slug"
+                className="liquid-input flex-1 rounded-full px-4 py-2 text-[14px] focus:outline-none"
+              />
+              <button
+                onClick={() => void handleClaim()}
+                disabled={!claimSlug.trim()}
+                className="btn-lime h-10 px-4 text-[13px]"
+              >
+                Claim
+              </button>
+            </div>
+          </div>
+
+          {manageMsg && (
+            <p className="text-[12px] text-tinta/70">{manageMsg}</p>
+          )}
+        </section>
+      )}
 
       <section className="mt-6 rounded-2xl glass p-4">
         <h2 className="text-[11px] uppercase tracking-[0.15em] text-tinta/50">{t('profile.weeklyPicksHeading')}</h2>
