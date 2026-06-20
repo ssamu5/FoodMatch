@@ -70,6 +70,7 @@ export interface Restaurant {
   slug: string
   name: string
   description: string
+  descriptionEs?: string // Spanish blurb (peninsular). Optional; see lib/descriptions.
 
   cuisine: Cuisine
   secondaryCuisines?: Cuisine[]

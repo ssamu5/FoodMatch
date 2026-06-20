@@ -13,6 +13,7 @@ import { track } from '../lib/analytics'
 import { hapticSuccess, hapticTap, openExternal, shareNative } from '../lib/native'
 import { useT, useLang } from '../lib/i18n'
 import { formatReason, formatWarning, bestForLabel, vibeLabel, cuisineLabel, areaLabel } from '../lib/reasonFormatter'
+import { localizedDescription } from '../lib/descriptions'
 import type { Restaurant } from '../types/restaurant'
 
 const LAST_QUERY_KEY = 'foodmatch.lastIntentQuery'
@@ -169,7 +170,7 @@ export default function RestaurantDetail() {
         <p className="text-[13px] text-tinta/70">
           {cuisineLabel(r.cuisine, lang)} · {areaLabel(r.area, lang)} · {priceMark(r.priceLevel)} · ★ {r.rating.toFixed(1)} ({r.reviewCount})
         </p>
-        <p className="text-[14px] leading-relaxed text-tinta">{r.description}</p>
+        <p className="text-[14px] leading-relaxed text-tinta">{localizedDescription(r, lang)}</p>
       </section>
 
       <section className="mt-4">

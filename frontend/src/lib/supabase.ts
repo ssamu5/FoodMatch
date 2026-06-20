@@ -19,6 +19,7 @@ export interface RestaurantRow {
   slug: string
   name: string
   description: string
+  description_es?: string | null
   cuisine: string
   secondary_cuisines: string[]
   tags: string[]
@@ -57,6 +58,7 @@ export function rowToRestaurant(row: RestaurantRow): Restaurant {
     slug: row.slug,
     name: row.name,
     description: row.description,
+    descriptionEs: row.description_es ?? undefined,
     cuisine: row.cuisine as Cuisine,
     secondaryCuisines: (row.secondary_cuisines as Cuisine[]) ?? [],
     tags: row.tags ?? [],
