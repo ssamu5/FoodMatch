@@ -15,6 +15,7 @@ export interface RestaurantEdit {
   slug: string
   name: string
   description: string
+  descriptionEs: string
   address: string
   phone: string
   instagram: string
@@ -57,6 +58,7 @@ export async function updateMyRestaurant(edit: RestaurantEdit): Promise<{ ok: bo
       p_slug: edit.slug,
       p_name: edit.name,
       p_description: edit.description,
+      p_description_es: edit.descriptionEs,
       p_address: edit.address,
       p_phone: edit.phone,
       p_instagram: edit.instagram,

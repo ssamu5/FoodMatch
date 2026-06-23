@@ -120,6 +120,7 @@ export default function Profile() {
         slug: r.slug,
         name: d.name ?? '',
         description: d.description ?? '',
+        descriptionEs: d.descriptionEs ?? '',
         address: d.address ?? '',
         phone: d.phone ?? '',
         instagram: d.instagram ?? '',
@@ -349,6 +350,13 @@ export default function Profile() {
                     value={d.description ?? ''}
                     onChange={(e) => patchDraft(r.slug, { description: e.target.value })}
                     placeholder={t('profile.fieldDescription')}
+                    rows={3}
+                    className="liquid-input w-full rounded-2xl px-4 py-2 text-[14px] focus:outline-none resize-none"
+                  />
+                  <textarea
+                    value={d.descriptionEs ?? ''}
+                    onChange={(e) => patchDraft(r.slug, { descriptionEs: e.target.value })}
+                    placeholder={t('profile.fieldDescriptionEs')}
                     rows={3}
                     className="liquid-input w-full rounded-2xl px-4 py-2 text-[14px] focus:outline-none resize-none"
                   />
