@@ -188,11 +188,13 @@ export default function Ask() {
           </div>
 
           {top && topScore && (
-            <MatchCard
-              restaurant={top}
-              score={topScore}
-              explanation={buildMatchExplanation(intent, top, topScore, lang)}
-            />
+            <div data-demo="top-match" className="rounded-4xl">
+              <MatchCard
+                restaurant={top}
+                score={topScore}
+                explanation={buildMatchExplanation(intent, top, topScore, lang)}
+              />
+            </div>
           )}
 
           {!top && (

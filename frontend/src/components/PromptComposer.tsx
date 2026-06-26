@@ -71,10 +71,11 @@ export default function PromptComposer({
 
       {starterChips && starterChips.length > 0 && (
         <div className="flex flex-wrap gap-2 py-1">
-          {starterChips.map((c) => (
+          {starterChips.map((c, i) => (
             <button
               key={c.label}
               type="button"
+              data-demo={`starter-chip-${i}`}
               className="chip"
               onClick={() => {
                 setValue(c.query)

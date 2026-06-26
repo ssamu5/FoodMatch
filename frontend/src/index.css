@@ -182,6 +182,16 @@ body::before {
 .dark .chip.active {
   color: #ff6f7c;
 }
+
+/* Investor demo: spotlight ring on the element the guide points at. The
+   box-shadow follows the target's own border-radius, and pointer events stay
+   intact so the real control remains clickable. */
+.demo-spotlight {
+  position: relative;
+  z-index: 30;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.75), 0 0 0 9px rgba(230, 57, 70, 0.18);
+  transition: box-shadow 0.2s ease;
+}
 /* Disabled chips (e.g. after feedback is submitted) must read as inert: dim
    them, drop the pointer cursor, and neutralize the hover change so they no
    longer look interactive. The chosen answer keeps full opacity for legibility. */

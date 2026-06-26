@@ -1,6 +1,38 @@
 import type { Dictionary } from './types'
 
 export const en: Dictionary = {
+  demo: {
+    label: 'Demo',
+    next: 'Next',
+    back: 'Back',
+    exit: 'Exit demo',
+    finish: 'Finish',
+    introEyebrow: 'FoodMatch for investors',
+    introTitle: 'A two-minute walk through the product.',
+    introBody: 'This is the real app with real data. Try it yourself: search, discover, and see why each place fits.',
+    introStart: 'Start the demo',
+    introSkip: 'Explore on my own',
+    ask: {
+      title: 'What are you craving?',
+      body: 'Tap the highlighted suggestion, or type anything in Spanish or English, and let FoodMatch search.',
+    },
+    shortlist: {
+      title: 'A shortlist, not 200 results.',
+      body: 'Each place is ranked, with the reason it fits. Open the top pick.',
+    },
+    listing: {
+      title: 'Beautiful, local listings.',
+      body: 'Accurate local info, why it matches, and one tap to reach them on WhatsApp.',
+    },
+    business: {
+      title: 'Here is the business.',
+      body: 'Restaurants claim and manage their own listing. They pay the subscription; diners never do.',
+    },
+    close: {
+      title: 'Free for diners, SaaS for restaurants.',
+      body: 'A live pilot in Valencia, with conversational discovery the big apps do not offer. Let us talk.',
+    },
+  },
   auth: {
     tabSignup: 'Create account',
     tabSignin: 'Sign in',

@@ -1,6 +1,38 @@
 import type { Dictionary } from './types'
 
 export const es: Dictionary = {
+  demo: {
+    label: 'Demo',
+    next: 'Siguiente',
+    back: 'Atrás',
+    exit: 'Salir del demo',
+    finish: 'Terminar',
+    introEyebrow: 'FoodMatch para inversores',
+    introTitle: 'Un recorrido de dos minutos por el producto.',
+    introBody: 'Es la app real, con datos reales. Pruébala tú mismo: busca, descubre y mira por qué cada sitio encaja.',
+    introStart: 'Empezar el demo',
+    introSkip: 'Explorar por mi cuenta',
+    ask: {
+      title: '¿Qué te apetece?',
+      body: 'Toca la sugerencia marcada, o escribe lo que quieras en español o inglés, y deja que FoodMatch busque.',
+    },
+    shortlist: {
+      title: 'Una lista corta, no 200 resultados.',
+      body: 'Cada sitio viene ordenado y con el motivo por el que encaja. Abre la mejor opción.',
+    },
+    listing: {
+      title: 'Fichas bonitas y locales.',
+      body: 'Información local precisa, por qué encaja y un toque para contactar por WhatsApp.',
+    },
+    business: {
+      title: 'Aquí está el negocio.',
+      body: 'Los restaurantes reclaman y gestionan su ficha. Ellos pagan la suscripción; los clientes nunca.',
+    },
+    close: {
+      title: 'Gratis para comensales, SaaS para restaurantes.',
+      body: 'Piloto en Valencia, con un descubrimiento conversacional que las grandes apps no ofrecen. Hablemos.',
+    },
+  },
   auth: {
     tabSignup: 'Crear cuenta',
     tabSignin: 'Iniciar sesión',

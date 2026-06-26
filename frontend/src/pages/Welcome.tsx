@@ -164,6 +164,12 @@ export default function Welcome() {
         <p className="pt-6 text-center text-[11px] text-tinta/45">
           {t('welcome.footer')}
         </p>
+        <button
+          onClick={() => navigate('/demo')}
+          className="mx-auto mt-1 block text-[11px] text-tinta/30 transition-colors hover:text-tinta/60 focus-visible:outline-none focus-visible:underline"
+        >
+          {t('demo.introEyebrow')}
+        </button>
       </main>
     </div>
   )

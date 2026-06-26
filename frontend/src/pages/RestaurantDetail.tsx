@@ -176,6 +176,7 @@ export default function RestaurantDetail() {
       <section className="mt-4">
         <button
           type="button"
+          data-demo="whatsapp"
           onClick={sendWhatsAppLead}
           className="flex h-14 w-full items-center justify-center gap-2 rounded-full font-semibold text-cream transition hover:brightness-95 active:scale-[0.99]"
           style={{ background: '#25D366' }}

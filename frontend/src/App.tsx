@@ -10,8 +10,11 @@ import RestaurantPartner from './pages/RestaurantPartner'
 import RestaurantSetup from './pages/RestaurantSetup'
 import Admin from './pages/Admin'
 import Welcome from './pages/Welcome'
+import DemoIntro from './pages/DemoIntro'
 import { hasSeenWelcome } from './lib/storage'
 import { LanguageProvider } from './lib/i18n'
+import { DemoProvider } from './lib/demo/DemoContext'
+import DemoOverlay from './components/demo/DemoOverlay'
 
 // First-run gate: on a fresh device (no account, welcome not seen), send the
 // user to /welcome. After they sign in or skip, normal routing resumes.
@@ -27,8 +30,10 @@ export default function App() {
   return (
     <LanguageProvider>
     <BrowserRouter>
+      <DemoProvider>
       <Routes>
         <Route path="/welcome" element={<Welcome />} />
+        <Route path="/demo" element={<DemoIntro />} />
         <Route
           path="/*"
           element={
@@ -49,6 +54,8 @@ export default function App() {
           }
         />
       </Routes>
+      <DemoOverlay />
+      </DemoProvider>
     </BrowserRouter>
     </LanguageProvider>
   )
